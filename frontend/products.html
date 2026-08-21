@@ -1,0 +1,2120 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+
+    <meta charset="UTF-8">
+
+    <meta
+        name="viewport"
+        content="width=device-width, initial-scale=1.0"
+    >
+
+    <title>
+        Products | Product Intelligence AI
+    </title>
+
+
+    <link
+        rel="stylesheet"
+        href="css/style.css"
+    >
+
+
+    <style>
+
+        * {
+            box-sizing: border-box;
+        }
+
+
+        body {
+            margin: 0;
+            background: #f5f7fb;
+            color: #172033;
+            font-family: Arial, sans-serif;
+        }
+
+
+        /* =====================================================
+           NAVBAR
+        ===================================================== */
+
+        .navbar {
+            min-height: 72px;
+            background: #111827;
+            color: white;
+
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+
+            padding: 0 45px;
+
+            gap: 20px;
+        }
+
+
+        .logo {
+            font-size: 21px;
+            font-weight: 700;
+        }
+
+
+        .nav {
+            display: flex;
+            align-items: center;
+            gap: 25px;
+
+            flex-wrap: wrap;
+        }
+
+
+        .nav a {
+            color: white;
+            text-decoration: none;
+
+            font-size: 14px;
+        }
+
+
+        .nav a:hover {
+            color: #93c5fd;
+        }
+
+
+        /* =====================================================
+           PAGE
+        ===================================================== */
+
+        .products-page {
+            max-width: 1400px;
+
+            margin: 40px auto;
+
+            padding: 0 20px;
+        }
+
+
+        /* =====================================================
+           HEADER
+        ===================================================== */
+
+        .product-header {
+            display: flex;
+
+            justify-content: space-between;
+
+            align-items: center;
+
+            gap: 25px;
+
+            flex-wrap: wrap;
+
+            margin-bottom: 25px;
+        }
+
+
+        .product-title h1 {
+            margin: 0 0 10px;
+
+            font-size: 36px;
+
+            color: #172033;
+        }
+
+
+        .dataset-name {
+            margin: 0;
+
+            color: #667085;
+
+            font-size: 16px;
+
+            line-height: 1.6;
+        }
+
+
+        .dataset-name strong {
+            color: #172033;
+        }
+
+
+        /* =====================================================
+           STATS
+        ===================================================== */
+
+        .stats {
+            display: flex;
+
+            gap: 15px;
+
+            flex-wrap: wrap;
+        }
+
+
+        .stat {
+            min-width: 150px;
+
+            background: white;
+
+            padding: 20px 25px;
+
+            border-radius: 14px;
+
+            box-shadow:
+                0 5px 20px rgba(0, 0, 0, .06);
+
+            text-align: center;
+        }
+
+
+        .stat strong {
+            display: block;
+
+            font-size: 28px;
+
+            color: #111827;
+
+            margin-bottom: 5px;
+        }
+
+
+        .stat span {
+            color: #667085;
+
+            font-size: 14px;
+        }
+
+
+        /* =====================================================
+           DATASET STATUS
+        ===================================================== */
+
+        .dataset-status {
+            display: inline-block;
+
+            margin-top: 10px;
+
+            padding: 6px 12px;
+
+            background: #dcfce7;
+
+            color: #15803d;
+
+            border-radius: 20px;
+
+            font-size: 12px;
+
+            font-weight: 700;
+        }
+
+
+        /* =====================================================
+           TABLE CARD
+        ===================================================== */
+
+        .table-card {
+            background: white;
+
+            border-radius: 18px;
+
+            overflow: hidden;
+
+            box-shadow:
+                0 5px 25px rgba(0, 0, 0, .07);
+        }
+
+
+        /* =====================================================
+           TABLE TOP BAR
+        ===================================================== */
+
+        .table-topbar {
+            display: flex;
+
+            justify-content: space-between;
+
+            align-items: center;
+
+            gap: 15px;
+
+            padding: 20px 25px;
+
+            border-bottom: 1px solid #e5e7eb;
+
+            flex-wrap: wrap;
+        }
+
+
+        .table-title {
+            margin: 0;
+
+            font-size: 20px;
+        }
+
+
+        .table-info {
+            color: #667085;
+
+            font-size: 13px;
+        }
+
+
+        /* =====================================================
+           SEARCH
+        ===================================================== */
+
+        .search-box {
+            width: 280px;
+
+            max-width: 100%;
+
+            padding: 11px 14px;
+
+            border: 1px solid #d1d5db;
+
+            border-radius: 8px;
+
+            outline: none;
+
+            font-size: 14px;
+        }
+
+
+        .search-box:focus {
+            border-color: #2563eb;
+
+            box-shadow:
+                0 0 0 3px rgba(37, 99, 235, .1);
+        }
+
+
+        /* =====================================================
+           TABLE
+        ===================================================== */
+
+        .table-container {
+            width: 100%;
+
+            overflow-x: auto;
+        }
+
+
+        table {
+            width: 100%;
+
+            min-width: 1000px;
+
+            border-collapse: collapse;
+        }
+
+
+        th {
+            background: #f8fafc;
+
+            text-align: left;
+
+            padding: 15px;
+
+            border-bottom:
+                1px solid #e5e7eb;
+
+            white-space: nowrap;
+
+            font-size: 13px;
+
+            color: #344054;
+
+            position: sticky;
+
+            top: 0;
+
+            z-index: 2;
+        }
+
+
+        td {
+            padding: 14px 15px;
+
+            border-bottom:
+                1px solid #f1f5f9;
+
+            white-space: nowrap;
+
+            max-width: 300px;
+
+            overflow: hidden;
+
+            text-overflow: ellipsis;
+
+            font-size: 13px;
+
+            color: #344054;
+        }
+
+
+        tbody tr:hover {
+            background: #f8fafc;
+        }
+
+
+        /* =====================================================
+           VIEW BUTTON
+        ===================================================== */
+
+        .view-button {
+            display: inline-block;
+
+            background: #2563eb;
+
+            color: white;
+
+            text-decoration: none;
+
+            padding: 7px 12px;
+
+            border-radius: 7px;
+
+            font-size: 12px;
+
+            font-weight: 700;
+        }
+
+
+        .view-button:hover {
+            background: #1d4ed8;
+        }
+
+
+        /* =====================================================
+           LOADING
+        ===================================================== */
+
+        .loading {
+            padding: 80px 30px;
+
+            text-align: center;
+
+            color: #667085;
+
+            font-size: 16px;
+        }
+
+
+        .loading-icon {
+            font-size: 40px;
+
+            margin-bottom: 15px;
+        }
+
+
+        /* =====================================================
+           EMPTY
+        ===================================================== */
+
+        .empty {
+            padding: 80px 30px;
+
+            text-align: center;
+        }
+
+
+        .empty-icon {
+            font-size: 55px;
+
+            margin-bottom: 15px;
+        }
+
+
+        .empty h2 {
+            margin: 0 0 10px;
+
+            color: #172033;
+        }
+
+
+        .empty p {
+            color: #667085;
+
+            margin-bottom: 25px;
+        }
+
+
+        .upload-button {
+            display: inline-block;
+
+            background: #2563eb;
+
+            color: white;
+
+            text-decoration: none;
+
+            padding: 13px 25px;
+
+            border-radius: 8px;
+
+            font-weight: 700;
+        }
+
+
+        .upload-button:hover {
+            background: #1d4ed8;
+        }
+
+
+        /* =====================================================
+           ERROR
+        ===================================================== */
+
+        .error {
+            padding: 70px 30px;
+
+            text-align: center;
+
+            color: #dc2626;
+
+            line-height: 1.7;
+        }
+
+
+        .retry-button {
+            margin-top: 20px;
+
+            border: none;
+
+            background: #2563eb;
+
+            color: white;
+
+            padding: 11px 20px;
+
+            border-radius: 8px;
+
+            cursor: pointer;
+
+            font-weight: 700;
+        }
+
+
+        .retry-button:hover {
+            background: #1d4ed8;
+        }
+
+
+        /* =====================================================
+           NO SEARCH RESULTS
+        ===================================================== */
+
+        .no-results {
+            display: none;
+
+            padding: 50px;
+
+            text-align: center;
+
+            color: #667085;
+        }
+
+
+        /* =====================================================
+           PAGINATION
+        ===================================================== */
+
+        .pagination {
+            display: flex;
+
+            align-items: center;
+
+            justify-content: space-between;
+
+            gap: 15px;
+
+            padding: 18px 25px;
+
+            border-top:
+                1px solid #e5e7eb;
+
+            flex-wrap: wrap;
+        }
+
+
+        .pagination-info {
+            color: #667085;
+
+            font-size: 13px;
+        }
+
+
+        .pagination-buttons {
+            display: flex;
+
+            gap: 8px;
+        }
+
+
+        .page-button {
+            border: 1px solid #d1d5db;
+
+            background: white;
+
+            color: #344054;
+
+            padding: 8px 13px;
+
+            border-radius: 7px;
+
+            cursor: pointer;
+
+            font-weight: 600;
+        }
+
+
+        .page-button:hover:not(:disabled) {
+            background: #f3f4f6;
+        }
+
+
+        .page-button:disabled {
+            opacity: .5;
+
+            cursor: not-allowed;
+        }
+
+
+        .page-number {
+            padding: 8px 13px;
+
+            background: #2563eb;
+
+            color: white;
+
+            border-radius: 7px;
+
+            font-weight: 700;
+
+            font-size: 13px;
+        }
+
+
+        /* =====================================================
+           RESPONSIVE
+        ===================================================== */
+
+        @media(max-width: 800px) {
+
+            .navbar {
+                padding: 18px 20px;
+
+                flex-direction: column;
+
+                align-items: flex-start;
+            }
+
+
+            .nav {
+                gap: 15px;
+            }
+
+
+            .products-page {
+                margin: 25px auto;
+
+                padding: 0 12px;
+            }
+
+
+            .product-title h1 {
+                font-size: 28px;
+            }
+
+
+            .stats {
+                width: 100%;
+            }
+
+
+            .stat {
+                flex: 1;
+
+                min-width: 120px;
+            }
+
+
+            .search-box {
+                width: 100%;
+            }
+
+
+            .table-topbar {
+                align-items: stretch;
+
+                flex-direction: column;
+            }
+
+
+            .pagination {
+                flex-direction: column;
+
+                align-items: flex-start;
+            }
+
+        }
+
+    </style>
+
+</head>
+
+
+<body>
+
+
+<!-- =====================================================
+     NAVBAR
+===================================================== -->
+
+<nav class="navbar">
+
+    <div class="logo">
+        Product Intelligence AI
+    </div>
+
+
+    <div class="nav">
+
+        <a href="dashboard.html">
+            Dashboard
+        </a>
+
+
+        <a href="upload.html">
+            Upload
+        </a>
+
+
+        <a href="products.html">
+            Products
+        </a>
+
+
+        <a href="validation.html">
+            Validation
+        </a>
+
+
+        <a href="reports.html">
+            Reports
+        </a>
+
+    </div>
+
+</nav>
+
+
+
+<!-- =====================================================
+     PAGE
+===================================================== -->
+
+<div class="products-page">
+
+
+    <!-- =================================================
+         HEADER
+    ================================================= -->
+
+    <div class="product-header">
+
+
+        <div class="product-title">
+
+            <h1>
+                Product Intelligence
+            </h1>
+
+
+            <p
+                id="datasetName"
+                class="dataset-name"
+            >
+                Checking current dataset...
+            </p>
+
+
+            <span
+                id="datasetStatus"
+                class="dataset-status"
+                style="display:none"
+            >
+                ✓ Dataset Active
+            </span>
+
+        </div>
+
+
+
+        <!-- STATS -->
+
+        <div class="stats">
+
+
+            <div class="stat">
+
+                <strong id="rowCount">
+                    0
+                </strong>
+
+                <span>
+                    Records
+                </span>
+
+            </div>
+
+
+
+            <div class="stat">
+
+                <strong id="columnCount">
+                    0
+                </strong>
+
+                <span>
+                    Columns
+                </span>
+
+            </div>
+
+
+        </div>
+
+    </div>
+
+
+
+    <!-- =================================================
+         TABLE CARD
+    ================================================= -->
+
+    <div class="table-card">
+
+
+        <!-- TABLE TOP BAR -->
+
+        <div
+            id="tableTopbar"
+            class="table-topbar"
+            style="display:none"
+        >
+
+            <div>
+
+                <h2 class="table-title">
+                    Product Records
+                </h2>
+
+
+                <div
+                    id="tableInfo"
+                    class="table-info"
+                >
+                    Showing product records
+                </div>
+
+            </div>
+
+
+            <input
+                type="text"
+                id="searchBox"
+                class="search-box"
+                placeholder="Search products..."
+            >
+
+        </div>
+
+
+
+        <!-- =================================================
+             LOADING
+        ================================================= -->
+
+        <div
+            id="loading"
+            class="loading"
+        >
+
+            <div class="loading-icon">
+                🔄
+            </div>
+
+            Loading product data...
+
+        </div>
+
+
+
+        <!-- =================================================
+             EMPTY
+        ================================================= -->
+
+        <div
+            id="empty"
+            class="empty"
+            style="display:none"
+        >
+
+            <div class="empty-icon">
+                📂
+            </div>
+
+
+            <h2>
+                No Dataset Uploaded
+            </h2>
+
+
+            <p>
+                Upload a dataset to see
+                product information here.
+            </p>
+
+
+            <a
+                class="upload-button"
+                href="upload.html"
+            >
+                Upload Dataset
+            </a>
+
+        </div>
+
+
+
+        <!-- =================================================
+             ERROR
+        ================================================= -->
+
+        <div
+            id="error"
+            class="error"
+            style="display:none"
+        >
+
+            ❌ Unable to load product data.
+
+            <br>
+
+            <span id="errorMessage">
+                Make sure FastAPI is running.
+            </span>
+
+
+            <br>
+
+
+            <button
+                class="retry-button"
+                onclick="loadProducts()"
+            >
+                🔄 Try Again
+            </button>
+
+        </div>
+
+
+
+        <!-- =================================================
+             TABLE
+        ================================================= -->
+
+        <div
+            id="tableContainer"
+            class="table-container"
+            style="display:none"
+        >
+
+            <table>
+
+                <thead id="tableHead">
+
+                </thead>
+
+
+                <tbody id="tableBody">
+
+                </tbody>
+
+            </table>
+
+        </div>
+
+
+
+        <!-- NO SEARCH RESULTS -->
+
+        <div
+            id="noResults"
+            class="no-results"
+        >
+
+            🔍
+
+            <br><br>
+
+            No products match your search.
+
+        </div>
+
+
+
+        <!-- =================================================
+             PAGINATION
+        ================================================= -->
+
+        <div
+            id="pagination"
+            class="pagination"
+            style="display:none"
+        >
+
+            <div
+                id="paginationInfo"
+                class="pagination-info"
+            >
+                Showing 1-50
+            </div>
+
+
+            <div class="pagination-buttons">
+
+                <button
+                    id="previousButton"
+                    class="page-button"
+                    onclick="previousPage()"
+                >
+                    ← Previous
+                </button>
+
+
+                <span
+                    id="pageNumber"
+                    class="page-number"
+                >
+                    1
+                </span>
+
+
+                <button
+                    id="nextButton"
+                    class="page-button"
+                    onclick="nextPage()"
+                >
+                    Next →
+                </button>
+
+            </div>
+
+        </div>
+
+
+    </div>
+
+</div>
+
+
+
+<script>
+
+
+/* =====================================================
+   FASTAPI URL
+===================================================== */
+
+const API =
+    "http://127.0.0.1:8000";
+
+
+
+/* =====================================================
+   DATA VARIABLES
+===================================================== */
+
+let datasetInfo = null;
+
+let columns = [];
+
+let allRows = [];
+
+let filteredRows = [];
+
+let currentPage = 1;
+
+const rowsPerPage = 50;
+
+
+
+/* =====================================================
+   ELEMENTS
+===================================================== */
+
+const loading =
+    document.getElementById(
+        "loading"
+    );
+
+
+const empty =
+    document.getElementById(
+        "empty"
+    );
+
+
+const errorBox =
+    document.getElementById(
+        "error"
+    );
+
+
+const errorMessage =
+    document.getElementById(
+        "errorMessage"
+    );
+
+
+const tableContainer =
+    document.getElementById(
+        "tableContainer"
+    );
+
+
+const tableTopbar =
+    document.getElementById(
+        "tableTopbar"
+    );
+
+
+const tableHead =
+    document.getElementById(
+        "tableHead"
+    );
+
+
+const tableBody =
+    document.getElementById(
+        "tableBody"
+    );
+
+
+const datasetName =
+    document.getElementById(
+        "datasetName"
+    );
+
+
+const datasetStatus =
+    document.getElementById(
+        "datasetStatus"
+    );
+
+
+const rowCount =
+    document.getElementById(
+        "rowCount"
+    );
+
+
+const columnCount =
+    document.getElementById(
+        "columnCount"
+    );
+
+
+const tableInfo =
+    document.getElementById(
+        "tableInfo"
+    );
+
+
+const searchBox =
+    document.getElementById(
+        "searchBox"
+    );
+
+
+const noResults =
+    document.getElementById(
+        "noResults"
+    );
+
+
+const pagination =
+    document.getElementById(
+        "pagination"
+    );
+
+
+const paginationInfo =
+    document.getElementById(
+        "paginationInfo"
+    );
+
+
+const pageNumber =
+    document.getElementById(
+        "pageNumber"
+    );
+
+
+const previousButton =
+    document.getElementById(
+        "previousButton"
+    );
+
+
+const nextButton =
+    document.getElementById(
+        "nextButton"
+    );
+
+
+
+/* =====================================================
+   LOAD DATASET
+   IMPORTANT:
+   USE /dataset, NOT /products
+===================================================== */
+
+async function loadProducts() {
+
+
+    /* ---------------------------------------------
+       RESET UI
+    --------------------------------------------- */
+
+    loading.style.display =
+        "block";
+
+
+    empty.style.display =
+        "none";
+
+
+    errorBox.style.display =
+        "none";
+
+
+    tableContainer.style.display =
+        "none";
+
+
+    tableTopbar.style.display =
+        "none";
+
+
+    pagination.style.display =
+        "none";
+
+
+    noResults.style.display =
+        "none";
+
+
+    datasetStatus.style.display =
+        "none";
+
+
+    datasetName.innerText =
+        "Checking current dataset...";
+
+
+    rowCount.innerText =
+        "0";
+
+
+    columnCount.innerText =
+        "0";
+
+
+    try {
+
+
+        console.log(
+            "Loading dataset from:",
+            `${API}/dataset`
+        );
+
+
+        /* -----------------------------------------
+           GET CURRENT DATASET
+        ----------------------------------------- */
+
+        const response =
+            await fetch(
+                `${API}/dataset`,
+                {
+                    method: "GET",
+
+                    cache: "no-store",
+
+                    headers: {
+                        "Accept":
+                            "application/json"
+                    }
+                }
+            );
+
+
+        console.log(
+            "Dataset API status:",
+            response.status
+        );
+
+
+        if (!response.ok) {
+
+            throw new Error(
+                `FastAPI returned HTTP ${response.status}`
+            );
+
+        }
+
+
+        /* -----------------------------------------
+           READ JSON
+        ----------------------------------------- */
+
+        const data =
+            await response.json();
+
+
+        console.log(
+            "Dataset response:",
+            data
+        );
+
+
+        /* -----------------------------------------
+           CHECK SUCCESS
+        ----------------------------------------- */
+
+        if (
+            !data ||
+            data.success !== true
+        ) {
+
+            showEmpty();
+
+            return;
+
+        }
+
+
+        /* -----------------------------------------
+           CHECK DATASET
+        ----------------------------------------- */
+
+        if (
+            !data.dataset
+        ) {
+
+            showEmpty();
+
+            return;
+
+        }
+
+
+        /* -----------------------------------------
+           STORE DATASET INFO
+        ----------------------------------------- */
+
+        datasetInfo =
+            data.dataset;
+
+
+        /* -----------------------------------------
+           STORE COLUMNS
+        ----------------------------------------- */
+
+        columns =
+            Array.isArray(
+                data.columns
+            )
+            ? data.columns
+            : [];
+
+
+        /* -----------------------------------------
+           STORE ROWS
+        ----------------------------------------- */
+
+        allRows =
+            Array.isArray(
+                data.rows
+            )
+            ? data.rows
+            : [];
+
+
+        /* -----------------------------------------
+           NORMALIZE ROWS
+        ----------------------------------------- */
+
+        allRows =
+            allRows.map(
+                row => {
+
+                    if (
+                        row &&
+                        typeof row === "object" &&
+                        !Array.isArray(row)
+                    ) {
+
+                        return row;
+
+                    }
+
+                    return {};
+
+                }
+            );
+
+
+        filteredRows =
+            [...allRows];
+
+
+        console.log(
+            "Dataset information:",
+            datasetInfo
+        );
+
+
+        console.log(
+            "Columns:",
+            columns
+        );
+
+
+        console.log(
+            "Rows:",
+            allRows.length
+        );
+
+
+        /* -----------------------------------------
+           CHECK COLUMNS
+        ----------------------------------------- */
+
+        if (
+            columns.length === 0
+        ) {
+
+            showEmpty(
+                "Dataset was found, but no columns were detected."
+            );
+
+            return;
+
+        }
+
+
+        /* -----------------------------------------
+           CHECK ROWS
+        ----------------------------------------- */
+
+        if (
+            allRows.length === 0
+        ) {
+
+            showEmpty(
+                "Dataset was found, but it contains no product records."
+            );
+
+            return;
+
+        }
+
+
+        /* -----------------------------------------
+           DISPLAY DATASET INFORMATION
+        ----------------------------------------- */
+
+        datasetName.innerHTML = `
+
+            Dataset:
+            <strong>
+                ${escapeHTML(
+                    datasetInfo.filename ||
+                    "Unnamed Dataset"
+                )}
+            </strong>
+
+        `;
+
+
+        rowCount.innerText =
+            datasetInfo.rows_count ??
+            allRows.length;
+
+
+        columnCount.innerText =
+            datasetInfo.columns_count ??
+            columns.length;
+
+
+        datasetStatus.style.display =
+            "inline-block";
+
+
+        /* -----------------------------------------
+           SHOW TABLE
+        ----------------------------------------- */
+
+        loading.style.display =
+            "none";
+
+
+        tableTopbar.style.display =
+            "flex";
+
+
+        tableContainer.style.display =
+            "block";
+
+
+        pagination.style.display =
+            "flex";
+
+
+        /* -----------------------------------------
+           BUILD TABLE HEADER
+        ----------------------------------------- */
+
+        buildTableHeader();
+
+
+        /* -----------------------------------------
+           DISPLAY FIRST PAGE
+        ----------------------------------------- */
+
+        currentPage = 1;
+
+        renderCurrentPage();
+
+
+    }
+
+    catch (error) {
+
+
+        console.error(
+            "Product loading error:",
+            error
+        );
+
+
+        loading.style.display =
+            "none";
+
+
+        tableContainer.style.display =
+            "none";
+
+
+        tableTopbar.style.display =
+            "none";
+
+
+        pagination.style.display =
+            "none";
+
+
+        errorBox.style.display =
+            "block";
+
+
+        errorMessage.innerText =
+            error.message ||
+            "Make sure FastAPI is running.";
+
+    }
+
+}
+
+
+
+/* =====================================================
+   SHOW EMPTY
+===================================================== */
+
+function showEmpty(
+    customMessage = ""
+) {
+
+
+    loading.style.display =
+        "none";
+
+
+    tableContainer.style.display =
+        "none";
+
+
+    tableTopbar.style.display =
+        "none";
+
+
+    pagination.style.display =
+        "none";
+
+
+    noResults.style.display =
+        "none";
+
+
+    empty.style.display =
+        "block";
+
+
+    if (
+        customMessage
+    ) {
+
+        empty.innerHTML = `
+
+            <div class="empty-icon">
+                📊
+            </div>
+
+            <h2>
+                Dataset Found
+            </h2>
+
+            <p>
+                ${escapeHTML(customMessage)}
+            </p>
+
+            <a
+                class="upload-button"
+                href="upload.html"
+            >
+                Go to Upload
+            </a>
+
+        `;
+
+    }
+
+}
+
+
+
+/* =====================================================
+   BUILD TABLE HEADER
+===================================================== */
+
+function buildTableHeader() {
+
+
+    tableHead.innerHTML =
+        "";
+
+
+    const headerRow =
+        document.createElement(
+            "tr"
+        );
+
+
+    columns.forEach(
+        column => {
+
+            const th =
+                document.createElement(
+                    "th"
+                );
+
+
+            th.innerText =
+                column;
+
+
+            th.title =
+                column;
+
+
+            headerRow.appendChild(
+                th
+            );
+
+        }
+    );
+
+
+    /* ---------------------------------------------
+       ACTION COLUMN
+    --------------------------------------------- */
+
+    const actionHeader =
+        document.createElement(
+            "th"
+        );
+
+
+    actionHeader.innerText =
+        "Action";
+
+
+    headerRow.appendChild(
+        actionHeader
+    );
+
+
+    tableHead.appendChild(
+        headerRow
+    );
+
+}
+
+
+
+/* =====================================================
+   RENDER CURRENT PAGE
+===================================================== */
+
+function renderCurrentPage() {
+
+
+    tableBody.innerHTML =
+        "";
+
+
+    noResults.style.display =
+        "none";
+
+
+    if (
+        filteredRows.length === 0
+    ) {
+
+        tableContainer.style.display =
+            "none";
+
+
+        pagination.style.display =
+            "none";
+
+
+        noResults.style.display =
+            "block";
+
+
+        return;
+
+    }
+
+
+    tableContainer.style.display =
+        "block";
+
+
+    pagination.style.display =
+        "flex";
+
+
+    const totalPages =
+        Math.ceil(
+            filteredRows.length /
+            rowsPerPage
+        );
+
+
+    if (
+        currentPage > totalPages
+    ) {
+
+        currentPage =
+            totalPages;
+
+    }
+
+
+    if (
+        currentPage < 1
+    ) {
+
+        currentPage =
+            1;
+
+    }
+
+
+    const startIndex =
+        (
+            currentPage -
+            1
+        ) *
+        rowsPerPage;
+
+
+    const endIndex =
+        Math.min(
+            startIndex +
+            rowsPerPage,
+            filteredRows.length
+        );
+
+
+    const pageRows =
+        filteredRows.slice(
+            startIndex,
+            endIndex
+        );
+
+
+    /* ---------------------------------------------
+       BUILD ROWS
+    --------------------------------------------- */
+
+    pageRows.forEach(
+        (
+            row,
+            pageIndex
+        ) => {
+
+
+            const tr =
+                document.createElement(
+                    "tr"
+                );
+
+
+            columns.forEach(
+                column => {
+
+                    const td =
+                        document.createElement(
+                            "td"
+                        );
+
+
+                    let value =
+                        row[column];
+
+
+                    if (
+                        value === null ||
+                        value === undefined ||
+                        value === ""
+                    ) {
+
+                        value =
+                            "-";
+
+                    }
+
+
+                    if (
+                        typeof value === "object"
+                    ) {
+
+                        try {
+
+                            value =
+                                JSON.stringify(
+                                    value
+                                );
+
+                        }
+
+                        catch {
+
+                            value =
+                                String(value);
+
+                        }
+
+                    }
+
+
+                    td.innerText =
+                        String(value);
+
+
+                    td.title =
+                        String(value);
+
+
+                    tr.appendChild(
+                        td
+                    );
+
+                }
+            );
+
+
+            /* -----------------------------------------
+               ACTION
+            ----------------------------------------- */
+
+            const actionTd =
+                document.createElement(
+                    "td"
+                );
+
+
+            const viewButton =
+                document.createElement(
+                    "a"
+                );
+
+
+            const actualRowIndex =
+                startIndex +
+                pageIndex;
+
+
+            viewButton.href =
+                `product-details.html?id=${actualRowIndex + 1}`;
+
+
+            viewButton.className =
+                "view-button";
+
+
+            viewButton.innerText =
+                "View";
+
+
+            actionTd.appendChild(
+                viewButton
+            );
+
+
+            tr.appendChild(
+                actionTd
+            );
+
+
+            tableBody.appendChild(
+                tr
+            );
+
+        }
+    );
+
+
+    /* ---------------------------------------------
+       UPDATE PAGINATION
+    --------------------------------------------- */
+
+    const showingStart =
+        startIndex + 1;
+
+
+    const showingEnd =
+        endIndex;
+
+
+    paginationInfo.innerText =
+
+        `Showing ${showingStart}-${showingEnd} of ${filteredRows.length} products`;
+
+
+    pageNumber.innerText =
+        `${currentPage} / ${totalPages}`;
+
+
+    previousButton.disabled =
+        currentPage <= 1;
+
+
+    nextButton.disabled =
+        currentPage >= totalPages;
+
+
+    tableInfo.innerText =
+
+        `${filteredRows.length} product records`;
+
+}
+
+
+
+/* =====================================================
+   PREVIOUS PAGE
+===================================================== */
+
+function previousPage() {
+
+
+    if (
+        currentPage > 1
+    ) {
+
+        currentPage--;
+
+        renderCurrentPage();
+
+    }
+
+}
+
+
+
+/* =====================================================
+   NEXT PAGE
+===================================================== */
+
+function nextPage() {
+
+
+    const totalPages =
+        Math.ceil(
+            filteredRows.length /
+            rowsPerPage
+        );
+
+
+    if (
+        currentPage <
+        totalPages
+    ) {
+
+        currentPage++;
+
+        renderCurrentPage();
+
+    }
+
+}
+
+
+
+/* =====================================================
+   SEARCH
+===================================================== */
+
+searchBox.addEventListener(
+    "input",
+    function() {
+
+
+        const searchText =
+            searchBox.value
+                .trim()
+                .toLowerCase();
+
+
+        if (
+            searchText === ""
+        ) {
+
+            filteredRows =
+                [...allRows];
+
+        }
+
+        else {
+
+            filteredRows =
+                allRows.filter(
+                    row => {
+
+                        return columns.some(
+                            column => {
+
+                                const value =
+                                    row[column];
+
+
+                                if (
+                                    value === null ||
+                                    value === undefined
+                                ) {
+
+                                    return false;
+
+                                }
+
+
+                                return String(value)
+                                    .toLowerCase()
+                                    .includes(
+                                        searchText
+                                    );
+
+                            }
+                        );
+
+                    }
+                );
+
+        }
+
+
+        currentPage =
+            1;
+
+
+        renderCurrentPage();
+
+    }
+);
+
+
+
+/* =====================================================
+   ESCAPE HTML
+===================================================== */
+
+function escapeHTML(
+    value
+) {
+
+
+    return String(value)
+
+        .replaceAll(
+            "&",
+            "&amp;"
+        )
+
+        .replaceAll(
+            "<",
+            "&lt;"
+        )
+
+        .replaceAll(
+            ">",
+            "&gt;"
+        )
+
+        .replaceAll(
+            '"',
+            "&quot;"
+        )
+
+        .replaceAll(
+            "'",
+            "&#039;"
+        );
+
+}
+
+
+
+/* =====================================================
+   INITIAL LOAD
+===================================================== */
+
+loadProducts();
+
+
+</script>
+
+
+</body>
+
+</html>
