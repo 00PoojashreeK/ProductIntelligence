@@ -273,19 +273,16 @@ async def login(
 # READ DATASET
 # ============================================================
 
-def read_dataset(
-    file_path,
-    filename
-):
+def read_dataset(file_path, filename):
 
     extension = os.path.splitext(
         filename
     )[1].lower()
 
+    # CSV
     if extension == ".csv":
 
         try:
-
             return pd.read_csv(
                 file_path,
                 encoding="utf-8"
@@ -298,12 +295,14 @@ def read_dataset(
                 encoding="latin1"
             )
 
+    # Excel
     elif extension in [".xlsx", ".xls"]:
 
         return pd.read_excel(
             file_path
         )
 
+    # TSV
     elif extension == ".tsv":
 
         return pd.read_csv(
@@ -311,6 +310,7 @@ def read_dataset(
             sep="\t"
         )
 
+    # JSON
     elif extension == ".json":
 
         with open(
@@ -327,6 +327,7 @@ def read_dataset(
 
         if isinstance(data, dict):
 
+            # JSON containing column lists
             if all(
                 isinstance(value, list)
                 for value in data.values()
@@ -334,13 +335,13 @@ def read_dataset(
 
                 return pd.DataFrame(data)
 
+            # Nested JSON
             return pd.json_normalize(data)
 
     raise ValueError(
         "Unsupported file type. "
         "Please upload CSV, Excel, JSON or TSV."
     )
-
 
 # ============================================================
 # CLEAN VALUE
@@ -464,29 +465,18 @@ def get_current_rows():
         connection.close()
 
 
-# ============================================================
-# UPLOAD DATASET
-# ============================================================
-
 @app.post("/upload-dataset")
 async def upload_dataset(
     file: UploadFile = File(...)
 ):
-
     if not file.filename:
-
         raise HTTPException(
             status_code=400,
             detail="No file selected."
         )
 
-    filename = os.path.basename(
-        file.filename
-    )
-
-    extension = os.path.splitext(
-        filename
-    )[1].lower()
+    filename = os.path.basename(file.filename)
+    extension = os.path.splitext(filename)[1].lower()
 
     supported_extensions = [
         ".csv",
@@ -497,7 +487,6 @@ async def upload_dataset(
     ]
 
     if extension not in supported_extensions:
-
         raise HTTPException(
             status_code=400,
             detail=(
@@ -506,14 +495,10 @@ async def upload_dataset(
             )
         )
 
-    dataset_id = str(
-        uuid.uuid4()
-    )
+    dataset_id = str(uuid.uuid4())
 
     safe_filename = (
-        dataset_id
-        + "_"
-        + filename
+        dataset_id + "_" + filename
     )
 
     file_path = os.path.join(
@@ -523,9 +508,9 @@ async def upload_dataset(
 
     try:
 
-        # ----------------------------------------------------
-        # READ UPLOADED FILE
-        # ----------------------------------------------------
+        # ====================================================
+        # 1. SAVE UPLOADED FILE
+        # ====================================================
 
         contents = await file.read()
 
@@ -533,14 +518,11 @@ async def upload_dataset(
             file_path,
             "wb"
         ) as output_file:
+            output_file.write(contents)
 
-            output_file.write(
-                contents
-            )
-
-        # ----------------------------------------------------
-        # READ DATASET
-        # ----------------------------------------------------
+        # ====================================================
+        # 2. READ DATASET
+        # ====================================================
 
         df = read_dataset(
             file_path,
@@ -548,14 +530,13 @@ async def upload_dataset(
         )
 
         if df is None or df.empty:
-
             raise ValueError(
                 "The uploaded dataset is empty."
             )
 
-        # ----------------------------------------------------
-        # CLEAN COLUMN NAMES
-        # ----------------------------------------------------
+        # ====================================================
+        # 3. CLEAN COLUMN NAMES
+        # ====================================================
 
         df.columns = [
             str(column).strip()
@@ -563,14 +544,12 @@ async def upload_dataset(
         ]
 
         # Remove completely empty columns
-
         df = df.dropna(
             axis=1,
             how="all"
         )
 
         if len(df.columns) == 0:
-
             raise ValueError(
                 "Dataset contains no usable columns."
             )
@@ -581,12 +560,11 @@ async def upload_dataset(
         ]
 
         rows_count = len(df)
-
         columns_count = len(columns)
 
-        # ----------------------------------------------------
-        # DATASET STATISTICS
-        # ----------------------------------------------------
+        # ====================================================
+        # 4. DATASET STATISTICS
+        # ====================================================
 
         missing_values = int(
             df.isna().sum().sum()
@@ -598,23 +576,52 @@ async def upload_dataset(
 
         numeric_columns = [
             str(column)
-            for column in
-            df.select_dtypes(
+            for column in df.select_dtypes(
                 include="number"
             ).columns
         ]
 
         text_columns = [
             str(column)
-            for column in
-            df.select_dtypes(
+            for column in df.select_dtypes(
                 include="object"
             ).columns
         ]
 
-        # ----------------------------------------------------
-        # DATABASE
-        # ----------------------------------------------------
+        # ====================================================
+        # 5. FAST DATA CONVERSION
+        # ====================================================
+
+        records = df.to_dict(
+            orient="records"
+        )
+
+        rows_to_insert = []
+
+        for index, record in enumerate(records):
+
+            cleaned_record = {}
+
+            for column in columns:
+
+                cleaned_record[column] = clean_value(
+                    record.get(column)
+                )
+
+            rows_to_insert.append(
+                (
+                    dataset_id,
+                    index + 1,
+                    json.dumps(
+                        cleaned_record,
+                        default=str
+                    )
+                )
+            )
+
+        # ====================================================
+        # 6. POSTGRESQL
+        # ====================================================
 
         connection = get_connection()
 
@@ -622,8 +629,7 @@ async def upload_dataset(
 
             cursor = connection.cursor()
 
-            # Delete previous dataset
-
+            # Remove previous dataset
             cursor.execute(
                 "DELETE FROM dataset_rows"
             )
@@ -632,9 +638,9 @@ async def upload_dataset(
                 "DELETE FROM datasets"
             )
 
-            # ------------------------------------------------
-            # INSERT DATASET
-            # ------------------------------------------------
+            # =================================================
+            # DATASET INFORMATION
+            # =================================================
 
             cursor.execute(
                 """
@@ -648,7 +654,8 @@ async def upload_dataset(
                     columns_json,
                     uploaded_at
                 )
-                VALUES (%s, %s, %s, %s, %s, %s, %s)
+                VALUES
+                (%s, %s, %s, %s, %s, %s, %s)
                 """,
                 (
                     dataset_id,
@@ -661,36 +668,9 @@ async def upload_dataset(
                 )
             )
 
-            # ------------------------------------------------
-            # PREPARE ALL ROWS
-            # ------------------------------------------------
-
-            rows_to_insert = []
-
-            for index, row in df.iterrows():
-
-                row_data = {}
-
-                for column in columns:
-
-                    row_data[column] = clean_value(
-                        row[column]
-                    )
-
-                rows_to_insert.append(
-                    (
-                        dataset_id,
-                        index + 1,
-                        json.dumps(
-                            row_data,
-                            default=str
-                        )
-                    )
-                )
-
-            # ------------------------------------------------
+            # =================================================
             # FAST BULK INSERT
-            # ------------------------------------------------
+            # =================================================
 
             if rows_to_insert:
 
@@ -706,7 +686,7 @@ async def upload_dataset(
                     VALUES %s
                     """,
                     rows_to_insert,
-                    page_size=500
+                    page_size=1000
                 )
 
             connection.commit()
@@ -716,19 +696,17 @@ async def upload_dataset(
         except Exception:
 
             connection.rollback()
-
             raise
 
         finally:
 
             connection.close()
 
-        # ----------------------------------------------------
-        # RETURN RESPONSE
-        # ----------------------------------------------------
+        # ====================================================
+        # 7. SUCCESS RESPONSE
+        # ====================================================
 
         return {
-
             "success": True,
 
             "message":
@@ -765,27 +743,30 @@ async def upload_dataset(
                 text_columns
         }
 
-    except HTTPException:
+    # ========================================================
+    # EXPECTED ERRORS
+    # ========================================================
 
+    except HTTPException:
         raise
+
+    # ========================================================
+    # OTHER ERRORS
+    # ========================================================
 
     except Exception as e:
 
         if os.path.exists(file_path):
 
             try:
-
                 os.remove(file_path)
-
             except Exception:
-
                 pass
 
         raise HTTPException(
             status_code=500,
             detail=str(e)
         )
-
 
 # ============================================================
 # OLD UPLOAD URL
@@ -1451,7 +1432,6 @@ def extract_number(value):
         return float(
             match.group()
         )
-
     except Exception:
         return None
 
