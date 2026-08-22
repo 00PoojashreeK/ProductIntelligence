@@ -533,3 +533,38 @@ body.pi-dark .report-score span {
 .upload-page .current-dataset-container {
     background: transparent !important;
 }
+/* =====================================================
+   GEMINI AI - DARK MODE TEXT FIX
+   Only applies in dark mode
+===================================================== */
+
+body:not(.pi-light) .gemini-ai,
+body:not(.pi-light) .gemini-ai *,
+body:not(.pi-light) .gemini-card,
+body:not(.pi-light) .gemini-card *,
+body:not(.pi-light) .ai-insight,
+body:not(.pi-light) .ai-insight *,
+body:not(.pi-light) .ai-response,
+body:not(.pi-light) .ai-response *,
+body:not(.pi-light) .gemini-response,
+body:not(.pi-light) .gemini-response *,
+body:not(.pi-light) .gemini-content,
+body:not(.pi-light) .gemini-content * {
+    color: #ffffff !important;
+}
+
+/* Gemini AI headings */
+body:not(.pi-light) .gemini-ai h1,
+body:not(.pi-light) .gemini-ai h2,
+body:not(.pi-light) .gemini-ai h3,
+body:not(.pi-light) .gemini-ai h4,
+body:not(.pi-light) .gemini-ai strong,
+body:not(.pi-light) .gemini-ai span {
+    color: #ffffff !important;
+}
+
+/* Gemini AI paragraphs / descriptions */
+body:not(.pi-light) .gemini-ai p,
+body:not(.pi-light) .gemini-ai div {
+    color: #ffffff !important;
+}
