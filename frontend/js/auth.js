@@ -1,5 +1,5 @@
 const API_URL =
-    "https://productintelligence-lzcn.onrender.com/";
+    "https://productintelligence-lzcn.onrender.com";
 
 
 const loginForm =
