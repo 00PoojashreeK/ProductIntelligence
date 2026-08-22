@@ -309,3 +309,66 @@ body.pi-light .validation-container .product-preview td {background:#fff !import
 .product-info-value {color:var(--app-text) !important;font-size:12px !important;word-break:break-word !important;}
 body.pi-light .product-info-row:nth-child(even) {background:#f8fafc !important;}
 body.pi-dark .product-info-row:nth-child(even) {background:#0b1728 !important;}
+/* =========================================================
+   GEMINI AI ASSISTANT - DARK MODE TEXT FIX
+   Only applies when ProductIQ is in dark mode
+========================================================= */
+
+body.pi-dark .pi-assistant {
+    color: #ffffff;
+}
+
+body.pi-dark .pi-assistant .pi-panel-title,
+body.pi-dark .pi-assistant .pi-muted,
+body.pi-dark .pi-assistant .pi-msg,
+body.pi-dark .pi-assistant p,
+body.pi-dark .pi-assistant span,
+body.pi-dark .pi-assistant strong,
+body.pi-dark .pi-assistant div {
+    color: #ffffff;
+}
+
+/* Gemini input */
+body.pi-dark .pi-assistant #piChatInput {
+    color: #ffffff;
+    background: #1f2937;
+    border-color: #475569;
+}
+
+body.pi-dark .pi-assistant #piChatInput::placeholder {
+    color: #cbd5e1;
+}
+
+/* Ask button */
+body.pi-dark .pi-assistant .pi-chat-form button {
+    color: #ffffff;
+}
+
+/* Close button */
+body.pi-dark .pi-assistant .pi-icon-btn {
+    color: #ffffff;
+}
+
+/* User and AI messages */
+body.pi-dark .pi-assistant .pi-msg.ai,
+body.pi-dark .pi-assistant .pi-msg.user {
+    color: #ffffff;
+}
+body.pi-dark .pi-assistant {
+    background: #111827;
+    border: 1px solid #374151;
+}
+
+body.pi-dark .pi-chat {
+    background: #111827;
+}
+
+body.pi-dark .pi-msg.ai {
+    background: #1f2937;
+    color: #ffffff;
+}
+
+body.pi-dark .pi-msg.user {
+    background: #2563eb;
+    color: #ffffff;
+}
