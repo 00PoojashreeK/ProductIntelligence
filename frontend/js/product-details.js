@@ -1,4 +1,4 @@
-const API = "https://productintelligence-lzcn.onrender.com/";
+const API = "https://productintelligence-lzcn.onrender.com";
 
 
 // ============================================================
