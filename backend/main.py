@@ -2,7 +2,9 @@ from fastapi import FastAPI, UploadFile, File, Form, HTTPException
 from fastapi.middleware.cors import CORSMiddleware
 
 import pandas as pd
-import sqlite3
+import psycopg2
+from psycopg2.extras import RealDictCursor, execute_values
+
 import json
 import os
 import uuid
@@ -10,6 +12,7 @@ import math
 import csv
 import io
 import re
+
 from datetime import datetime
 
 
@@ -50,10 +53,7 @@ UPLOAD_FOLDER = os.path.join(
     "uploads"
 )
 
-DATABASE_PATH = os.path.join(
-    BASE_DIR,
-    "product_intelligence.db"
-)
+DATABASE_URL = os.getenv("DATABASE_URL")
 
 os.makedirs(
     UPLOAD_FOLDER,
@@ -62,66 +62,93 @@ os.makedirs(
 
 
 # ============================================================
-# DATABASE
+# DATABASE CONNECTION
 # ============================================================
 
 def get_connection():
 
-    connection = sqlite3.connect(
-        DATABASE_PATH
-    )
+    if not DATABASE_URL:
+        raise RuntimeError(
+            "DATABASE_URL environment variable is not configured."
+        )
 
-    connection.row_factory = sqlite3.Row
+    connection = psycopg2.connect(
+        DATABASE_URL,
+        cursor_factory=RealDictCursor
+    )
 
     return connection
 
+
+# ============================================================
+# CREATE DATABASE TABLES
+# ============================================================
 
 def create_database():
 
     connection = get_connection()
 
-    cursor = connection.cursor()
+    try:
 
-    cursor.execute("""
-        CREATE TABLE IF NOT EXISTS datasets (
+        cursor = connection.cursor()
 
-            id INTEGER PRIMARY KEY AUTOINCREMENT,
+        cursor.execute("""
+            CREATE TABLE IF NOT EXISTS datasets (
 
-            dataset_id TEXT UNIQUE NOT NULL,
+                id SERIAL PRIMARY KEY,
 
-            filename TEXT NOT NULL,
+                dataset_id TEXT UNIQUE NOT NULL,
 
-            file_type TEXT,
+                filename TEXT NOT NULL,
 
-            rows_count INTEGER DEFAULT 0,
+                file_type TEXT,
 
-            columns_count INTEGER DEFAULT 0,
+                rows_count INTEGER DEFAULT 0,
 
-            columns_json TEXT,
+                columns_count INTEGER DEFAULT 0,
 
-            uploaded_at TEXT
-        )
-    """)
+                columns_json TEXT,
 
-    cursor.execute("""
-        CREATE TABLE IF NOT EXISTS dataset_rows (
+                uploaded_at TEXT
+            )
+        """)
 
-            id INTEGER PRIMARY KEY AUTOINCREMENT,
+        cursor.execute("""
+            CREATE TABLE IF NOT EXISTS dataset_rows (
 
-            dataset_id TEXT NOT NULL,
+                id SERIAL PRIMARY KEY,
 
-            row_number INTEGER NOT NULL,
+                dataset_id TEXT NOT NULL,
 
-            data_json TEXT NOT NULL
-        )
-    """)
+                row_number INTEGER NOT NULL,
 
-    connection.commit()
+                data_json TEXT NOT NULL
+            )
+        """)
 
-    connection.close()
+        # Useful index for faster dataset lookup
+        cursor.execute("""
+            CREATE INDEX IF NOT EXISTS idx_dataset_rows_dataset_id
+            ON dataset_rows(dataset_id)
+        """)
+
+        connection.commit()
+
+        cursor.close()
+
+    finally:
+
+        connection.close()
 
 
-create_database()
+# ============================================================
+# STARTUP
+# ============================================================
+
+@app.on_event("startup")
+def startup_event():
+
+    create_database()
 
 
 # ============================================================
@@ -132,9 +159,14 @@ create_database()
 def home():
 
     return {
+
         "success": True,
-        "message": "Product Intelligence AI API is running",
-        "version": "4.0"
+
+        "message":
+            "Product Intelligence AI API is running",
+
+        "version":
+            "4.0"
     }
 
 
@@ -145,15 +177,23 @@ def home():
 @app.get("/health")
 def health():
 
-    connection = get_connection()
+    connection = None
 
     try:
 
-        connection.execute(
+        connection = get_connection()
+
+        cursor = connection.cursor()
+
+        cursor.execute(
             "SELECT 1"
         )
 
+        cursor.fetchone()
+
         database_ok = True
+
+        cursor.close()
 
     except Exception:
 
@@ -161,12 +201,18 @@ def health():
 
     finally:
 
-        connection.close()
+        if connection:
+            connection.close()
 
     return {
+
         "success": True,
-        "database": database_ok,
-        "message": "Backend is healthy"
+
+        "database":
+            database_ok,
+
+        "message":
+            "Backend is healthy"
     }
 
 
@@ -182,7 +228,6 @@ async def login(
     email: str = Form(None),
 
     password: str = Form(...)
-
 ):
 
     user = (
@@ -196,15 +241,19 @@ async def login(
     if user == "" or password == "":
 
         return {
+
             "success": False,
-            "message": "Please enter username and password"
+
+            "message":
+                "Please enter username and password"
         }
 
     return {
 
         "success": True,
 
-        "message": "Login successful",
+        "message":
+            "Login successful",
 
         "user": {
 
@@ -216,9 +265,7 @@ async def login(
 
             "email":
                 user if "@" in user else ""
-
         }
-
     }
 
 
@@ -302,14 +349,17 @@ def read_dataset(
 def clean_value(value):
 
     if value is None:
+
         return None
 
     try:
 
         if pd.isna(value):
+
             return None
 
     except Exception:
+
         pass
 
     if isinstance(
@@ -327,6 +377,7 @@ def clean_value(value):
         if isinstance(value, float):
 
             if math.isnan(value):
+
                 return None
 
         return value
@@ -344,31 +395,39 @@ def get_current_rows():
 
     try:
 
-        dataset = connection.execute("""
+        cursor = connection.cursor()
+
+        cursor.execute("""
             SELECT *
             FROM datasets
             ORDER BY id DESC
             LIMIT 1
-        """).fetchone()
+        """)
+
+        dataset = cursor.fetchone()
 
         if not dataset:
+
+            cursor.close()
 
             return None, []
 
         dataset_id = dataset["dataset_id"]
 
-        rows = connection.execute(
+        cursor.execute(
             """
             SELECT
                 id,
                 row_number,
                 data_json
             FROM dataset_rows
-            WHERE dataset_id = ?
+            WHERE dataset_id = %s
             ORDER BY row_number
             """,
             (dataset_id,)
-        ).fetchall()
+        )
+
+        rows = cursor.fetchall()
 
         result = []
 
@@ -394,8 +453,9 @@ def get_current_rows():
 
                 "data":
                     data
-
             })
+
+        cursor.close()
 
         return dataset, result
 
@@ -463,6 +523,10 @@ async def upload_dataset(
 
     try:
 
+        # ----------------------------------------------------
+        # READ UPLOADED FILE
+        # ----------------------------------------------------
+
         contents = await file.read()
 
         with open(
@@ -473,6 +537,10 @@ async def upload_dataset(
             output_file.write(
                 contents
             )
+
+        # ----------------------------------------------------
+        # READ DATASET
+        # ----------------------------------------------------
 
         df = read_dataset(
             file_path,
@@ -485,10 +553,16 @@ async def upload_dataset(
                 "The uploaded dataset is empty."
             )
 
+        # ----------------------------------------------------
+        # CLEAN COLUMN NAMES
+        # ----------------------------------------------------
+
         df.columns = [
             str(column).strip()
             for column in df.columns
         ]
+
+        # Remove completely empty columns
 
         df = df.dropna(
             axis=1,
@@ -510,76 +584,9 @@ async def upload_dataset(
 
         columns_count = len(columns)
 
-        connection = get_connection()
-
-        cursor = connection.cursor()
-
-        cursor.execute(
-            "DELETE FROM dataset_rows"
-        )
-
-        cursor.execute(
-            "DELETE FROM datasets"
-        )
-
-        cursor.execute(
-            """
-            INSERT INTO datasets
-            (
-                dataset_id,
-                filename,
-                file_type,
-                rows_count,
-                columns_count,
-                columns_json,
-                uploaded_at
-            )
-            VALUES (?, ?, ?, ?, ?, ?, ?)
-            """,
-            (
-                dataset_id,
-                filename,
-                extension,
-                rows_count,
-                columns_count,
-                json.dumps(columns),
-                datetime.now().isoformat()
-            )
-        )
-
-        for index, row in df.iterrows():
-
-            row_data = {}
-
-            for column in columns:
-
-                row_data[column] = clean_value(
-                    row[column]
-                )
-
-            cursor.execute(
-                """
-                INSERT INTO dataset_rows
-                (
-                    dataset_id,
-                    row_number,
-                    data_json
-                )
-                VALUES (?, ?, ?)
-                """,
-                (
-                    dataset_id,
-                    index + 1,
-                    json.dumps(
-                        row_data,
-                        default=str
-                    )
-                )
-            )
-
-        connection.commit()
-
-        connection.close()
+        # ----------------------------------------------------
+        # DATASET STATISTICS
+        # ----------------------------------------------------
 
         missing_values = int(
             df.isna().sum().sum()
@@ -604,6 +611,121 @@ async def upload_dataset(
                 include="object"
             ).columns
         ]
+
+        # ----------------------------------------------------
+        # DATABASE
+        # ----------------------------------------------------
+
+        connection = get_connection()
+
+        try:
+
+            cursor = connection.cursor()
+
+            # Delete previous dataset
+
+            cursor.execute(
+                "DELETE FROM dataset_rows"
+            )
+
+            cursor.execute(
+                "DELETE FROM datasets"
+            )
+
+            # ------------------------------------------------
+            # INSERT DATASET
+            # ------------------------------------------------
+
+            cursor.execute(
+                """
+                INSERT INTO datasets
+                (
+                    dataset_id,
+                    filename,
+                    file_type,
+                    rows_count,
+                    columns_count,
+                    columns_json,
+                    uploaded_at
+                )
+                VALUES (%s, %s, %s, %s, %s, %s, %s)
+                """,
+                (
+                    dataset_id,
+                    filename,
+                    extension,
+                    rows_count,
+                    columns_count,
+                    json.dumps(columns),
+                    datetime.now().isoformat()
+                )
+            )
+
+            # ------------------------------------------------
+            # PREPARE ALL ROWS
+            # ------------------------------------------------
+
+            rows_to_insert = []
+
+            for index, row in df.iterrows():
+
+                row_data = {}
+
+                for column in columns:
+
+                    row_data[column] = clean_value(
+                        row[column]
+                    )
+
+                rows_to_insert.append(
+                    (
+                        dataset_id,
+                        index + 1,
+                        json.dumps(
+                            row_data,
+                            default=str
+                        )
+                    )
+                )
+
+            # ------------------------------------------------
+            # FAST BULK INSERT
+            # ------------------------------------------------
+
+            if rows_to_insert:
+
+                execute_values(
+                    cursor,
+                    """
+                    INSERT INTO dataset_rows
+                    (
+                        dataset_id,
+                        row_number,
+                        data_json
+                    )
+                    VALUES %s
+                    """,
+                    rows_to_insert,
+                    page_size=500
+                )
+
+            connection.commit()
+
+            cursor.close()
+
+        except Exception:
+
+            connection.rollback()
+
+            raise
+
+        finally:
+
+            connection.close()
+
+        # ----------------------------------------------------
+        # RETURN RESPONSE
+        # ----------------------------------------------------
 
         return {
 
@@ -643,13 +765,20 @@ async def upload_dataset(
                 text_columns
         }
 
+    except HTTPException:
+
+        raise
+
     except Exception as e:
 
         if os.path.exists(file_path):
 
             try:
+
                 os.remove(file_path)
+
             except Exception:
+
                 pass
 
         raise HTTPException(
@@ -680,6 +809,7 @@ def find_column(
 ):
 
     # Exact
+
     for name in possible_names:
 
         if name in data:
@@ -687,8 +817,12 @@ def find_column(
             return data[name]
 
     # Case insensitive
+
     lower_map = {
-        str(key).lower().strip(): key
+
+        str(key).lower().strip():
+            key
+
         for key in data.keys()
     }
 
@@ -703,6 +837,7 @@ def find_column(
             return data[key]
 
     # Partial
+
     for key in data.keys():
 
         key_lower = (
@@ -1130,7 +1265,9 @@ def get_products():
 # ============================================================
 
 @app.get("/products/{product_id}")
-def get_product(product_id: int):
+def get_product(
+    product_id: int
+):
 
     dataset, rows = get_current_rows()
 
@@ -1141,10 +1278,7 @@ def get_product(product_id: int):
             detail="No dataset uploaded."
         )
 
-
-    # ========================================================
-    # FIRST: SEARCH USING DATABASE ID
-    # ========================================================
+    # Search using database ID
 
     for item in rows:
 
@@ -1156,10 +1290,7 @@ def get_product(product_id: int):
                 item["data"]
             )
 
-
-    # ========================================================
-    # SECOND: SEARCH USING DATASET ROW NUMBER
-    # ========================================================
+    # Search using row number
 
     for item in rows:
 
@@ -1171,11 +1302,6 @@ def get_product(product_id: int):
                 item["data"]
             )
 
-
-    # ========================================================
-    # NOT FOUND
-    # ========================================================
-
     raise HTTPException(
         status_code=404,
         detail=(
@@ -1183,6 +1309,7 @@ def get_product(product_id: int):
             "in the current dataset."
         )
     )
+
 
 # ============================================================
 # DASHBOARD
@@ -1229,22 +1356,30 @@ def dashboard():
     ]
 
     verified = sum(
+
         1
+
         for product in products
+
         if product["status"] == "Verified"
     )
 
     needs_review = (
-        len(products) - verified
+        len(products)
+        - verified
     )
 
     average_confidence = (
 
         round(
+
             sum(
                 p["confidence"]
                 for p in products
-            ) / len(products)
+            )
+            /
+            len(products)
+
         )
 
         if products
@@ -1313,15 +1448,12 @@ def extract_number(value):
         return None
 
     try:
-
         return float(
             match.group()
         )
 
     except Exception:
-
         return None
-
 
 # ============================================================
 # PRODUCT VALIDATION ENGINE
@@ -1374,7 +1506,6 @@ def generate_validation(
                 "Product name is available."
         })
 
-
     # ========================================================
     # 2. BRAND
     # ========================================================
@@ -1412,7 +1543,6 @@ def generate_validation(
             "message":
                 "Brand information is available."
         })
-
 
     # ========================================================
     # 3. MODEL
@@ -1469,7 +1599,6 @@ def generate_validation(
                 "Model identifier is available."
         })
 
-
     # ========================================================
     # 4. CATEGORY
     # ========================================================
@@ -1507,7 +1636,6 @@ def generate_validation(
             "message":
                 "Product category is available."
         })
-
 
     # ========================================================
     # 5. POWER
@@ -1587,7 +1715,6 @@ def generate_validation(
                     "Power specification is present."
             })
 
-
     # ========================================================
     # 6. VOLTAGE
     # ========================================================
@@ -1666,7 +1793,6 @@ def generate_validation(
                     "Voltage specification is available."
             })
 
-
     # ========================================================
     # 7. DESCRIPTION
     # ========================================================
@@ -1724,7 +1850,6 @@ def generate_validation(
                 "Product description contains sufficient information."
         })
 
-
     # ========================================================
     # 8. MATERIAL
     # ========================================================
@@ -1745,7 +1870,6 @@ def generate_validation(
             "message":
                 "Material information is available."
         })
-
 
     # ========================================================
     # 9. DUPLICATE CHECK
@@ -1838,7 +1962,6 @@ def generate_validation(
                 "No matching duplicate product record was detected."
         })
 
-
     # ========================================================
     # QUALITY SCORE
     # ========================================================
@@ -1866,18 +1989,19 @@ def generate_validation(
     if total_checks:
 
         quality_score = round(
+
             (
                 passed
                 + warnings * 0.5
             )
-            / total_checks
+            /
+            total_checks
             * 100
         )
 
     else:
 
         quality_score = 0
-
 
     if failed > 0:
 
@@ -1894,7 +2018,6 @@ def generate_validation(
     else:
 
         status = "Critical Issues"
-
 
     return {
 
@@ -1923,7 +2046,9 @@ def generate_validation(
 # ============================================================
 
 @app.post("/validate-product")
-async def validate_product_new(payload: dict):
+async def validate_product_new(
+    payload: dict
+):
 
     product_data = payload.get(
         "product",
@@ -1941,9 +2066,6 @@ async def validate_product_new(payload: dict):
             status_code=400,
             detail="Product data is missing."
         )
-
-    # Product from frontend may be raw dataset data
-    # or an already formatted product.
 
     if "raw_data" in product_data:
 
@@ -1972,19 +2094,22 @@ async def validate_product_new(payload: dict):
             if "raw_data" in row:
 
                 all_rows.append({
-                    "data": row["raw_data"]
+                    "data":
+                        row["raw_data"]
                 })
 
             elif "data" in row:
 
                 all_rows.append({
-                    "data": row["data"]
+                    "data":
+                        row["data"]
                 })
 
             else:
 
                 all_rows.append({
-                    "data": row
+                    "data":
+                        row
                 })
 
     result = generate_validation(
@@ -2041,6 +2166,7 @@ def validate_product_by_id(
         if int(item["id"]) == int(product_id):
 
             selected = item
+
             break
 
     if not selected:
@@ -2141,7 +2267,6 @@ def get_report():
 
                 missing_values += 1
 
-
     # --------------------------------------------------------
     # DUPLICATES
     # --------------------------------------------------------
@@ -2166,7 +2291,6 @@ def get_report():
 
             seen.add(normalized)
 
-
     # --------------------------------------------------------
     # VALIDATION SUMMARY
     # --------------------------------------------------------
@@ -2183,7 +2307,6 @@ def get_report():
         validation_results.append(
             result
         )
-
 
     verified = sum(
         1
@@ -2203,15 +2326,17 @@ def get_report():
         if result["status"] == "Critical Issues"
     )
 
-
     average_quality = (
 
         round(
+
             sum(
                 result["quality_score"]
                 for result in validation_results
             )
-            / len(validation_results)
+            /
+            len(validation_results)
+
         )
 
         if validation_results
@@ -2219,22 +2344,29 @@ def get_report():
         else 0
     )
 
+    # --------------------------------------------------------
+    # OVERALL DATASET QUALITY
+    # --------------------------------------------------------
 
-    # Overall dataset quality
     total_cells = (
         dataset["rows_count"]
-        * dataset["columns_count"]
+        *
+        dataset["columns_count"]
     )
 
     completeness = (
 
         round(
+
             (
                 total_cells
                 - missing_values
             )
-            / total_cells
-            * 100
+            /
+            total_cells
+            *
+            100
+
         )
 
         if total_cells > 0
@@ -2242,31 +2374,30 @@ def get_report():
         else 0
     )
 
-    duplicate_score = (
+    duplicate_score = round(
 
-        round(
-            (
+        (
+            1
+            -
+            duplicate_rows
+            /
+            max(
+                dataset["rows_count"],
                 1
-                -
-                duplicate_rows
-                /
-                max(dataset["rows_count"], 1)
             )
-            * 100
         )
-
+        *
+        100
     )
 
     overall_quality = round(
+
         (
-            completeness
-            * 0.45
+            completeness * 0.45
             +
-            duplicate_score
-            * 0.10
+            duplicate_score * 0.10
             +
-            average_quality
-            * 0.45
+            average_quality * 0.45
         )
     )
 
@@ -2378,6 +2509,7 @@ def individual_product_report(
         if int(item["id"]) == int(product_id):
 
             selected = item
+
             break
 
     if not selected:
@@ -2435,7 +2567,7 @@ def individual_product_report(
 
 
 # ============================================================
-# CSV
+# CSV REPORT
 # ============================================================
 
 @app.get("/report/csv")
@@ -2467,7 +2599,12 @@ def report_csv():
         data = item["data"]
 
         writer.writerow([
-            data.get(column, "")
+
+            data.get(
+                column,
+                ""
+            )
+
             for column in columns
         ])
 
@@ -2484,7 +2621,7 @@ def report_csv():
 
 
 # ============================================================
-# JSON
+# JSON REPORT
 # ============================================================
 
 @app.get("/report/json")
@@ -2504,7 +2641,9 @@ def get_datasets():
 
     try:
 
-        datasets = connection.execute(
+        cursor = connection.cursor()
+
+        cursor.execute(
             """
             SELECT
                 id,
@@ -2517,12 +2656,16 @@ def get_datasets():
             FROM datasets
             ORDER BY id DESC
             """
-        ).fetchall()
+        )
+
+        datasets = cursor.fetchall()
 
         result = [
             dict(dataset)
             for dataset in datasets
         ]
+
+        cursor.close()
 
         return {
 
@@ -2553,14 +2696,16 @@ def delete_current_dataset():
 
         cursor = connection.cursor()
 
-        dataset = cursor.execute(
+        cursor.execute(
             """
             SELECT dataset_id
             FROM datasets
             ORDER BY id DESC
             LIMIT 1
             """
-        ).fetchone()
+        )
+
+        dataset = cursor.fetchone()
 
         if not dataset:
 
@@ -2579,7 +2724,7 @@ def delete_current_dataset():
         cursor.execute(
             """
             DELETE FROM dataset_rows
-            WHERE dataset_id = ?
+            WHERE dataset_id = %s
             """,
             (dataset_id,)
         )
@@ -2587,12 +2732,16 @@ def delete_current_dataset():
         cursor.execute(
             """
             DELETE FROM datasets
-            WHERE dataset_id = ?
+            WHERE dataset_id = %s
             """,
             (dataset_id,)
         )
 
         connection.commit()
+
+        cursor.close()
+
+        # Delete uploaded file
 
         for filename in os.listdir(
             UPLOAD_FOLDER
@@ -2608,8 +2757,11 @@ def delete_current_dataset():
                 )
 
                 try:
+
                     os.remove(path)
+
                 except Exception:
+
                     pass
 
         return {
@@ -2619,6 +2771,12 @@ def delete_current_dataset():
             "message":
                 "Dataset deleted successfully."
         }
+
+    except Exception:
+
+        connection.rollback()
+
+        raise
 
     finally:
 
@@ -2648,6 +2806,10 @@ def delete_all_datasets():
 
         connection.commit()
 
+        cursor.close()
+
+        # Delete uploaded files
+
         for filename in os.listdir(
             UPLOAD_FOLDER
         ):
@@ -2664,6 +2826,7 @@ def delete_all_datasets():
                     os.remove(path)
 
             except Exception:
+
                 pass
 
         return {
@@ -2673,6 +2836,12 @@ def delete_all_datasets():
             "message":
                 "All datasets deleted successfully."
         }
+
+    except Exception:
+
+        connection.rollback()
+
+        raise
 
     finally:
 

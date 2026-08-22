@@ -6,3 +6,4 @@ pandas
 python-dotenv
 pymupdf
 openpyxl
+psycopg2-binary
