@@ -1,0 +1,412 @@
+
+/* =========================================================
+   ProductIQ — Final global theme, icon & interaction polish
+========================================================= */
+
+/* ---------- Theme-safe base ---------- */
+body.pi-dark {
+    --page-bg: #07111f;
+    --surface: #0d1a2c;
+    --surface-2: #122238;
+    --surface-3: #182a43;
+    --text-main: #f7f9fc;
+    --text-soft: #c5d0df;
+    --text-muted: #98a7bb;
+    --border-soft: #263a55;
+}
+
+body.pi-light {
+    --page-bg: #f5f7fb;
+    --surface: #ffffff;
+    --surface-2: #f8fafc;
+    --surface-3: #eef2f7;
+    --text-main: #172033;
+    --text-soft: #344054;
+    --text-muted: #667085;
+    --border-soft: #d8dee9;
+}
+
+/* Never let a theme leave the page with unreadable text */
+body.pi-dark {
+    background: var(--page-bg) !important;
+    color: var(--text-main) !important;
+}
+body.pi-light {
+    background: var(--page-bg) !important;
+    color: var(--text-main) !important;
+}
+
+/* ---------- Sidebar ---------- */
+body.pi-light .sidebar {
+    background: #ffffff !important;
+    border-right: 1px solid #d9e0ea !important;
+}
+body.pi-dark .sidebar {
+    background: #081321 !important;
+    border-right: 1px solid #1d2d44 !important;
+}
+
+body.pi-light .sidebar a {
+    color: #344054 !important;
+}
+body.pi-light .sidebar a:hover {
+    color: #111827 !important;
+    background: #eef2ff !important;
+}
+body.pi-light .sidebar a.active {
+    color: #111827 !important;
+}
+body.pi-dark .sidebar a {
+    color: #c4cfdf !important;
+}
+body.pi-dark .sidebar a:hover,
+body.pi-dark .sidebar a.active {
+    color: #ffffff !important;
+}
+
+body.pi-light .sidebar .nav-icon {
+    color: #667085 !important;
+}
+body.pi-light .sidebar a:hover .nav-icon,
+body.pi-light .sidebar a.active .nav-icon {
+    color: #4f46e5 !important;
+}
+body.pi-dark .sidebar .nav-icon {
+    color: #9aacbf !important;
+}
+body.pi-dark .sidebar a:hover .nav-icon,
+body.pi-dark .sidebar a.active .nav-icon {
+    color: #ffffff !important;
+}
+
+/* ---------- Common cards / panels ---------- */
+body.pi-light .card,
+body.pi-light .panel,
+body.pi-light .dashboard-card,
+body.pi-light .report-dashboard-card,
+body.pi-light .reports-stat-card,
+body.pi-light .products-report-card,
+body.pi-light .report-panel,
+body.pi-light .individual-report,
+body.pi-light .settings-card,
+body.pi-light .settings-option,
+body.pi-light .pi-card,
+body.pi-light .pi-modal,
+body.pi-light .pi-compare-card,
+body.pi-light .pi-insight,
+body.pi-light .pi-result {
+    background: #ffffff !important;
+    color: #172033 !important;
+    border-color: #d8dee9 !important;
+}
+
+body.pi-dark .card,
+body.pi-dark .panel,
+body.pi-dark .dashboard-card,
+body.pi-dark .report-dashboard-card,
+body.pi-dark .reports-stat-card,
+body.pi-dark .products-report-card,
+body.pi-dark .report-panel,
+body.pi-dark .individual-report,
+body.pi-dark .settings-card,
+body.pi-dark .settings-option,
+body.pi-dark .pi-card,
+body.pi-dark .pi-modal,
+body.pi-dark .pi-compare-card,
+body.pi-dark .pi-insight,
+body.pi-dark .pi-result {
+    background: #0d1a2c !important;
+    color: #f7f9fc !important;
+    border-color: #263a55 !important;
+}
+
+/* ---------- Light theme text ---------- */
+body.pi-light h1,
+body.pi-light h2,
+body.pi-light h3,
+body.pi-light h4,
+body.pi-light h5,
+body.pi-light strong,
+body.pi-light label,
+body.pi-light th,
+body.pi-light td,
+body.pi-light .title,
+body.pi-light .heading,
+body.pi-light .stat-value,
+body.pi-light .product-name {
+    color: #172033 !important;
+}
+body.pi-light p,
+body.pi-light .muted,
+body.pi-light .description,
+body.pi-light .subtitle,
+body.pi-light .stat-label,
+body.pi-light .section-eyebrow {
+    color: #667085 !important;
+}
+
+/* ---------- Dark theme text ---------- */
+body.pi-dark h1,
+body.pi-dark h2,
+body.pi-dark h3,
+body.pi-dark h4,
+body.pi-dark h5,
+body.pi-dark strong,
+body.pi-dark label,
+body.pi-dark th,
+body.pi-dark td,
+body.pi-dark .title,
+body.pi-dark .heading,
+body.pi-dark .stat-value,
+body.pi-dark .product-name {
+    color: #f7f9fc !important;
+}
+body.pi-dark p,
+body.pi-dark .muted,
+body.pi-dark .description,
+body.pi-dark .subtitle,
+body.pi-dark .stat-label,
+body.pi-dark .section-eyebrow {
+    color: #b8c4d6 !important;
+}
+
+/* ---------- White/light surfaces inside dark mode ---------- */
+/* This specifically fixes the problem where a white panel remains white
+   while inherited dark text makes its contents disappear. */
+body.pi-dark .white-bg,
+body.pi-dark .light-bg,
+body.pi-dark .table-container,
+body.pi-dark .product-table-container,
+body.pi-dark .info-box,
+body.pi-dark .summary-box,
+body.pi-dark .product-information,
+body.pi-dark .dataset-information,
+body.pi-dark .comparison-container,
+body.pi-dark .compare-modal,
+body.pi-dark .upload-box,
+body.pi-dark .drop-zone {
+    background: #0f1d31 !important;
+    color: #f7f9fc !important;
+    border-color: #2b405d !important;
+}
+
+body.pi-dark .white-bg *,
+body.pi-dark .light-bg *,
+body.pi-dark .table-container *,
+body.pi-dark .product-table-container *,
+body.pi-dark .info-box *,
+body.pi-dark .summary-box *,
+body.pi-dark .product-information *,
+body.pi-dark .dataset-information *,
+body.pi-dark .comparison-container *,
+body.pi-dark .compare-modal *,
+body.pi-dark .upload-box *,
+body.pi-dark .drop-zone * {
+    color: #f1f5fb !important;
+}
+
+/* ---------- Inputs / selects ---------- */
+body.pi-light input,
+body.pi-light select,
+body.pi-light textarea {
+    background: #ffffff !important;
+    color: #172033 !important;
+    border-color: #cbd5e1 !important;
+}
+body.pi-light input::placeholder,
+body.pi-light textarea::placeholder {
+    color: #98a2b3 !important;
+}
+body.pi-dark input,
+body.pi-dark select,
+body.pi-dark textarea {
+    background: #0b1728 !important;
+    color: #f7f9fc !important;
+    border-color: #2b405d !important;
+}
+body.pi-dark input::placeholder,
+body.pi-dark textarea::placeholder {
+    color: #8493a8 !important;
+}
+
+/* ---------- Buttons ---------- */
+body.pi-light .button,
+body.pi-light button {
+    color: #172033;
+}
+body.pi-dark .button,
+body.pi-dark button {
+    color: #f7f9fc;
+}
+body.pi-light .secondary-button,
+body.pi-light .button.secondary-button {
+    background: #f1f4f8 !important;
+    color: #344054 !important;
+    border-color: #d0d7e2 !important;
+}
+body.pi-dark .secondary-button,
+body.pi-dark .button.secondary-button {
+    background: #17263b !important;
+    color: #eaf0f8 !important;
+    border-color: #30455f !important;
+}
+
+/* ---------- Realistic icons ---------- */
+.nav-icon,
+.brand-icon,
+.feature-icon,
+.card-icon,
+.stat-icon,
+.action-icon,
+.settings-real-icon,
+.ui-icon {
+    fill: none;
+    stroke: currentColor;
+    stroke-width: 1.8;
+    stroke-linecap: round;
+    stroke-linejoin: round;
+}
+
+.nav-icon {
+    width: 20px;
+    height: 20px;
+    transition: transform .2s ease, color .2s ease;
+}
+.sidebar a:hover .nav-icon {
+    transform: translateY(-1px) scale(1.06);
+}
+
+.feature-icon,
+.card-icon,
+.stat-icon,
+.action-icon,
+.settings-real-icon,
+.ui-icon {
+    width: 22px;
+    height: 22px;
+}
+
+.icon-tile {
+    width: 44px;
+    height: 44px;
+    display: grid;
+    place-items: center;
+    border-radius: 13px;
+    transition: transform .22s ease, box-shadow .22s ease;
+}
+.icon-tile:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 10px 24px rgba(79,70,229,.14);
+}
+
+/* ---------- Dashboard / upload icons ---------- */
+.dashboard-icon,
+.upload-icon,
+.dataset-icon,
+.metric-icon,
+.activity-icon,
+.quick-action-icon,
+.validation-icon,
+.report-icon,
+.product-icon {
+    width: 42px;
+    height: 42px;
+    display: grid;
+    place-items: center;
+    flex: 0 0 42px;
+    border-radius: 13px;
+    color: #4f46e5;
+    background: #eef2ff;
+    border: 1px solid #dbe3ff;
+    transition: transform .22s ease, box-shadow .22s ease;
+}
+body.pi-dark .dashboard-icon,
+body.pi-dark .upload-icon,
+body.pi-dark .dataset-icon,
+body.pi-dark .metric-icon,
+body.pi-dark .activity-icon,
+body.pi-dark .quick-action-icon,
+body.pi-dark .validation-icon,
+body.pi-dark .report-icon,
+body.pi-dark .product-icon {
+    color: #a5b4fc;
+    background: #172442;
+    border-color: #33456b;
+}
+.dashboard-icon:hover,
+.upload-icon:hover,
+.dataset-icon:hover,
+.metric-icon:hover,
+.activity-icon:hover,
+.quick-action-icon:hover,
+.validation-icon:hover,
+.report-icon:hover,
+.product-icon:hover {
+    transform: translateY(-3px) scale(1.03);
+    box-shadow: 0 12px 28px rgba(79,70,229,.16);
+}
+
+/* ---------- Tables ---------- */
+body.pi-light table,
+body.pi-light .product-report-table table {
+    background: #ffffff !important;
+    color: #172033 !important;
+}
+body.pi-light table th {
+    background: #eef2f7 !important;
+    color: #344054 !important;
+}
+body.pi-light table td {
+    color: #344054 !important;
+}
+body.pi-light table tr:hover td {
+    background: #f7f9fc !important;
+}
+
+body.pi-dark table,
+body.pi-dark .product-report-table table {
+    background: #0d1a2c !important;
+    color: #f7f9fc !important;
+}
+body.pi-dark table th {
+    background: #17263b !important;
+    color: #e7edf6 !important;
+}
+body.pi-dark table td {
+    color: #d9e2ef !important;
+}
+body.pi-dark table tr:hover td {
+    background: #14243a !important;
+}
+
+/* ---------- Smooth page polish ---------- */
+.card,
+.panel,
+.dashboard-card,
+.report-dashboard-card,
+.reports-stat-card,
+.products-report-card,
+.report-panel,
+.settings-card,
+.settings-option,
+.button,
+button,
+.sidebar a {
+    transition:
+        background-color .22s ease,
+        border-color .22s ease,
+        color .22s ease,
+        transform .22s ease,
+        box-shadow .22s ease;
+}
+
+@media (prefers-reduced-motion: reduce) {
+    *,
+    *::before,
+    *::after {
+        animation-duration: .01ms !important;
+        animation-iteration-count: 1 !important;
+        transition-duration: .01ms !important;
+        scroll-behavior: auto !important;
+    }
+}

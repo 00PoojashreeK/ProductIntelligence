@@ -1,0 +1,558 @@
+
+/* =========================================================
+   FINAL SHARED DARK-THEME CONTRAST FIX
+   Loaded after all other CSS.
+========================================================= */
+
+body.dark-theme .dashboard-hero,
+body.dark-theme .reports-hero,
+body.dark-theme .hero,
+.dark-theme .dashboard-hero,
+.dark-theme .reports-hero {
+    color: #f8fafc !important;
+}
+
+body.dark-theme .dashboard-hero h1,
+body.dark-theme .dashboard-hero h2,
+body.dark-theme .dashboard-hero h3,
+body.dark-theme .dashboard-hero p,
+body.dark-theme .dashboard-hero span,
+body.dark-theme .dashboard-hero strong,
+body.dark-theme .reports-hero h1,
+body.dark-theme .reports-hero h2,
+body.dark-theme .reports-hero h3,
+body.dark-theme .reports-hero p,
+body.dark-theme .reports-hero span,
+body.dark-theme .reports-hero strong,
+.dark-theme .dashboard-hero h1,
+.dark-theme .dashboard-hero h2,
+.dark-theme .dashboard-hero h3,
+.dark-theme .dashboard-hero p,
+.dark-theme .dashboard-hero span,
+.dark-theme .dashboard-hero strong,
+.dark-theme .reports-hero h1,
+.dark-theme .reports-hero h2,
+.dark-theme .reports-hero h3,
+.dark-theme .reports-hero p,
+.dark-theme .reports-hero span,
+.dark-theme .reports-hero strong {
+    color: #f8fafc !important;
+}
+
+/* Secondary text on blue/purple hero backgrounds */
+body.dark-theme .dashboard-hero .muted,
+body.dark-theme .dashboard-hero .subtitle,
+body.dark-theme .dashboard-hero .description,
+body.dark-theme .reports-hero .muted,
+body.dark-theme .reports-hero .subtitle,
+body.dark-theme .reports-hero .description,
+.dark-theme .dashboard-hero .muted,
+.dark-theme .dashboard-hero .subtitle,
+.dark-theme .dashboard-hero .description,
+.dark-theme .reports-hero .muted,
+.dark-theme .reports-hero .subtitle,
+.dark-theme .reports-hero .description {
+    color: #e2e8f0 !important;
+}
+
+/* Eyebrows/labels should not disappear on colored backgrounds */
+body.dark-theme .dashboard-hero .section-eyebrow,
+body.dark-theme .reports-hero .section-eyebrow,
+.dark-theme .dashboard-hero .section-eyebrow,
+.dark-theme .reports-hero .section-eyebrow {
+    color: #f1f5f9 !important;
+}
+
+/* Dashboard cards and report cards */
+body.dark-theme .stat-card,
+body.dark-theme .dashboard-card,
+body.dark-theme .report-dashboard-card,
+body.dark-theme .reports-stat-card,
+body.dark-theme .products-report-card,
+body.dark-theme .individual-report,
+.dark-theme .stat-card,
+.dark-theme .dashboard-card,
+.dark-theme .report-dashboard-card,
+.dark-theme .reports-stat-card,
+.dark-theme .products-report-card,
+.dark-theme .individual-report {
+    color: #f8fafc !important;
+}
+
+body.dark-theme .stat-card h1,
+body.dark-theme .stat-card h2,
+body.dark-theme .stat-card h3,
+body.dark-theme .stat-card p,
+body.dark-theme .stat-card span,
+body.dark-theme .stat-card strong,
+body.dark-theme .dashboard-card h1,
+body.dark-theme .dashboard-card h2,
+body.dark-theme .dashboard-card h3,
+body.dark-theme .dashboard-card p,
+body.dark-theme .dashboard-card span,
+body.dark-theme .dashboard-card strong,
+body.dark-theme .report-dashboard-card h1,
+body.dark-theme .report-dashboard-card h2,
+body.dark-theme .report-dashboard-card h3,
+body.dark-theme .report-dashboard-card p,
+body.dark-theme .report-dashboard-card span,
+body.dark-theme .report-dashboard-card strong,
+body.dark-theme .reports-stat-card h1,
+body.dark-theme .reports-stat-card h2,
+body.dark-theme .reports-stat-card h3,
+body.dark-theme .reports-stat-card p,
+body.dark-theme .reports-stat-card span,
+body.dark-theme .reports-stat-card strong,
+body.dark-theme .products-report-card h1,
+body.dark-theme .products-report-card h2,
+body.dark-theme .products-report-card h3,
+body.dark-theme .products-report-card p,
+body.dark-theme .products-report-card span,
+body.dark-theme .products-report-card strong,
+body.dark-theme .individual-report h1,
+body.dark-theme .individual-report h2,
+body.dark-theme .individual-report h3,
+body.dark-theme .individual-report p,
+body.dark-theme .individual-report span,
+body.dark-theme .individual-report strong,
+.dark-theme .stat-card h1,
+.dark-theme .stat-card h2,
+.dark-theme .stat-card h3,
+.dark-theme .stat-card p,
+.dark-theme .stat-card span,
+.dark-theme .stat-card strong,
+.dark-theme .dashboard-card h1,
+.dark-theme .dashboard-card h2,
+.dark-theme .dashboard-card h3,
+.dark-theme .dashboard-card p,
+.dark-theme .dashboard-card span,
+.dark-theme .dashboard-card strong,
+.dark-theme .report-dashboard-card h1,
+.dark-theme .report-dashboard-card h2,
+.dark-theme .report-dashboard-card h3,
+.dark-theme .report-dashboard-card p,
+.dark-theme .report-dashboard-card span,
+.dark-theme .report-dashboard-card strong,
+.dark-theme .reports-stat-card h1,
+.dark-theme .reports-stat-card h2,
+.dark-theme .reports-stat-card h3,
+.dark-theme .reports-stat-card p,
+.dark-theme .reports-stat-card span,
+.dark-theme .reports-stat-card strong,
+.dark-theme .products-report-card h1,
+.dark-theme .products-report-card h2,
+.dark-theme .products-report-card h3,
+.dark-theme .products-report-card p,
+.dark-theme .products-report-card span,
+.dark-theme .products-report-card strong,
+.dark-theme .individual-report h1,
+.dark-theme .individual-report h2,
+.dark-theme .individual-report h3,
+.dark-theme .individual-report p,
+.dark-theme .individual-report span,
+.dark-theme .individual-report strong {
+    color: #f8fafc !important;
+}
+
+/* Muted text still needs enough contrast */
+body.dark-theme .stat-card .muted,
+body.dark-theme .dashboard-card .muted,
+body.dark-theme .report-dashboard-card .muted,
+body.dark-theme .reports-stat-card .muted,
+body.dark-theme .products-report-card .muted,
+body.dark-theme .individual-report .muted,
+.dark-theme .stat-card .muted,
+.dark-theme .dashboard-card .muted,
+.dark-theme .report-dashboard-card .muted,
+.dark-theme .reports-stat-card .muted,
+.dark-theme .products-report-card .muted,
+.dark-theme .individual-report .muted {
+    color: #cbd5e1 !important;
+}
+
+/* Links and buttons on dark backgrounds */
+body.dark-theme .dashboard-hero a,
+body.dark-theme .reports-hero a,
+.dark-theme .dashboard-hero a,
+.dark-theme .reports-hero a {
+    color: #ffffff !important;
+}
+
+/* Keep form/readability text bright in dark theme */
+body.dark-theme input,
+body.dark-theme select,
+body.dark-theme textarea,
+.dark-theme input,
+.dark-theme select,
+.dark-theme textarea {
+    color: #f8fafc !important;
+}
+
+body.dark-theme input::placeholder,
+body.dark-theme textarea::placeholder,
+.dark-theme input::placeholder,
+.dark-theme textarea::placeholder {
+    color: #94a3b8 !important;
+}
+
+
+/* =========================================================
+   ACTUAL GLOBAL THEME CLASS: .pi-dark
+   The shared theme controller uses body.pi-dark / body.pi-light.
+   These rules fix the remaining low-contrast text.
+========================================================= */
+
+body.pi-dark .dashboard-hero,
+body.pi-dark .reports-hero,
+body.pi-dark .hero {
+    color: #f8fafc !important;
+}
+
+body.pi-dark .dashboard-hero *,
+body.pi-dark .reports-hero *,
+body.pi-dark .hero * {
+    color: #f8fafc !important;
+}
+
+body.pi-dark .dashboard-hero p,
+body.pi-dark .reports-hero p,
+body.pi-dark .hero p {
+    color: #dbe5f3 !important;
+}
+
+body.pi-dark .dashboard-hero .section-eyebrow,
+body.pi-dark .reports-hero .section-eyebrow {
+    color: #f1f5f9 !important;
+}
+
+/* Reports individual product information */
+body.pi-dark .report-panel,
+body.pi-dark .report-panel *,
+body.pi-dark .individual-report,
+body.pi-dark .individual-report * {
+    color: #f8fafc !important;
+}
+
+body.pi-dark .report-panel .panel-heading,
+body.pi-dark .report-panel .panel-heading span {
+    color: #cbd5e1 !important;
+}
+
+body.pi-dark .report-panel .report-description,
+body.pi-dark .report-panel .report-description *,
+body.pi-dark .individual-report .report-description,
+body.pi-dark .individual-report .report-description * {
+    color: #dbe5f3 !important;
+}
+
+body.pi-dark .product-report-table,
+body.pi-dark .product-report-table *,
+body.pi-dark .product-report-table table,
+body.pi-dark .product-report-table tbody,
+body.pi-dark .product-report-table tr,
+body.pi-dark .product-report-table td,
+body.pi-dark .product-report-table th {
+    color: #f8fafc !important;
+}
+
+body.pi-dark .product-report-table td {
+    background: rgba(8,24,46,.55) !important;
+    border-bottom: 1px solid rgba(129,169,220,.14) !important;
+}
+
+body.pi-dark .product-report-table th {
+    background: rgba(49,83,124,.30) !important;
+    color: #e2e8f0 !important;
+}
+
+/* Generic dark-theme tables, including the validation Product Information table.
+   premium.css has a global light table rule with !important, so override it here. */
+body.pi-dark table {
+    color: #f8fafc !important;
+}
+
+body.pi-dark thead th {
+    background: rgba(49,83,124,.30) !important;
+    color: #f8fafc !important;
+    border-bottom: 1px solid rgba(129,169,220,.22) !important;
+}
+
+body.pi-dark tbody td {
+    background: rgba(8,24,46,.55) !important;
+    color: #f1f5f9 !important;
+    border-bottom: 1px solid rgba(129,169,220,.14) !important;
+}
+
+body.pi-dark tbody tr:nth-child(even) td {
+    background: rgba(12,31,55,.58) !important;
+}
+
+body.pi-dark tbody tr:hover td {
+    background: rgba(49,83,124,.28) !important;
+    color: #ffffff !important;
+}
+
+/* Validation Product Information labels and values */
+body.pi-dark .product-preview,
+body.pi-dark .product-preview h3,
+body.pi-dark .product-preview table,
+body.pi-dark #productInfo,
+body.pi-dark #productInfo *,
+body.pi-dark #productInfo td,
+body.pi-dark #productInfo th {
+    color: #f8fafc !important;
+}
+
+body.pi-dark .product-preview h3 {
+    color: #ffffff !important;
+}
+
+body.pi-dark #productInfo td:first-child,
+body.pi-dark #productInfo th:first-child {
+    color: #cbd5e1 !important;
+    font-weight: 700;
+}
+
+/* Dashboard/report cards: ensure nested text does not inherit an old dark color */
+body.pi-dark .dashboard-card *,
+body.pi-dark .stat-card *,
+body.pi-dark .report-dashboard-card *,
+body.pi-dark .reports-stat-card *,
+body.pi-dark .products-report-card *,
+body.pi-dark .report-card *,
+body.pi-dark .table-card * {
+    color: #f8fafc !important;
+}
+
+body.pi-dark .dashboard-card .muted,
+body.pi-dark .stat-card .muted,
+body.pi-dark .report-dashboard-card .muted,
+body.pi-dark .reports-stat-card .muted,
+body.pi-dark .products-report-card .muted,
+body.pi-dark .report-card .muted,
+body.pi-dark .table-card .muted {
+    color: #cbd5e1 !important;
+}
+
+/* Product names and cells that were previously hidden by global tbody rules */
+body.pi-dark .product-list .product-report-button,
+body.pi-dark .product-list .product-report-button * {
+    color: #f8fafc !important;
+}
+
+/* Keep light mode explicitly clean */
+body.pi-light .report-panel,
+body.pi-light .report-panel *,
+body.pi-light .individual-report,
+body.pi-light .individual-report * {
+    color: #172033;
+}
+
+body.pi-light .report-panel .panel-heading {
+    color: #64748b !important;
+}
+
+body.pi-light .report-panel .report-description,
+body.pi-light .report-panel .report-description * {
+    color: #475569 !important;
+}
+
+
+/* =========================================================
+   LATEST THEME / VISIBILITY FIXES
+========================================================= */
+
+/* Dashboard: Current Dataset must remain readable in dark mode. */
+body.pi-dark .dashboard-card .dataset-info,
+body.pi-dark .dashboard-card .dataset-item {
+    background: rgba(13,25,43,.82) !important;
+    border-color: rgba(148,163,184,.16) !important;
+}
+body.pi-dark .dashboard-card .dataset-item span {
+    color: #aebbd0 !important;
+    -webkit-text-fill-color: #aebbd0 !important;
+}
+body.pi-dark .dashboard-card .dataset-item strong {
+    color: #f8fafc !important;
+    -webkit-text-fill-color: #f8fafc !important;
+}
+
+/* Reports: light theme navigation and confidence must be visible. */
+body.pi-light .reports-page .page-navigation .button,
+body.pi-light .reports-page .page-navigation button,
+body.pi-light .reports-page .page-navigation #previousPage,
+body.pi-light .reports-page .page-navigation #nextPage {
+    color: #172033 !important;
+    -webkit-text-fill-color: #172033 !important;
+    background: #ffffff !important;
+    border: 1px solid #d7deea !important;
+}
+body.pi-light .reports-page .report-score strong,
+body.pi-light .reports-page .report-score span,
+body.pi-light .reports-page #averageConfidence {
+    color: #ffffff !important;
+    -webkit-text-fill-color: #ffffff !important;
+    opacity: 1 !important;
+    visibility: visible !important;
+}
+
+/* Compare Products modal: complete light-theme contrast. */
+body.pi-light .pi-modal {
+    background: #ffffff !important;
+    color: #172033 !important;
+    border: 1px solid #d7deea !important;
+}
+body.pi-light .pi-modal h2,
+body.pi-light .pi-modal h3,
+body.pi-light .pi-modal b,
+body.pi-light .pi-modal strong,
+body.pi-light .pi-modal label,
+body.pi-light .pi-modal span,
+body.pi-light .pi-modal .pi-panel-title {
+    color: #172033 !important;
+    -webkit-text-fill-color: #172033 !important;
+}
+body.pi-light .pi-modal .pi-muted,
+body.pi-light .pi-modal p {
+    color: #64748b !important;
+    -webkit-text-fill-color: #64748b !important;
+}
+body.pi-light .pi-modal .pi-result {
+    background: #f7f9fc !important;
+    border-color: #dfe5ee !important;
+    color: #172033 !important;
+}
+body.pi-light .pi-modal .pi-result span,
+body.pi-light .pi-modal .pi-result a {
+    color: #172033 !important;
+}
+body.pi-light .pi-modal .pi-compare-card {
+    background: #f8fafc !important;
+    border-color: #dfe5ee !important;
+    color: #172033 !important;
+}
+body.pi-light .pi-modal .pi-compare-card h3,
+body.pi-light .pi-modal .pi-compare-row,
+body.pi-light .pi-modal .pi-compare-row span,
+body.pi-light .pi-modal .pi-compare-row b {
+    color: #172033 !important;
+}
+body.pi-light .pi-modal .pi-compare-row {
+    border-color: #e2e8f0 !important;
+}
+body.pi-light .pi-modal .pi-panel {
+    background: #f7f9fc !important;
+    color: #172033 !important;
+    border-color: #dfe5ee !important;
+}
+body.pi-light .pi-modal .pi-action {
+    color: #344054 !important;
+    background: #ffffff !important;
+    border-color: #d7deea !important;
+}
+
+/* Settings page */
+.settings-page { max-width: 1100px; margin:0 auto; padding-bottom:60px; }
+.settings-header h1 { margin:4px 0 8px; color:#fff; font-size:36px; }
+.settings-header p { margin:0 0 24px; color:#9eabc1; }
+.settings-grid { display:grid; grid-template-columns:repeat(2,minmax(0,1fr)); gap:18px; }
+.settings-card { padding:22px; border-radius:20px; background:linear-gradient(145deg,rgba(18,24,43,.86),rgba(8,13,27,.78)); border:1px solid rgba(255,255,255,.10); box-shadow:0 18px 55px rgba(0,0,0,.22); }
+.settings-card h2 { margin:0 0 6px; color:#fff; font-size:18px; }
+.settings-card > p { margin:0 0 18px; color:#9eabc1; font-size:13px; line-height:1.6; }
+.settings-option { display:flex; justify-content:space-between; align-items:center; gap:18px; padding:14px 0; border-top:1px solid rgba(148,163,184,.12); }
+.settings-option:first-of-type { border-top:0; }
+.settings-option strong { display:block; color:#f8fafc; font-size:13px; }
+.settings-option span { display:block; margin-top:4px; color:#9eabc1; font-size:12px; }
+.settings-theme-buttons { display:flex; gap:8px; }
+.settings-theme-buttons button { padding:9px 13px; border-radius:10px; border:1px solid rgba(148,163,184,.20); background:rgba(255,255,255,.06); color:#f8fafc; cursor:pointer; font-weight:700; }
+.settings-theme-buttons button.active { background:linear-gradient(135deg,#6d5dfc,#4f8df7); color:#fff; border-color:transparent; }
+.settings-toggle { width:44px; height:24px; border:0; border-radius:999px; background:#475569; position:relative; cursor:pointer; }
+.settings-toggle::after { content:""; position:absolute; width:18px; height:18px; top:3px; left:3px; border-radius:50%; background:#fff; transition:.2s; }
+.settings-toggle.on { background:#6d5dfc; }
+.settings-toggle.on::after { left:23px; }
+.settings-note { margin-top:18px; padding:12px 14px; border-radius:12px; background:rgba(34,211,238,.06); border:1px solid rgba(34,211,238,.12); color:#aebbd0; font-size:12px; }
+body.pi-light .settings-header h1 { color:#172033 !important; }
+body.pi-light .settings-header p { color:#64748b !important; }
+body.pi-light .settings-card { background:rgba(255,255,255,.82) !important; border-color:rgba(15,23,42,.09) !important; box-shadow:0 12px 35px rgba(15,23,42,.08) !important; }
+body.pi-light .settings-card h2 { color:#172033 !important; }
+body.pi-light .settings-card > p { color:#64748b !important; }
+body.pi-light .settings-option { border-color:#e5e7eb !important; }
+body.pi-light .settings-option strong { color:#172033 !important; }
+body.pi-light .settings-option span { color:#64748b !important; }
+body.pi-light .settings-theme-buttons button { background:#fff; color:#344054; border-color:#d7deea; }
+body.pi-light .settings-theme-buttons button.active { color:#fff; background:linear-gradient(135deg,#6d5dfc,#4f8df7); }
+body.pi-light .settings-note { color:#475467; background:#f0f9ff; border-color:#dbeafe; }
+@media(max-width:800px){.settings-grid{grid-template-columns:1fr}.settings-option{align-items:flex-start;flex-direction:column}.settings-theme-buttons{width:100%}.settings-theme-buttons button{flex:1}}
+
+
+/* =========================================================
+   REALISTIC SETTINGS PAGE
+========================================================= */
+body.pi-dark .settings-card { color:#f8fafc !important; }
+body.pi-dark .settings-card h2,
+body.pi-dark .settings-card strong { color:#f8fafc !important; }
+body.pi-dark .settings-card p,
+body.pi-dark .settings-card span { color:#aebbd0; }
+
+body.pi-light .settings-card { color:#172033 !important; }
+body.pi-light .settings-card h2,
+body.pi-light .settings-card strong { color:#172033 !important; }
+body.pi-light .settings-card p,
+body.pi-light .settings-card span { color:#64748b; }
+
+body.pi-light .settings-toggle { background:#cbd5e1; }
+body.pi-light .settings-toggle.on { background:#6366f1; }
+
+/* Final UI polish: normal icons + dark-mode contrast */
+.nav-icon,.brand-icon{display:block;flex:0 0 auto;width:20px;height:20px;fill:none;stroke:currentColor;stroke-width:1.8;stroke-linecap:round;stroke-linejoin:round}
+.brand-icon{width:27px;height:27px;color:#67e8f9}
+.sidebar-brand{display:flex!important;align-items:center!important;gap:10px!important;text-transform:none!important}
+.sidebar-brand span{color:inherit!important}
+.sidebar a .nav-label{color:inherit!important}
+
+body.pi-dark .pi-modal,
+body.pi-dark .pi-assistant,
+body.pi-dark .pi-compare-card,
+body.pi-dark .pi-score-ring:after,
+body.pi-dark .pi-insight,
+body.pi-dark .pi-fix-item,
+body.pi-dark .pi-feature-card,
+body.pi-dark .pi-exec-card,
+body.pi-dark .pi-icon-btn,
+body.pi-dark .pi-chat-form,
+body.pi-dark .pi-result{
+  background:#101c2f!important;color:#f5f8ff!important;border-color:#2a3b55!important
+}
+body.pi-dark .pi-modal h1,body.pi-dark .pi-modal h2,body.pi-dark .pi-modal h3,
+body.pi-dark .pi-modal h4,body.pi-dark .pi-modal p,body.pi-dark .pi-modal span,
+body.pi-dark .pi-modal label,body.pi-dark .pi-compare-card *,
+body.pi-dark .pi-assistant *,body.pi-dark .pi-insight *,body.pi-dark .pi-fix-item *{
+  color:#f5f8ff!important
+}
+body.pi-dark .pi-modal .pi-muted,body.pi-dark .pi-assistant .pi-muted,
+body.pi-dark .pi-insight p,body.pi-dark .pi-feature-card p{
+  color:#b8c4d8!important
+}
+body.pi-dark .pi-compare-row{border-color:#31415a!important}
+body.pi-dark .pi-fix-item{background:#2a2117!important;border-color:#6b4b25!important}
+body.pi-dark .pi-fix-item p{color:#f6d8ad!important}
+body.pi-dark .pi-score-ring:after{background:#101c2f!important}
+body.pi-dark .pi-score-ring span{color:#fff!important}
+
+body.pi-dark .product-report-table,
+body.pi-dark .product-report-table table,
+body.pi-dark #productReportTable,
+body.pi-dark #productSummary,
+body.pi-dark .report-description,
+body.pi-dark .report-panel,
+body.pi-dark .product-report-table td,
+body.pi-dark .product-report-table th{
+  background:#0f1b2d!important;color:#f5f8ff!important;border-color:#2a3b55!important
+}
+body.pi-dark .product-report-table th{background:#18283e!important;color:#dce7f6!important}
+body.pi-dark .report-description p,body.pi-dark #productSummary p,
+body.pi-dark #productSummary *{color:#d8e1ee!important}
+
+body.pi-light .nav-icon{color:#667085!important}
+body.pi-dark .nav-icon{color:#93a4bf!important}
+body.pi-light .sidebar a.active .nav-icon,body.pi-dark .sidebar a.active .nav-icon{color:#fff!important}

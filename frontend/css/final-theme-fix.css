@@ -1,0 +1,203 @@
+
+/* =========================================================
+   ProductIQ FINAL THEME / VALIDATION VISIBILITY FIX
+========================================================= */
+
+/* ---------- LIGHT THEME: genuinely light UI everywhere ---------- */
+body.pi-light,
+body.pi-light main,
+body.pi-light .main-content,
+body.pi-light .page-content,
+body.pi-light .content,
+body.pi-light .dashboard,
+body.pi-light .reports-page,
+body.pi-light .validation-page {
+  background: #f7f9fc !important;
+  color: #172033 !important;
+}
+
+body.pi-light .card,
+body.pi-light .panel,
+body.pi-light .dashboard-card,
+body.pi-light .report-dashboard-card,
+body.pi-light .reports-stat-card,
+body.pi-light .products-report-card,
+body.pi-light .report-panel,
+body.pi-light .individual-report,
+body.pi-light .settings-card,
+body.pi-light .settings-option,
+body.pi-light .validation-card,
+body.pi-light .validation-panel,
+body.pi-light .data-quality-card,
+body.pi-light .quality-card,
+body.pi-light .score-card,
+body.pi-light .white-bg,
+body.pi-light .light-bg,
+body.pi-light .table-container,
+body.pi-light .product-information,
+body.pi-light .dataset-information,
+body.pi-light .comparison-container {
+  background: #ffffff !important;
+  color: #172033 !important;
+  border-color: #d9e1ec !important;
+  box-shadow: 0 8px 24px rgba(16,24,40,.05) !important;
+}
+
+body.pi-light h1,
+body.pi-light h2,
+body.pi-light h3,
+body.pi-light h4,
+body.pi-light h5,
+body.pi-light h6,
+body.pi-light strong,
+body.pi-light b,
+body.pi-light label,
+body.pi-light th,
+body.pi-light td,
+body.pi-light .value,
+body.pi-light .score,
+body.pi-light .percentage,
+body.pi-light .stat-value,
+body.pi-light .validation-check,
+body.pi-light .quality-score,
+body.pi-light .quality-value {
+  color: #172033 !important;
+}
+
+body.pi-light p,
+body.pi-light span,
+body.pi-light small,
+body.pi-light .muted,
+body.pi-light .subtitle,
+body.pi-light .description,
+body.pi-light .stat-label {
+  color: #475467 !important;
+}
+
+/* Light sidebar, including hover state */
+body.pi-light .sidebar {
+  background: #ffffff !important;
+  color: #172033 !important;
+  border-right: 1px solid #d9e1ec !important;
+}
+body.pi-light .sidebar a,
+body.pi-light .sidebar a span {
+  color: #344054 !important;
+}
+body.pi-light .sidebar a:hover {
+  background: #f1f4f9 !important;
+  color: #172033 !important;
+}
+body.pi-light .sidebar a:hover span {
+  color: #172033 !important;
+}
+body.pi-light .sidebar a.active {
+  color: #312e81 !important;
+}
+
+/* Light tables */
+body.pi-light table,
+body.pi-light table tbody,
+body.pi-light table tr,
+body.pi-light table td {
+  background: #ffffff !important;
+  color: #344054 !important;
+}
+body.pi-light table th {
+  background: #f2f5f9 !important;
+  color: #344054 !important;
+}
+
+/* ---------- DARK THEME: no invisible text on light-looking elements ---------- */
+body.pi-dark .data-quality,
+body.pi-dark .data-quality-card,
+body.pi-dark .quality-card,
+body.pi-dark .score-card,
+body.pi-dark .quality-ring,
+body.pi-dark .score-ring,
+body.pi-dark .progress-ring,
+body.pi-dark .confidence-ring {
+  color: #f8fafc !important;
+}
+
+/* White oval / percentage badge in Dashboard */
+body.pi-dark .data-quality .percentage,
+body.pi-dark .data-quality .score,
+body.pi-dark .data-quality .quality-score,
+body.pi-dark .data-quality .quality-value,
+body.pi-dark .data-quality-card .percentage,
+body.pi-dark .data-quality-card .score,
+body.pi-dark .quality-card .percentage,
+body.pi-dark .quality-card .score,
+body.pi-dark .score-card .percentage,
+body.pi-dark .score-card .score,
+body.pi-dark .quality-ring span,
+body.pi-dark .score-ring span,
+body.pi-dark .progress-ring span,
+body.pi-dark .confidence-ring span {
+  color: #0b1220 !important;
+  text-shadow: none !important;
+  opacity: 1 !important;
+}
+
+/* If the oval itself is white, keep the percentage dark and explicit. */
+body.pi-dark .data-quality .score-badge,
+body.pi-dark .data-quality-card .score-badge,
+body.pi-dark .quality-card .score-badge,
+body.pi-dark .score-card .score-badge {
+  background: #ffffff !important;
+  color: #0b1220 !important;
+}
+
+/* Dark validation check / result */
+body.pi-dark .validation-check,
+body.pi-dark .validation-check *,
+body.pi-dark .validation-result,
+body.pi-dark .validation-result *,
+body.pi-dark .validation-status,
+body.pi-dark .validation-status *,
+body.pi-dark .check-result,
+body.pi-dark .check-result * {
+  color: #f8fafc !important;
+  opacity: 1 !important;
+}
+
+body.pi-dark .validation-check svg,
+body.pi-dark .validation-result svg,
+body.pi-dark .validation-status svg,
+body.pi-dark .check-result svg {
+  stroke: #34d399 !important;
+  color: #34d399 !important;
+  opacity: 1 !important;
+}
+
+/* Dark validation score */
+body.pi-dark .data-quality-score,
+body.pi-dark .data-quality-score *,
+body.pi-dark .quality-score,
+body.pi-dark .quality-score * {
+  color: #f8fafc !important;
+  opacity: 1 !important;
+}
+
+/* ---------- Both themes: score/check readability ---------- */
+.validation-check,
+.validation-status,
+.quality-score,
+.data-quality-score,
+.score-value,
+.percentage-value {
+  opacity: 1 !important;
+  visibility: visible !important;
+}
+
+body.pi-light .validation-check svg,
+body.pi-light .validation-result svg,
+body.pi-light .validation-status svg,
+body.pi-light .check-result svg {
+  stroke: #15803d !important;
+  color: #15803d !important;
+}
+
+/* ---------- Control Value spelling ---------- */
+/* Correct common typo wherever it occurs in rendered labels. */

@@ -1,0 +1,535 @@
+
+/* =========================================================
+   ProductIQ FINAL THEME REPAIR v2
+   Loaded last on every page.
+========================================================= */
+
+/* ---------- LIGHT MODE: white/light surfaces + dark text ---------- */
+html[data-theme="light"] body,
+body.pi-light {
+  background: #f6f8fb !important;
+  color: #172033 !important;
+}
+
+body.pi-light .main,
+body.pi-light main,
+body.pi-light .main-content,
+body.pi-light .content {
+  background: #f6f8fb !important;
+  color: #172033 !important;
+}
+
+body.pi-light .sidebar {
+  background: #ffffff !important;
+  border-right: 1px solid #d9e1ec !important;
+  color: #172033 !important;
+}
+
+body.pi-light .sidebar a,
+body.pi-light .sidebar a span,
+body.pi-light .sidebar .nav-label {
+  color: #344054 !important;
+}
+
+body.pi-light .sidebar a:hover {
+  background: #eef2f7 !important;
+  color: #111827 !important;
+}
+
+body.pi-light .sidebar a:hover *,
+body.pi-light .sidebar a.active * {
+  color: #111827 !important;
+}
+
+body.pi-light .dashboard-card,
+body.pi-light .validation-card,
+body.pi-light .score-box,
+body.pi-light .product-preview,
+body.pi-light .reports-stat-card,
+body.pi-light .report-panel,
+body.pi-light .individual-report,
+body.pi-light .settings-card,
+body.pi-light .settings-option,
+body.pi-light .card,
+body.pi-light .panel {
+  background: #ffffff !important;
+  color: #172033 !important;
+  border-color: #d9e1ec !important;
+}
+
+body.pi-light .validation-card *,
+body.pi-light .score-box *,
+body.pi-light .product-preview * {
+  color: #172033;
+}
+
+body.pi-light .validation-card p,
+body.pi-light .score-box p,
+body.pi-light .product-preview p {
+  color: #475467 !important;
+}
+
+/* Dashboard light theme */
+body.pi-light .dashboard-header h1,
+body.pi-light .dashboard-header p,
+body.pi-light .card-title h3,
+body.pi-light .card-title span,
+body.pi-light .stat-label,
+body.pi-light .stat-value,
+body.pi-light .stat-sub {
+  color: #172033 !important;
+}
+
+body.pi-light .dashboard-header p,
+body.pi-light .card-title span,
+body.pi-light .stat-sub {
+  color: #667085 !important;
+}
+
+/* Validation light theme */
+body.pi-light .select-label,
+body.pi-light .result-header h2,
+body.pi-light .score-box > div:first-child,
+body.pi-light .checks h3,
+body.pi-light .product-preview h3,
+body.pi-light .product-preview th,
+body.pi-light .product-preview td {
+  color: #172033 !important;
+}
+
+body.pi-light .score-number,
+body.pi-light #qualityScore {
+  color: #1d4ed8 !important;
+  opacity: 1 !important;
+  visibility: visible !important;
+}
+
+body.pi-light .score-box {
+  background: #f8fafc !important;
+  border: 1px solid #e2e8f0 !important;
+}
+
+body.pi-light .progress {
+  background: #e5e7eb !important;
+}
+
+body.pi-light .check-item {
+  color: #172033 !important;
+}
+
+body.pi-light .check-item * {
+  color: #344054 !important;
+}
+
+body.pi-light .check-pass {
+  background: #f0fdf4 !important;
+  border-left-color: #22c55e !important;
+}
+
+body.pi-light .check-fail {
+  background: #fff7ed !important;
+  border-left-color: #f97316 !important;
+}
+
+/* ---------- DARK MODE ---------- */
+html[data-theme="dark"] body,
+body.pi-dark {
+  background: #07111f !important;
+  color: #f8fafc !important;
+}
+
+body.pi-dark .main,
+body.pi-dark main,
+body.pi-dark .main-content,
+body.pi-dark .content {
+  background: #07111f !important;
+  color: #f8fafc !important;
+}
+
+/* Dashboard Data Quality white oval */
+body.pi-dark .quality-circle {
+  background: #f8fafc !important;
+  border-color: #818cf8 !important;
+  color: #0b1220 !important;
+}
+
+body.pi-dark .quality-circle strong,
+body.pi-dark .quality-circle span {
+  color: #0b1220 !important;
+  opacity: 1 !important;
+  visibility: visible !important;
+}
+
+body.pi-dark .quality-text h4 {
+  color: #f8fafc !important;
+}
+
+body.pi-dark .quality-text p {
+  color: #b9c5d6 !important;
+}
+
+/* Validation dark mode */
+body.pi-dark .validation-card {
+  background: #0d1a2c !important;
+  color: #f8fafc !important;
+  border: 1px solid #263a55 !important;
+}
+
+body.pi-dark .validation-card * {
+  color: #f3f6fb;
+}
+
+body.pi-dark .product-select {
+  background: #101f34 !important;
+  color: #f8fafc !important;
+  border-color: #334a67 !important;
+}
+
+body.pi-dark .score-box {
+  background: #122238 !important;
+  color: #f8fafc !important;
+  border: 1px solid #2c425f !important;
+}
+
+body.pi-dark .score-box > div:first-child {
+  color: #dce5f1 !important;
+}
+
+body.pi-dark .score-number,
+body.pi-dark #qualityScore {
+  color: #60a5fa !important;
+  opacity: 1 !important;
+  visibility: visible !important;
+}
+
+body.pi-dark .progress {
+  background: #263a55 !important;
+}
+
+body.pi-dark .checks h3,
+body.pi-dark .product-preview h3 {
+  color: #f8fafc !important;
+}
+
+/* Validation check cards: make both icon/check and text visible */
+body.pi-dark .check-item {
+  background: #111f33 !important;
+  color: #f8fafc !important;
+  border-color: #34d399 !important;
+}
+
+body.pi-dark .check-item *,
+body.pi-dark .check-pass *,
+body.pi-dark .check-fail * {
+  color: #f8fafc !important;
+  opacity: 1 !important;
+  visibility: visible !important;
+}
+
+body.pi-dark .check-pass {
+  background: #10281f !important;
+  border-left-color: #34d399 !important;
+}
+
+body.pi-dark .check-fail {
+  background: #2a1a19 !important;
+  border-left-color: #fb7185 !important;
+}
+
+body.pi-dark .check-item svg,
+body.pi-dark .check-pass svg {
+  stroke: #34d399 !important;
+  color: #34d399 !important;
+  fill: none !important;
+}
+
+/* Product information in validation */
+body.pi-dark .product-preview {
+  background: #0d1a2c !important;
+  color: #f8fafc !important;
+  border-color: #263a55 !important;
+}
+
+body.pi-dark .product-preview table,
+body.pi-dark .product-preview tbody,
+body.pi-dark .product-preview tr {
+  background: #0d1a2c !important;
+}
+
+body.pi-dark .product-preview th,
+body.pi-dark .product-preview td {
+  color: #e8eef7 !important;
+  border-color: #263a55 !important;
+}
+
+/* ---------- Shared readable text ---------- */
+body.pi-dark h1,
+body.pi-dark h2,
+body.pi-dark h3,
+body.pi-dark h4,
+body.pi-dark h5,
+body.pi-dark strong,
+body.pi-dark label,
+body.pi-dark th,
+body.pi-dark td {
+  color: #f8fafc !important;
+}
+
+body.pi-dark p,
+body.pi-dark .subtitle,
+body.pi-dark .description,
+body.pi-dark .muted,
+body.pi-dark .stat-sub {
+  color: #b9c5d6 !important;
+}
+
+/* Correct phrase */
+.control-value,
+.control-value-label {
+  color: inherit !important;
+}
+
+/* ---------- Light theme controls/buttons ---------- */
+body.pi-light button,
+body.pi-light .button,
+body.pi-light .secondary-button {
+  color: #172033 !important;
+}
+
+body.pi-light input,
+body.pi-light select,
+body.pi-light textarea {
+  background: #ffffff !important;
+  color: #172033 !important;
+  border-color: #cbd5e1 !important;
+}
+
+body.pi-dark input,
+body.pi-dark select,
+body.pi-dark textarea {
+  background: #101f34 !important;
+  color: #f8fafc !important;
+  border-color: #334a67 !important;
+}
+
+/* Never hide the values due to inherited opacity */
+#qualityScore,
+#progressBar,
+#qualityCircle,
+#heroScore,
+#averageConfidence {
+  opacity: 1 !important;
+  visibility: visible !important;
+}
+/* ================================
+   REPORTS - EXECUTIVE INTELLIGENCE
+   DARK MODE VISIBILITY FIX
+================================ */
+
+body.pi-dark .executive-intelligence,
+body.pi-dark .executive-intelligence-card,
+body.pi-dark .executive-summary,
+body.pi-dark .intelligence-summary {
+    background: #0d1a2c !important;
+    color: #f8fafc !important;
+}
+
+/* Percentage / score */
+body.pi-dark .executive-intelligence .percentage,
+body.pi-dark .executive-intelligence .score,
+body.pi-dark .executive-intelligence .confidence,
+body.pi-dark .executive-intelligence .confidence-value,
+body.pi-dark .executive-intelligence .score-value,
+body.pi-dark .executive-intelligence .percentage-value,
+body.pi-dark .executive-intelligence .metric-value,
+body.pi-dark .executive-intelligence strong,
+body.pi-dark .executive-intelligence h2,
+body.pi-dark .executive-intelligence h3 {
+    color: #ffffff !important;
+    opacity: 1 !important;
+    visibility: visible !important;
+}
+
+/* If percentage uses an ID */
+body.pi-dark #executiveConfidence,
+body.pi-dark #executivePercentage,
+body.pi-dark #executiveScore,
+body.pi-dark #averageConfidence,
+body.pi-dark #confidencePercentage {
+    color: #ffffff !important;
+    opacity: 1 !important;
+    visibility: visible !important;
+}
+
+/* Supporting text */
+body.pi-dark .executive-intelligence p,
+body.pi-dark .executive-intelligence span,
+body.pi-dark .executive-intelligence label {
+    color: #c4cfdd !important;
+}
+
+/* If percentage is inside a circle */
+body.pi-dark .executive-intelligence .score-circle,
+body.pi-dark .executive-intelligence .confidence-circle,
+body.pi-dark .executive-intelligence .progress-circle {
+    color: #ffffff !important;
+}
+
+body.pi-dark .executive-intelligence .score-circle *,
+body.pi-dark .executive-intelligence .confidence-circle *,
+body.pi-dark .executive-intelligence .progress-circle * {
+    color: #ffffff !important;
+    opacity: 1 !important;
+    visibility: visible !important;
+}
+/* =========================================
+   LIGHT MODE - REMOVE GREY BACKGROUNDS
+========================================= */
+
+body.pi-light {
+    background: #ffffff !important;
+    color: #172033 !important;
+}
+
+body.pi-light main,
+body.pi-light .main,
+body.pi-light .main-content,
+body.pi-light .content,
+body.pi-light .page-content {
+    background: #ffffff !important;
+}
+
+/* Main cards */
+body.pi-light .card,
+body.pi-light .panel,
+body.pi-light .dashboard-card,
+body.pi-light .report-dashboard-card,
+body.pi-light .reports-stat-card,
+body.pi-light .products-report-card,
+body.pi-light .report-panel,
+body.pi-light .individual-report,
+body.pi-light .settings-card,
+body.pi-light .settings-option {
+    background: #ffffff !important;
+    color: #172033 !important;
+}
+
+/* Information sections */
+body.pi-light .dataset-information,
+body.pi-light .product-information,
+body.pi-light .data-quality-card,
+body.pi-light .validation-card,
+body.pi-light .score-box,
+body.pi-light .comparison-container,
+body.pi-light .table-container,
+body.pi-light .info-box {
+    background: #ffffff !important;
+    color: #172033 !important;
+}
+
+/* Tables */
+body.pi-light table {
+    background: #ffffff !important;
+    color: #172033 !important;
+}
+
+body.pi-light table th {
+    background: #f8fafc !important;
+    color: #344054 !important;
+}
+
+body.pi-light table td {
+    background: #ffffff !important;
+    color: #344054 !important;
+}
+
+/* Inputs */
+body.pi-light input,
+body.pi-light select,
+body.pi-light textarea {
+    background: #ffffff !important;
+    color: #172033 !important;
+    border: 1px solid #d0d5dd !important;
+}
+
+/* Sidebar */
+body.pi-light .sidebar {
+    background: #ffffff !important;
+    color: #172033 !important;
+    border-right: 1px solid #e4e7ec !important;
+}
+
+body.pi-light .sidebar a {
+    color: #344054 !important;
+}
+
+body.pi-light .sidebar a:hover {
+    background: #f8fafc !important;
+    color: #172033 !important;
+}
+
+/* Normal text */
+body.pi-light h1,
+body.pi-light h2,
+body.pi-light h3,
+body.pi-light h4,
+body.pi-light h5,
+body.pi-light h6,
+body.pi-light strong,
+body.pi-light label {
+    color: #172033 !important;
+}
+
+body.pi-light p,
+body.pi-light span,
+body.pi-light .description,
+body.pi-light .subtitle,
+body.pi-light .muted {
+    color: #475467 !important;
+}
+/* =========================================================
+   REPORTS - DARK THEME NUMBER VISIBILITY FIX
+   ========================================================= */
+
+/* Executive Intelligence numbers */
+body.pi-dark .pi-executive .pi-exec-card b,
+body.pi-dark #piReportFeatures .pi-exec-card b {
+    color: #ffffff !important;
+    opacity: 1 !important;
+    visibility: visible !important;
+}
+
+/* Executive Intelligence labels */
+body.pi-dark .pi-executive .pi-exec-card small,
+body.pi-dark #piReportFeatures .pi-exec-card small {
+    color: #ffffff !important;
+    opacity: 1 !important;
+}
+
+/* =========================================================
+   DATASET OVERVIEW - CIRCLE
+   ========================================================= */
+
+body.pi-light .report-score strong,
+body.pi-light .report-score span {
+    color: #000000 !important;
+}
+
+body.pi-dark .report-score strong,
+body.pi-dark .report-score span {
+    color: #ffffff !important;
+    opacity: 1 !important;
+    visibility: visible !important;
+}
+/* =========================================================
+   UPLOAD PAGE - CURRENT DATASET
+   Remove grey background
+   ========================================================= */
+
+.upload-page .current-dataset,
+.upload-page .current-dataset-box,
+.upload-page .dataset-preview,
+.upload-page .dataset-info,
+.upload-page .current-dataset-container {
+    background: transparent !important;
+}

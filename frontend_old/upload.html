@@ -21,7 +21,7 @@
         body {
             margin: 0;
             font-family: Arial, sans-serif;
-            background: #ffffff;
+            background: #f5f7fb;
             color: #172033;
         }
 
@@ -117,14 +117,7 @@
             cursor: pointer;
 
             transition: .2s;
-            
-            background: #ffffff !important;
-            border: 2px dashed #cbd5e1;
-            border-radius: 16px;
-            padding: 55px 30px;
-            text-align: center;
         }
-        
 
         .drop-zone:hover,
         .drop-zone.dragover {
@@ -178,7 +171,7 @@
 
             padding: 18px;
 
-            background: #ffffff;
+            background: #f8fafc;
 
             border-radius: 10px;
 
@@ -320,7 +313,7 @@
 
             border-radius: 12px;
 
-            background: #ffffff;
+            background: #f8fafc;
         }
 
         .dataset-info {
@@ -455,7 +448,7 @@
 
             color: #667085;
 
-            background: #ffffff;
+            background: #f8fafc;
 
             border-radius: 12px;
 
@@ -613,91 +606,11 @@
             }
 
         }
-        /* =====================================================
-   LIGHT MODE - UPLOAD PAGE FIX
-===================================================== */
 
-body.pi-light .navbar {
-    background: #ffffff !important;
-    color: #172033 !important;
-    border-bottom: 1px solid #e5e7eb;
-}
-
-body.pi-light .navbar .logo {
-    color: #172033 !important;
-}
-
-body.pi-light .navbar .nav a {
-    color: #172033 !important;
-}
-
-body.pi-light .navbar .nav a:hover {
-    color: #2563eb !important;
-}
-
-
-/* Upload your dataset box */
-body.pi-light .upload-card {
-    background: #ffffff !important;
-}
-
-
-/* Drag and drop area */
-body.pi-light .drop-zone {
-    background: #ffffff !important;
-    border: 2px dashed #cbd5e1 !important;
-    color: #172033 !important;
-}
-
-body.pi-light .drop-zone h2 {
-    color: #172033 !important;
-}
-
-body.pi-light .drop-zone p {
-    color: #667085 !important;
-}
-
-
-/* Current Dataset main card */
-body.pi-light .current-card {
-    background: #ffffff !important;
-}
-
-
-/* Currently uploaded dataset information box */
-body.pi-light .dataset-box {
-    background: #ffffff !important;
-    border: 1px solid #e5e7eb !important;
-    color: #172033 !important;
-}
-
-
-/* Dataset text */
-body.pi-light .dataset-name {
-    color: #172033 !important;
-}
-
-body.pi-light .dataset-meta {
-    color: #667085 !important;
-}
-
-
-/* No dataset / loading box */
-body.pi-light .no-dataset {
-    background: #ffffff !important;
-    color: #667085 !important;
-    border: 1px dashed #cbd5e1 !important;
-}
     </style>
 
     <link rel="stylesheet" href="css/innovative.css">
-    <link rel="stylesheet" href="css/premium.css">
-    <link rel="stylesheet" href="css/theme-contrast-fix.css">
 
-    <link rel="stylesheet" href="css/global-polish.css">
-    <link rel="stylesheet" href="css/final-theme-fix.css">
-    <script src="js/global-theme.js"></script>
-    <link rel="stylesheet" href="css/theme-repair-v2.css">
 </head>
 
 
@@ -734,10 +647,6 @@ body.pi-light .no-dataset {
 
         <a href="reports.html">
             Reports
-        </a>
-
-        <a href="settings.html">
-            Settings
         </a>
 
     </div>
@@ -779,7 +688,7 @@ body.pi-light .no-dataset {
         >
 
             <div class="upload-icon">
-                
+                📂
             </div>
 
             <h2>
@@ -932,7 +841,7 @@ body.pi-light .no-dataset {
     <div class="modal-box">
 
         <div class="success-icon">
-            
+            ✓
         </div>
 
         <h2>
@@ -1338,7 +1247,7 @@ function showCurrentDataset(dataset) {
 
                     <span class="dataset-status">
 
-                         Currently Active
+                        ✓ Currently Active
 
                     </span>
 
@@ -1379,7 +1288,7 @@ function showNoDataset() {
 
         <div class="no-dataset">
 
-             <strong>No dataset uploaded.</strong>
+            📂 <strong>No dataset uploaded.</strong>
 
             <br>
 
@@ -2107,7 +2016,6 @@ document.addEventListener(
 </script>
 
 
-<script src="js/intelligence.js"></script>
 </body>
 
 </html>

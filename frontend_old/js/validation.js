@@ -598,22 +598,12 @@ function displayValidationResult(
     productInfo.innerHTML =
         "";
 
-    const selectedProduct =
-        productRows.find(
-            item => String(item.id) === String(productSelect.value)
-        ) || {};
-
-    const product = {
-        ...selectedProduct,
-        ...(data.product || {}),
-    };
+    const product =
+        data.product || {};
 
     const rawData =
-        product.raw_data &&
-        typeof product.raw_data === "object" &&
-        Object.keys(product.raw_data).length
-            ? product.raw_data
-            : product;
+        product.raw_data ||
+        product;
 
     Object.entries(rawData)
         .forEach(

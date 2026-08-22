@@ -1,0 +1,2040 @@
+
+/* ============================================================
+   PRODUCT INTELLIGENCE AI — AURORA GLASS UI
+   Rebuild layer: visual only; existing JS/API hooks preserved.
+============================================================ */
+
+:root{
+  --bg:#050711;
+  --bg2:#090d1a;
+  --panel:rgba(14,19,35,.64);
+  --panel-strong:rgba(17,23,43,.82);
+  --line:rgba(255,255,255,.10);
+  --line-bright:rgba(255,255,255,.18);
+  --text:#f7f8ff;
+  --muted:#9ba5bf;
+  --muted2:#6f7891;
+  --violet:#8b5cf6;
+  --indigo:#6366f1;
+  --cyan:#22d3ee;
+  --pink:#ec4899;
+  --green:#34d399;
+  --amber:#fbbf24;
+  --red:#fb7185;
+  --shadow:0 25px 80px rgba(0,0,0,.42);
+  --glass:blur(24px) saturate(135%);
+}
+
+html,body{min-height:100%;background:var(--bg)!important;color:var(--text)!important}
+body{
+  font-family:Inter,ui-sans-serif,system-ui,-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif!important;
+  background:
+    radial-gradient(700px 500px at 8% -5%,rgba(99,102,241,.22),transparent 60%),
+    radial-gradient(650px 520px at 92% 0%,rgba(34,211,238,.13),transparent 60%),
+    radial-gradient(600px 500px at 70% 100%,rgba(236,72,153,.11),transparent 60%),
+    linear-gradient(135deg,#04050b 0%,#070b17 45%,#050711 100%)!important;
+  line-height:1.55!important;
+  overflow-x:hidden;
+}
+body::before,body::after{
+  content:"";position:fixed;pointer-events:none;z-index:-1;border-radius:50%;filter:blur(2px);
+}
+body::before{width:380px;height:380px;left:-180px;top:35%;background:rgba(139,92,246,.10);box-shadow:0 0 180px 80px rgba(139,92,246,.08);animation:auroraFloat 13s ease-in-out infinite}
+body::after{width:300px;height:300px;right:-140px;bottom:10%;background:rgba(34,211,238,.08);box-shadow:0 0 160px 70px rgba(34,211,238,.07);animation:auroraFloat 16s ease-in-out infinite reverse}
+@keyframes auroraFloat{50%{transform:translate(35px,-25px) scale(1.08)}}
+*{scrollbar-width:thin;scrollbar-color:#39405a transparent}
+*::-webkit-scrollbar{width:8px;height:8px}
+*::-webkit-scrollbar-thumb{background:#343b55;border-radius:99px}
+*::-webkit-scrollbar-track{background:transparent}
+
+h1,h2,h3,h4,h5,h6,p,label,span,div{color:inherit}
+a{color:inherit}
+button,input,select{font:inherit}
+
+.layout{min-height:100vh;position:relative}
+.sidebar{
+  width:264px!important;padding:24px 15px!important;
+  background:rgba(6,9,20,.72)!important;
+  backdrop-filter:var(--glass)!important;-webkit-backdrop-filter:var(--glass)!important;
+  border-right:1px solid var(--line)!important;box-shadow:20px 0 80px rgba(0,0,0,.22)!important;
+}
+.sidebar h2{
+  margin:2px 10px 30px!important;color:#fff!important;font-size:18px!important;
+  letter-spacing:.2px!important;text-transform:none!important;
+}
+.sidebar h2:first-letter{color:var(--cyan)}
+.sidebar a{
+  position:relative!important;display:flex!important;align-items:center!important;gap:12px!important;
+  margin:5px 0!important;padding:13px 14px!important;border:1px solid transparent!important;
+  border-radius:14px!important;color:#aab3ca!important;background:transparent!important;
+  font-size:14px!important;font-weight:600!important;transition:.25s ease!important;
+}
+
+
+
+
+
+
+.sidebar a::before{width:20px;color:#75809b;font-size:15px;text-align:center}
+.sidebar a:hover{transform:translateX(4px)!important;color:#fff!important;background:rgba(255,255,255,.055)!important;border-color:var(--line)!important}
+.sidebar a.active{
+  color:#fff!important;
+  background:linear-gradient(100deg,rgba(99,102,241,.30),rgba(139,92,246,.13))!important;
+  border-color:rgba(139,92,246,.32)!important;
+  box-shadow:0 10px 35px rgba(99,102,241,.16),inset 0 1px 0 rgba(255,255,255,.07)!important;
+}
+.sidebar a.active::after{content:"";position:absolute;left:-15px;top:12px;bottom:12px;width:3px;border-radius:0 4px 4px 0;background:linear-gradient(#22d3ee,#8b5cf6)}
+
+.main{
+  width:calc(100% - 264px)!important;margin-left:264px!important;min-height:100vh!important;
+  padding:34px 42px 60px!important;color:var(--text)!important;
+}
+.main h1,.main h2,.main h3,.main h4{color:#fff!important}
+.main p{color:var(--muted)!important}
+
+.navbar{
+  height:76px!important;padding:0 42px!important;position:sticky!important;
+  background:rgba(5,7,17,.68)!important;backdrop-filter:var(--glass)!important;
+  -webkit-backdrop-filter:var(--glass)!important;border-bottom:1px solid var(--line)!important;
+  box-shadow:0 15px 55px rgba(0,0,0,.24)!important;
+}
+.logo{color:#fff!important;font-size:19px!important;letter-spacing:-.3px}
+
+.dashboard-header{display:flex;align-items:center;justify-content:space-between;gap:20px}
+.dashboard-header h1,.product-title h1,.heading h1,.page-title{
+  font-size:clamp(28px,3vw,42px)!important;letter-spacing:-1.5px!important;
+  background:linear-gradient(100deg,#fff 20%,#c4c9ff 55%,#73e8f7 95%);
+  -webkit-background-clip:text;background-clip:text;-webkit-text-fill-color:transparent;
+}
+.dashboard-header p,.heading p{font-size:15px!important;color:var(--muted)!important}
+
+.dashboard-hero{
+  position:relative!important;overflow:hidden!important;
+  display:flex!important;justify-content:space-between!important;align-items:center!important;gap:30px!important;
+  padding:32px!important;border-radius:26px!important;
+  background:linear-gradient(135deg,rgba(99,102,241,.18),rgba(8,13,30,.64) 55%,rgba(34,211,238,.08))!important;
+  border:1px solid rgba(139,92,246,.28)!important;box-shadow:var(--shadow),inset 0 1px 0 rgba(255,255,255,.08)!important;
+  backdrop-filter:var(--glass)!important;
+}
+.dashboard-hero::before{content:"";position:absolute;width:240px;height:240px;right:8%;top:-150px;border-radius:50%;background:rgba(34,211,238,.16);filter:blur(40px)}
+.hero-text h2{font-size:24px!important;margin:0 0 8px!important;color:#fff!important}
+.hero-text p{max-width:720px;color:#aeb7cd!important}
+.hero-score{
+  flex:0 0 150px!important;width:150px!important;height:150px!important;border-radius:50%!important;
+  display:flex!important;flex-direction:column!important;align-items:center!important;justify-content:center!important;
+  background:radial-gradient(circle at 50% 35%,rgba(139,92,246,.25),rgba(9,13,29,.92) 65%)!important;
+  border:1px solid rgba(255,255,255,.14)!important;box-shadow:0 0 45px rgba(139,92,246,.22),inset 0 0 25px rgba(255,255,255,.04)!important;
+}
+.hero-score strong{font-size:32px!important;color:#fff!important}
+.hero-score span{font-size:11px!important;text-transform:uppercase;color:#8f99b2!important;letter-spacing:1px}
+
+.stats-grid,.summary-grid{gap:16px!important}
+.stat-card,.summary-card,.dashboard-card,.action-card,.dataset-info,.current-dataset,.table-card,.validation-card,.overall-report,.individual-report,.product-card,.report-card,.info-card,.feature-card{
+  background:linear-gradient(145deg,rgba(18,24,43,.76),rgba(9,13,27,.66))!important;
+  color:#fff!important;border:1px solid var(--line)!important;border-radius:20px!important;
+  box-shadow:0 18px 55px rgba(0,0,0,.25),inset 0 1px 0 rgba(255,255,255,.055)!important;
+  backdrop-filter:var(--glass)!important;-webkit-backdrop-filter:var(--glass)!important;
+}
+.stat-card{padding:21px!important;transition:.25s ease!important}
+.stat-card:hover,.summary-card:hover,.action-card:hover{transform:translateY(-4px)!important;border-color:rgba(139,92,246,.35)!important;box-shadow:0 24px 70px rgba(0,0,0,.35),0 0 35px rgba(99,102,241,.08)!important}
+.stat-icon{background:rgba(99,102,241,.14)!important;border:1px solid rgba(139,92,246,.2)!important}
+.stat-label,.stat-sub{color:#929cb5!important}
+.stat-value{color:#fff!important;font-size:30px!important}
+.dataset-pill,.dataset-status,.format,.status-badge{
+  background:rgba(34,211,238,.09)!important;color:#8ff2ff!important;border:1px solid rgba(34,211,238,.25)!important;
+  border-radius:999px!important;
+}
+
+.card,.report-container,.report-page,.product-information,.product-details{background:var(--panel)!important;color:#fff!important;border:1px solid var(--line)!important;box-shadow:var(--shadow)!important}
+
+.product-header{
+  display:flex!important;align-items:flex-end!important;justify-content:space-between!important;gap:25px!important;
+  padding:4px 0 10px!important;
+}
+.product-title h1{margin:0 0 7px!important}
+.dataset-name{color:#8e99b2!important}
+.stats{display:flex!important;gap:12px!important}
+.stat{
+  min-width:110px!important;padding:13px 17px!important;border-radius:15px!important;
+  background:rgba(255,255,255,.045)!important;border:1px solid var(--line)!important;
+}
+.stat strong{display:block!important;color:#fff!important;font-size:22px!important}
+.stat span{color:#8791aa!important;font-size:11px!important;text-transform:uppercase!important;letter-spacing:.8px}
+
+.table-card{overflow:hidden!important}
+.table-topbar{padding:20px 22px!important;border-bottom:1px solid var(--line)!important;background:rgba(255,255,255,.018)!important}
+.table-title{color:#fff!important}
+.table-info{color:#7f89a4!important}
+.search-box,.product-select,input,select{
+  color:#eef2ff!important;background:rgba(255,255,255,.055)!important;border:1px solid rgba(255,255,255,.12)!important;
+  border-radius:12px!important;outline:none!important;
+}
+.search-box:focus,.product-select:focus,input:focus,select:focus{border-color:rgba(34,211,238,.55)!important;box-shadow:0 0 0 4px rgba(34,211,238,.08)!important}
+.search-box::placeholder,input::placeholder{color:#68738d!important}
+table{color:#e9edfa!important;background:transparent!important}
+th{background:rgba(255,255,255,.045)!important;color:#8f9ab5!important;border-color:var(--line)!important}
+td{color:#dbe1f2!important;border-color:rgba(255,255,255,.065)!important}
+tr:hover td{background:rgba(99,102,241,.055)!important}
+
+.validation-container{margin-top:25px!important}
+.validation-card{padding:25px!important;margin-bottom:18px!important}
+.select-label{display:block!important;color:#aeb7cc!important;font-size:12px!important;text-transform:uppercase!important;letter-spacing:.8px!important;margin-bottom:8px!important}
+.product-select{width:100%!important;min-height:48px!important;padding:0 14px!important}
+.product-select option{background:#101526!important;color:#fff!important}
+.validate-btn,.button,.upload-btn,.choose-button,.page-button,.modal-btn{
+  border:1px solid rgba(139,92,246,.32)!important;border-radius:12px!important;
+  color:#fff!important;background:linear-gradient(135deg,#6366f1,#8b5cf6)!important;
+  box-shadow:0 10px 30px rgba(99,102,241,.22)!important;transition:.22s ease!important;
+}
+.validate-btn:hover,.button:hover,.upload-btn:hover,.choose-button:hover,.page-button:hover,.modal-btn:hover{
+  transform:translateY(-2px)!important;box-shadow:0 16px 38px rgba(99,102,241,.30)!important;filter:brightness(1.08)
+}
+.result-header{border-bottom:1px solid var(--line)!important}
+.score-box{background:rgba(255,255,255,.045)!important;border:1px solid var(--line)!important;color:#fff!important}
+.score-number{color:#fff!important}
+
+.reports-page .page-title{margin-bottom:24px!important}
+.overall-report{padding:28px!important}
+.overall-report h2{color:#fff!important;font-size:22px!important}
+.summary-card{padding:20px!important}
+.summary-card h3{color:#8f9ab4!important;font-size:12px!important;text-transform:uppercase!important;letter-spacing:.7px!important}
+.summary-card p{color:#fff!important;font-size:28px!important;font-weight:800!important}
+.report-section,.product-report-table{background:rgba(255,255,255,.025)!important;border:1px solid var(--line)!important;border-radius:16px!important}
+.navigation-buttons{display:flex;gap:10px!important}
+
+.page{padding:42px!important}
+.heading{text-align:left!important}
+.upload-card{max-width:900px!important;margin:0 auto 25px!important;padding:0!important;background:transparent!important}
+.drop-zone{
+  position:relative!important;overflow:hidden!important;padding:58px 30px!important;border-radius:26px!important;
+  background:linear-gradient(145deg,rgba(18,24,43,.75),rgba(8,12,25,.62))!important;
+  border:1px dashed rgba(139,92,246,.52)!important;box-shadow:var(--shadow),inset 0 1px 0 rgba(255,255,255,.05)!important;
+  backdrop-filter:var(--glass)!important;
+}
+.drop-zone::before{content:"";position:absolute;inset:-80px auto auto 20%;width:280px;height:120px;border-radius:50%;background:rgba(34,211,238,.10);filter:blur(45px)}
+.upload-icon{font-size:48px!important;filter:drop-shadow(0 0 18px rgba(34,211,238,.25))}
+.drop-zone h2{color:#fff!important;font-size:25px!important}
+.drop-zone p{color:#8994ad!important}
+.file-info,.current-card,.dataset-box{
+  background:rgba(255,255,255,.04)!important;color:#fff!important;border:1px solid var(--line)!important;border-radius:17px!important;
+}
+.formats{margin-top:18px!important}
+.format{display:inline-flex!important;padding:6px 10px!important;margin:4px!important;background:rgba(255,255,255,.04)!important;color:#aeb8cf!important;border-color:var(--line)!important}
+.message{color:#aeb8cf!important}
+
+.auth-container{
+  min-height:100vh!important;display:grid!important;place-items:center!important;padding:30px!important;
+  background:
+    radial-gradient(500px 400px at 20% 20%,rgba(99,102,241,.20),transparent 65%),
+    radial-gradient(450px 380px at 80% 80%,rgba(34,211,238,.13),transparent 65%)!important;
+}
+.auth-card{
+  position:relative!important;width:min(460px,100%)!important;padding:42px!important;border-radius:28px!important;
+  background:linear-gradient(145deg,rgba(20,27,49,.82),rgba(8,12,25,.78))!important;
+  border:1px solid rgba(255,255,255,.13)!important;box-shadow:0 35px 100px rgba(0,0,0,.48),inset 0 1px 0 rgba(255,255,255,.07)!important;
+  backdrop-filter:var(--glass)!important;-webkit-backdrop-filter:var(--glass)!important;color:#fff!important;
+}
+.auth-card::before{content:"";position:absolute;width:160px;height:160px;right:-70px;top:-70px;border-radius:50%;background:rgba(139,92,246,.20);filter:blur(30px);pointer-events:none}
+.auth-card h1,.auth-card h2{color:#fff!important}
+.auth-card h1{font-size:30px!important;letter-spacing:-1px!important}
+.auth-card .subtitle,.auth-card p{color:#929cb4!important}
+.auth-card input{width:100%!important;min-height:48px!important}
+.auth-card button,.auth-card .button{width:100%!important;min-height:48px!important}
+.auth-card a{color:#8eeaf7!important}
+
+.empty,.empty-box,.loading,.error{
+  background:rgba(255,255,255,.035)!important;color:#9da7bf!important;border:1px solid var(--line)!important;border-radius:15px!important;padding:22px!important;
+}
+.error{color:#ff9aa9!important;border-color:rgba(251,113,133,.25)!important;background:rgba(251,113,133,.06)!important}
+.loading{color:#aeb8d0!important}
+
+.pagination{color:#8f9ab3!important}
+.page-number{color:#aeb7cb!important;background:rgba(255,255,255,.04)!important;border:1px solid var(--line)!important}
+.page-number.active{background:linear-gradient(135deg,#6366f1,#8b5cf6)!important;color:#fff!important;border-color:transparent!important}
+
+@media(max-width:900px){
+ .sidebar{width:82px!important;padding:20px 10px!important}
+ .sidebar h2{font-size:0!important;text-align:center}
+ 
+ .sidebar a{justify-content:center!important;font-size:0!important;padding:14px 8px!important}
+ .sidebar a::before{font-size:18px!important}
+ .sidebar a.active::after{left:-10px}
+ .main{width:calc(100% - 82px)!important;margin-left:82px!important;padding:26px 20px 50px!important}
+ .navbar{padding:0 20px!important}
+ .nav a{font-size:0!important;padding:10px!important}
+ 
+ .dashboard-hero{align-items:flex-start!important;flex-direction:column!important}
+ .hero-score{align-self:flex-end!important}
+ .product-header{align-items:flex-start!important;flex-direction:column!important}
+}
+@media(max-width:600px){
+ .main{padding:22px 14px 40px!important}
+ .navbar{height:68px!important;padding:0 12px!important}
+ .logo{font-size:15px!important}
+ 
+
+/* ============================================================
+   FINAL CONTRAST + COHESION PATCH
+============================================================ */
+
+/* Default is dark. Light mode is explicitly activated by JS. */
+body.pi-light{
+  --bg:#eef2f9;--bg2:#f7f9fd;--panel:rgba(255,255,255,.74);--panel-strong:rgba(255,255,255,.9);
+  --line:rgba(15,23,42,.10);--line-bright:rgba(15,23,42,.16);--text:#101828;--muted:#5d687d;--muted2:#7a8598;
+  background:
+    radial-gradient(700px 500px at 8% -5%,rgba(99,102,241,.16),transparent 60%),
+    radial-gradient(650px 520px at 92% 0%,rgba(34,211,238,.12),transparent 60%),
+    linear-gradient(135deg,#f4f7ff,#edf2fa 55%,#f8faff)!important;
+  color:#101828!important;
+}
+body.pi-light .main p,body.pi-light .dashboard-header p,body.pi-light .heading p{color:#5d687d!important}
+body.pi-light .sidebar{background:rgba(255,255,255,.72)!important;border-color:rgba(15,23,42,.08)!important}
+body.pi-light .sidebar h2,.pi-light .main h1,.pi-light .main h2,.pi-light .main h3,.pi-light .main h4{color:#111827!important}
+body.pi-light .sidebar a{color:#566176!important}
+body.pi-light .sidebar a.active{color:#fff!important}
+body.pi-light .navbar{background:rgba(255,255,255,.72)!important;border-color:rgba(15,23,42,.08)!important}
+body.pi-light .logo{color:#111827!important}
+body.pi-light .nav a{color:#596579!important}
+body.pi-light .stat-card,body.pi-light .summary-card,body.pi-light .dashboard-card,body.pi-light .action-card,body.pi-light .dataset-info,body.pi-light .table-card,body.pi-light .validation-card,body.pi-light .overall-report,body.pi-light .individual-report,body.pi-light .product-card,body.pi-light .report-card,body.pi-light .info-card,body.pi-light .feature-card,body.pi-light .pi-panel{background:rgba(255,255,255,.76)!important;color:#111827!important;border-color:rgba(15,23,42,.09)!important}
+body.pi-light .stat-value,body.pi-light .dataset-item strong,body.pi-light .action-card strong,body.pi-light .action-card span{color:#111827!important}
+body.pi-light .dataset-item span,body.pi-light .stat-label,body.pi-light .stat-sub{color:#68758a!important}
+body.pi-light .table-container table,body.pi-light table{color:#111827!important}
+body.pi-light th{background:#f2f5fa!important;color:#344054!important;border-color:#e2e8f0!important}
+body.pi-light td{color:#344054!important;border-color:#edf0f5!important}
+body.pi-light .pi-assistant{background:rgba(255,255,255,.97)!important;color:#172033!important}
+body.pi-light .pi-msg.ai{background:#eef2ff!important;color:#172033!important}
+body.pi-light .pi-msg.user{background:#dff7ff!important;color:#172033!important}
+body.pi-light .pi-chat-form input{background:#fff!important;color:#172033!important}
+
+/* Dashboard quick actions: force a visible, premium grid. */
+.dashboard-grid{display:grid!important;grid-template-columns:minmax(0,1.15fr) minmax(0,.85fr)!important;gap:18px!important;align-items:stretch!important}
+.dashboard-card{min-width:0!important;padding:22px!important}
+.card-title{display:flex!important;justify-content:space-between!important;align-items:flex-start!important;gap:12px!important;margin-bottom:18px!important}
+.card-title h3{margin:0!important;color:#fff!important;font-size:17px!important}
+.card-title span{color:#8994ad!important;font-size:12px!important}
+.actions-grid{display:grid!important;grid-template-columns:repeat(2,minmax(0,1fr))!important;gap:12px!important}
+.action-card{display:flex!important;flex-direction:column!important;gap:6px!important;min-height:92px!important;padding:16px!important;text-decoration:none!important;color:#fff!important;visibility:visible!important;opacity:1!important}
+.action-card strong{color:#fff!important;font-size:14px!important}
+.action-card span{color:#9da8bf!important;font-size:12px!important}
+.action-card:hover{background:linear-gradient(135deg,rgba(99,102,241,.18),rgba(34,211,238,.07))!important}
+
+/* Product health ring: percentage must always sit above the inner disc. */
+.pi-score-ring{background:conic-gradient(var(--pi-accent,#8b5cf6) calc(var(--score)*1%),rgba(255,255,255,.10) 0)!important;box-shadow:0 0 28px rgba(139,92,246,.16),inset 0 0 0 1px rgba(255,255,255,.08)!important}
+.pi-score-ring:after{background:#0b1020!important;border:1px solid rgba(255,255,255,.08)!important;inset:9px!important}
+.pi-score-ring span{color:#fff!important;text-shadow:0 1px 12px rgba(0,0,0,.5)!important;font-size:25px!important;font-weight:900!important;position:relative!important;z-index:5!important}
+body.pi-light .pi-score-ring:after{background:#fff!important;border-color:rgba(15,23,42,.08)!important}
+body.pi-light .pi-score-ring span{color:#172033!important;text-shadow:none!important}
+.quality-circle{background:radial-gradient(circle,#11182a 0 58%,transparent 59%)!important;border:8px solid #7c6cff!important;box-shadow:0 0 30px rgba(124,108,255,.2)!important}
+.quality-circle strong{color:#fff!important;z-index:2!important}
+.quality-circle span{color:#9ba5bf!important;z-index:2!important}
+body.pi-light .quality-circle{background:#fff!important}
+body.pi-light .quality-circle strong{color:#312e81!important}
+body.pi-light .quality-circle span{color:#64748b!important}
+
+/* Products: records + intelligence panels must have readable text. */
+.products-page .dataset-name,.products-page .dataset-name strong{color:#cbd4e8!important}
+.products-page .table-card,.products-page .table-container,.products-page .table-container table{color:#f7f8ff!important}
+.products-page .table-container th{background:rgba(255,255,255,.055)!important;color:#b8c2d7!important;border-bottom:1px solid rgba(255,255,255,.10)!important}
+.products-page .table-container td{color:#eef2ff!important;border-bottom:1px solid rgba(255,255,255,.07)!important}
+.products-page .table-container tbody tr:hover{background:rgba(99,102,241,.08)!important}
+body.pi-light .products-page .dataset-name,body.pi-light .products-page .dataset-name strong{color:#596579!important}
+body.pi-light .products-page .table-container td{color:#344054!important}
+.pi-feature-grid{position:relative!important;z-index:2!important}
+.pi-panel{color:#f4f7ff!important;background:linear-gradient(145deg,rgba(18,24,43,.84),rgba(8,12,25,.72))!important;border-color:rgba(255,255,255,.10)!important}
+.pi-panel-title{color:#fff!important}
+.pi-panel p,.pi-muted{color:#aab5ca!important}
+.pi-insight{background:rgba(255,255,255,.045)!important;border-color:rgba(255,255,255,.09)!important}
+.pi-insight strong{color:#fff!important}
+.pi-insight p{color:#aab5ca!important}
+.pi-exec-card{color:#fff!important;background:linear-gradient(135deg,rgba(99,102,241,.13),rgba(34,211,238,.06))!important;border-color:rgba(255,255,255,.09)!important}
+.pi-exec-card small{color:#9eabc1!important}
+.pi-exec-card b{color:#fff!important}
+.pi-command input,.pi-chat-form input{background:rgba(255,255,255,.065)!important;color:#fff!important;border-color:rgba(255,255,255,.12)!important}
+.pi-command input::placeholder,.pi-chat-form input::placeholder{color:#78849c!important}
+.pi-command button{color:#fff!important}
+.pi-result{background:rgba(255,255,255,.04)!important;border-color:rgba(255,255,255,.09)!important;color:#fff!important}
+.pi-result a{color:#fff!important}
+.pi-result span{color:#fff!important}
+.pi-action{background:rgba(255,255,255,.065)!important;color:#f5f7ff!important;border-color:rgba(255,255,255,.12)!important}
+.pi-action:hover{background:rgba(139,92,246,.16)!important}
+body.pi-light .pi-panel{background:rgba(255,255,255,.78)!important;color:#172033!important}
+body.pi-light .pi-panel-title,body.pi-light .pi-insight strong,body.pi-light .pi-exec-card b{color:#172033!important}
+body.pi-light .pi-panel p,body.pi-light .pi-muted,body.pi-light .pi-insight p{color:#64748b!important}
+body.pi-light .pi-insight,body.pi-light .pi-result{background:rgba(15,23,42,.025)!important;border-color:rgba(15,23,42,.08)!important}
+body.pi-light .pi-result a{color:#172033!important}
+body.pi-light .pi-command input,body.pi-light .pi-chat-form input{background:#fff!important;color:#172033!important;border-color:#d7deea!important}
+body.pi-light .pi-action{background:#fff!important;color:#344054!important;border-color:#d7deea!important}
+
+/* Validation: names, brands and table content are high-contrast. */
+.validation-container .validation-card{color:#f7f8ff!important}
+.validation-container .validation-card h1,.validation-container .validation-card h2,.validation-container .validation-card h3,.validation-container .validation-card h4,.validation-container .validation-card strong{color:#fff!important}
+.validation-container .validation-card label,.validation-container .validation-card p,.validation-container .select-label{color:#aeb8cc!important}
+.validation-container select,.validation-container option{color:#f7f8ff!important;background:#10172a!important}
+.validation-container .product-info table{color:#fff!important}
+.validation-container .product-info th{background:rgba(255,255,255,.055)!important;color:#b8c2d7!important}
+.validation-container .product-info td{color:#f4f7ff!important;background:rgba(255,255,255,.02)!important}
+.validation-container .check-item{background:rgba(255,255,255,.045)!important;border-color:rgba(255,255,255,.09)!important;color:#fff!important}
+.validation-container .check-title{color:#fff!important}
+.validation-container .check-message{color:#aeb8cc!important}
+body.pi-light .validation-container .validation-card{color:#172033!important}
+body.pi-light .validation-container .validation-card h1,body.pi-light .validation-container .validation-card h2,body.pi-light .validation-container .validation-card h3,body.pi-light .validation-container .validation-card h4,body.pi-light .validation-container .validation-card strong{color:#172033!important}
+body.pi-light .validation-container .validation-card label,body.pi-light .validation-container .validation-card p{color:#64748b!important}
+body.pi-light .validation-container select{color:#172033!important;background:#fff!important}
+body.pi-light .validation-container .product-info th{background:#f3f6fa!important;color:#475467!important}
+body.pi-light .validation-container .product-info td{color:#344054!important;background:#fff!important}
+
+/* Reports: same visual language as dashboard/products, not a separate white admin page. */
+.reports-page{padding-bottom:40px!important}
+.reports-page>.page-title{margin-bottom:8px!important}
+#overallReport{padding:26px!important;margin-top:18px!important}
+#overallReport>h2{color:#fff!important;font-size:21px!important;margin:0 0 5px!important}
+#overallReport>#datasetName{color:#9ca8be!important;margin:0!important}
+.summary-grid{display:grid!important;grid-template-columns:repeat(5,minmax(0,1fr))!important;gap:12px!important;margin-top:20px!important}
+.summary-card{padding:18px!important;background:rgba(255,255,255,.045)!important}
+.summary-card h3{color:#8f9ab1!important;font-size:11px!important;text-transform:uppercase!important;letter-spacing:.8px!important}
+.summary-card p{color:#fff!important;font-size:27px!important;margin:0!important}
+#productGroups{margin-top:18px!important}
+.product-group{padding:22px!important;background:linear-gradient(145deg,rgba(18,24,43,.82),rgba(8,12,25,.72))!important;border:1px solid rgba(255,255,255,.10)!important;border-radius:22px!important;box-shadow:var(--shadow)!important}
+.product-group h2{color:#fff!important}
+.product-group p{color:#9aa5bc!important}
+.product-list{display:grid!important;grid-template-columns:repeat(4,minmax(0,1fr))!important;gap:11px!important}
+.product-report-button{display:block!important;width:100%!important;text-align:left!important;padding:15px!important;border:1px solid rgba(255,255,255,.09)!important;background:rgba(255,255,255,.04)!important;border-radius:15px!important;color:#fff!important;cursor:pointer!important}
+.product-report-button:hover{background:linear-gradient(135deg,rgba(99,102,241,.16),rgba(34,211,238,.06))!important;border-color:rgba(139,92,246,.34)!important;transform:translateY(-2px)!important}
+.product-number{color:#7f8ba4!important;font-size:10px!important;text-transform:uppercase!important;letter-spacing:.8px!important}
+.product-name{color:#fff!important;font-size:14px!important;font-weight:800!important;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.page-navigation{border-top:1px solid rgba(255,255,255,.08)!important;padding-top:18px!important}
+#pageNumber{color:#c5cee0!important}
+#individualReport{padding:26px!important;margin-top:20px!important}
+.individual-header h2{color:#fff!important}
+.report-label{color:#8995ad!important}
+.product-report-table{color:#fff!important}
+.product-report-table th{background:rgba(255,255,255,.045)!important;color:#9eabc0!important;border-color:rgba(255,255,255,.08)!important}
+.product-report-table td{color:#f5f7ff!important;border-color:rgba(255,255,255,.08)!important;background:rgba(255,255,255,.015)!important}
+.score-box{color:#fff!important;border:1px solid rgba(255,255,255,.12)!important}
+.score-good{background:rgba(52,211,153,.15)!important;color:#73f5c0!important}
+.score-medium{background:rgba(251,191,36,.15)!important;color:#ffd66e!important}
+.score-low{background:rgba(251,113,133,.15)!important;color:#ff9aab!important}
+.report-status{background:rgba(99,102,241,.14)!important;color:#b9b5ff!important}
+.report-description{background:rgba(255,255,255,.04)!important;color:#c1cada!important;border:1px solid rgba(255,255,255,.08)!important}
+.report-description p{color:#c1cada!important}
+.empty-box{background:linear-gradient(145deg,rgba(18,24,43,.82),rgba(8,12,25,.72))!important;color:#fff!important;border:1px solid rgba(255,255,255,.10)!important;border-radius:22px!important;padding:40px!important}
+body.pi-light #overallReport,body.pi-light .product-group,body.pi-light #individualReport,body.pi-light .empty-box{background:rgba(255,255,255,.78)!important;color:#172033!important;border-color:rgba(15,23,42,.09)!important}
+body.pi-light #overallReport>h2,body.pi-light .product-group h2,body.pi-light .individual-header h2{color:#172033!important}
+body.pi-light #overallReport>#datasetName,body.pi-light .product-group p,body.pi-light .report-label{color:#667085!important}
+body.pi-light .summary-card{background:rgba(15,23,42,.025)!important;border-color:rgba(15,23,42,.07)!important}
+body.pi-light .summary-card h3{color:#667085!important}
+body.pi-light .summary-card p{color:#172033!important}
+body.pi-light .product-report-button{background:rgba(15,23,42,.025)!important;color:#172033!important;border-color:rgba(15,23,42,.08)!important}
+body.pi-light .product-name{color:#172033!important}
+body.pi-light .product-report-table th{background:#f3f6fa!important;color:#475467!important;border-color:#e5e7eb!important}
+body.pi-light .product-report-table td{color:#344054!important;background:#fff!important;border-color:#e5e7eb!important}
+body.pi-light .report-description{background:#f7f9fc!important;color:#475467!important;border-color:#e5e7eb!important}
+
+/* AI assistant: visible user + assistant messages, readable input, consistent glass. */
+.pi-floating{right:24px!important;bottom:24px!important}
+.pi-fab{border:1px solid rgba(255,255,255,.18)!important;background:linear-gradient(135deg,#7c5cff,#16c7ed)!important;color:#fff!important}
+.pi-assistant{width:min(390px,calc(100vw - 28px))!important;padding:17px!important;background:rgba(10,15,29,.94)!important;border:1px solid rgba(255,255,255,.13)!important;box-shadow:0 30px 90px rgba(0,0,0,.55)!important;color:#fff!important}
+.pi-assistant .pi-panel-head{margin-bottom:10px!important}
+.pi-assistant .pi-panel-title{color:#fff!important}
+.pi-assistant .pi-muted{color:#8f9ab2!important}
+.pi-chat{height:270px!important;padding:8px 4px!important}
+.pi-msg{display:block!important;max-width:88%!important;padding:11px 13px!important;border-radius:15px!important;margin:9px 0!important;font-size:13px!important;line-height:1.55!important;white-space:normal!important;word-break:break-word!important;color:#f8fbff!important}
+.pi-msg.ai{background:linear-gradient(135deg,rgba(99,102,241,.18),rgba(34,211,238,.08))!important;border:1px solid rgba(139,92,246,.18)!important;color:#f4f7ff!important}
+.pi-msg.user{margin-left:auto!important;background:linear-gradient(135deg,rgba(139,92,246,.85),rgba(99,102,241,.72))!important;color:#fff!important;border:1px solid rgba(255,255,255,.12)!important}
+.pi-chat-form{background:rgba(255,255,255,.04)!important;border:1px solid rgba(255,255,255,.08)!important;padding:7px!important;border-radius:14px!important}
+.pi-chat-form input{border:0!important;background:transparent!important;padding:9px 10px!important;color:#fff!important}
+.pi-chat-form input:focus{box-shadow:none!important}
+.pi-chat-form button{min-height:38px!important;background:linear-gradient(135deg,#7c5cff,#16c7ed)!important;color:#fff!important;border-radius:11px!important}
+body.pi-light .pi-assistant{background:rgba(255,255,255,.96)!important;color:#172033!important;border-color:rgba(15,23,42,.10)!important}
+body.pi-light .pi-assistant .pi-panel-title{color:#172033!important}
+body.pi-light .pi-msg.ai{background:#eef2ff!important;color:#172033!important;border-color:#dde3ff!important}
+body.pi-light .pi-msg.user{background:linear-gradient(135deg,#7058f7,#4f8df7)!important;color:#fff!important}
+body.pi-light .pi-chat-form{background:#f5f7fb!important;border-color:#dce2ec!important}
+body.pi-light .pi-chat-form input{color:#172033!important}
+
+/* Theme button is now an intentional control, not a floating mystery icon. */
+#piThemeBtn{position:fixed!important;right:94px!important;bottom:28px!important;width:46px!important;height:46px!important;border-radius:14px!important;background:rgba(16,23,42,.82)!important;color:#fff!important;border:1px solid rgba(255,255,255,.14)!important;box-shadow:0 14px 35px rgba(0,0,0,.28)!important;z-index:9998!important}
+body.pi-light #piThemeBtn{background:rgba(255,255,255,.86)!important;color:#172033!important;border-color:rgba(15,23,42,.10)!important}
+
+@media(max-width:1100px){.summary-grid{grid-template-columns:repeat(3,minmax(0,1fr))!important}.product-list{grid-template-columns:repeat(3,minmax(0,1fr))!important}}
+@media(max-width:850px){.dashboard-grid{grid-template-columns:1fr!important}.summary-grid{grid-template-columns:repeat(2,minmax(0,1fr))!important}.product-list{grid-template-columns:repeat(2,minmax(0,1fr))!important}}
+@media(max-width:620px){.actions-grid{grid-template-columns:1fr!important}.summary-grid,.product-list{grid-template-columns:1fr!important}.main{padding:24px 16px 80px!important}.pi-floating{right:14px!important;bottom:14px!important}.pi-assistant{bottom:64px!important}.pi-score-ring{width:104px!important;height:104px!important}}
+
+/* =========================================================
+   FINAL OVERRIDE: PRODUCTS PAGE REAL DOM
+   Fixes the original table rules and theme logo.
+========================================================= */
+
+/* ---------- DARK PRODUCTS ---------- */
+body.pi-dark .products-page .product-title h1,
+body.pi-dark .products-page .product-title .dataset-name,
+body.pi-dark .products-page .product-title .dataset-name strong,
+body.pi-dark .products-page .table-title,
+body.pi-dark .products-page .table-info,
+body.pi-dark .products-page .stat strong,
+body.pi-dark .products-page .stat span,
+body.pi-dark .products-page th,
+body.pi-dark .products-page td,
+body.pi-dark .products-page td * {
+    color: #f8fafc !important;
+    -webkit-text-fill-color: #f8fafc !important;
+    opacity: 1 !important;
+    visibility: visible !important;
+}
+
+body.pi-dark .products-page .dataset-name,
+body.pi-dark .products-page .table-info,
+body.pi-dark .products-page .stat span {
+    color: #aebbd0 !important;
+    -webkit-text-fill-color: #aebbd0 !important;
+}
+
+body.pi-dark .products-page .dataset-name strong {
+    color: #8fe7ff !important;
+    -webkit-text-fill-color: #8fe7ff !important;
+}
+
+body.pi-dark .products-page .table-card {
+    background: rgba(12,18,34,.92) !important;
+    color: #f8fafc !important;
+    border: 1px solid rgba(255,255,255,.10) !important;
+}
+
+body.pi-dark .products-page .table-topbar {
+    background: rgba(18,25,45,.72) !important;
+    border-bottom-color: rgba(255,255,255,.09) !important;
+}
+
+body.pi-dark .products-page table {
+    background: rgba(8,13,26,.80) !important;
+    color: #f8fafc !important;
+}
+
+body.pi-dark .products-page table thead th,
+body.pi-dark .products-page table th {
+    background: #17213a !important;
+    color: #eaf0ff !important;
+    -webkit-text-fill-color: #eaf0ff !important;
+    border-bottom-color: rgba(255,255,255,.12) !important;
+}
+
+body.pi-dark .products-page table tbody tr,
+body.pi-dark .products-page table tbody tr td {
+    background: rgba(10,17,32,.88) !important;
+    color: #f5f7ff !important;
+    -webkit-text-fill-color: #f5f7ff !important;
+    border-bottom-color: rgba(255,255,255,.08) !important;
+}
+
+/* THE IMPORTANT HOVER FIX */
+body.pi-dark .products-page table tbody tr:hover,
+body.pi-dark .products-page table tbody tr:hover td,
+body.pi-dark .products-page table tbody tr:hover td * {
+    background: rgba(99,102,241,.20) !important;
+    color: #ffffff !important;
+    -webkit-text-fill-color: #ffffff !important;
+    opacity: 1 !important;
+    visibility: visible !important;
+}
+
+body.pi-dark .products-page .search-box {
+    background: #0b1220 !important;
+    color: #ffffff !important;
+    -webkit-text-fill-color: #ffffff !important;
+    border-color: rgba(148,163,184,.28) !important;
+}
+
+body.pi-dark .products-page .search-box::placeholder {
+    color: #7f8ba3 !important;
+    -webkit-text-fill-color: #7f8ba3 !important;
+}
+
+body.pi-dark .products-page .status {
+    color: #ffffff !important;
+    -webkit-text-fill-color: #ffffff !important;
+}
+
+body.pi-dark .products-page .button,
+body.pi-dark .products-page .view-button {
+    color: #ffffff !important;
+    -webkit-text-fill-color: #ffffff !important;
+}
+
+/* ---------- LIGHT PRODUCTS ---------- */
+body.pi-light .products-page .product-title h1,
+body.pi-light .products-page .table-title,
+body.pi-light .products-page th,
+body.pi-light .products-page td,
+body.pi-light .products-page td * {
+    color: #172033 !important;
+    -webkit-text-fill-color: #172033 !important;
+    opacity: 1 !important;
+    visibility: visible !important;
+}
+
+body.pi-light .products-page .dataset-name,
+body.pi-light .products-page .table-info,
+body.pi-light .products-page .stat span {
+    color: #667085 !important;
+    -webkit-text-fill-color: #667085 !important;
+}
+
+body.pi-light .products-page .dataset-name strong {
+    color: #172033 !important;
+    -webkit-text-fill-color: #172033 !important;
+}
+
+body.pi-light .products-page table tbody tr:hover,
+body.pi-light .products-page table tbody tr:hover td,
+body.pi-light .products-page table tbody tr:hover td * {
+    background: #eef2ff !important;
+    color: #172033 !important;
+    -webkit-text-fill-color: #172033 !important;
+    opacity: 1 !important;
+    visibility: visible !important;
+}
+
+/* ---------- PRODUCT INTELLIGENCE LOGO ---------- */
+body.pi-light .navbar .logo,
+body.pi-light .navbar .logo * {
+    color: #172033 !important;
+    -webkit-text-fill-color: #172033 !important;
+    text-shadow: none !important;
+    opacity: 1 !important;
+    visibility: visible !important;
+}
+
+body.pi-dark .navbar .logo,
+body.pi-dark .navbar .logo * {
+    color: #ffffff !important;
+    -webkit-text-fill-color: #ffffff !important;
+    opacity: 1 !important;
+    visibility: visible !important;
+}
+
+/* =========================================================
+   FINAL FIX — LIGHT PRODUCTS / REPORTS / VALIDATION
+========================================================= */
+
+/* ---------- PRODUCTS: LIGHT MODE ---------- */
+body.pi-light .products-page .product-header,
+body.pi-light .products-page .table-card,
+body.pi-light .products-page .table-topbar,
+body.pi-light .products-page .table-container {
+    background: rgba(255,255,255,.82) !important;
+    color:#172033 !important;
+    border-color:rgba(15,23,42,.10) !important;
+}
+
+body.pi-light .products-page .product-title h1,
+body.pi-light .products-page .product-title h1 *,
+body.pi-light .products-page .table-title,
+body.pi-light .products-page .table-title *,
+body.pi-light .products-page #rowCount,
+body.pi-light .products-page #columnCount {
+    color:#111827 !important;
+    -webkit-text-fill-color:#111827 !important;
+    opacity:1 !important;
+    visibility:visible !important;
+}
+
+body.pi-light .products-page .stat {
+    background:rgba(248,250,252,.90) !important;
+    color:#172033 !important;
+    border:1px solid #dfe5ee !important;
+}
+
+body.pi-light .products-page .stat strong,
+body.pi-light .products-page .stat span {
+    opacity:1 !important;
+    visibility:visible !important;
+}
+
+body.pi-light .products-page .stat strong {
+    color:#111827 !important;
+    -webkit-text-fill-color:#111827 !important;
+}
+
+body.pi-light .products-page .stat span {
+    color:#667085 !important;
+    -webkit-text-fill-color:#667085 !important;
+}
+
+body.pi-light .products-page .table-info,
+body.pi-light .products-page .dataset-name {
+    color:#667085 !important;
+    -webkit-text-fill-color:#667085 !important;
+}
+
+body.pi-light .products-page table,
+body.pi-light .products-page tbody,
+body.pi-light .products-page tbody tr {
+    color:#344054 !important;
+}
+
+body.pi-light .products-page table th {
+    background:#eef2f7 !important;
+    color:#344054 !important;
+    -webkit-text-fill-color:#344054 !important;
+}
+
+body.pi-light .products-page table td {
+    background:rgba(255,255,255,.70) !important;
+    color:#344054 !important;
+    -webkit-text-fill-color:#344054 !important;
+}
+
+body.pi-light .products-page table td strong,
+body.pi-light .products-page table td span,
+body.pi-light .products-page table td a {
+    color:#172033 !important;
+    -webkit-text-fill-color:#172033 !important;
+}
+
+body.pi-light .products-page table tbody tr:hover td {
+    background:#eef2ff !important;
+    color:#172033 !important;
+}
+
+/* ---------- REPORTS: SIMPLE, NOT CARD-HEAVY ---------- */
+.reports-page > .page-title,
+body.pi-light .reports-page > .page-title {
+    display:block !important;
+    visibility:visible !important;
+    opacity:1 !important;
+    color:#ffffff !important;
+    -webkit-text-fill-color:#ffffff !important;
+}
+
+body.pi-light .reports-page > .page-title {
+    color:#111827 !important;
+    -webkit-text-fill-color:#111827 !important;
+}
+
+/* Turn the 5 KPI cards into one clean metrics strip. */
+.summary-grid {
+    display:grid !important;
+    grid-template-columns:repeat(5,minmax(0,1fr)) !important;
+    gap:0 !important;
+    margin-top:22px !important;
+    padding:0 !important;
+    border-top:1px solid rgba(148,163,184,.18) !important;
+    border-bottom:1px solid rgba(148,163,184,.18) !important;
+}
+
+.summary-card,
+body.pi-light .summary-card {
+    background:transparent !important;
+    border:0 !important;
+    border-right:1px solid rgba(148,163,184,.18) !important;
+    border-radius:0 !important;
+    box-shadow:none !important;
+    padding:18px 16px !important;
+}
+
+.summary-card:last-child {
+    border-right:0 !important;
+}
+
+.summary-card h3,
+body.pi-light .summary-card h3 {
+    color:#8f9ab1 !important;
+    font-size:11px !important;
+    margin:0 0 6px !important;
+}
+
+.summary-card p,
+body.pi-light .summary-card p {
+    color:#ffffff !important;
+    font-size:24px !important;
+    font-weight:800 !important;
+    margin:0 !important;
+}
+
+body.pi-light .summary-card h3 {
+    color:#667085 !important;
+}
+body.pi-light .summary-card p {
+    color:#111827 !important;
+}
+
+/* Clean overall report instead of multiple floating cards. */
+#overallReport,
+body.pi-light #overallReport {
+    border-radius:18px !important;
+    padding:26px 28px !important;
+    box-shadow:0 18px 50px rgba(15,23,42,.08) !important;
+}
+
+/* Product Intelligence Reports heading and report text */
+.reports-page .page-title,
+.reports-page .overall-report h2,
+.reports-page .individual-header h2,
+.reports-page .report-section h3 {
+    visibility:visible !important;
+    opacity:1 !important;
+}
+
+body.pi-light .reports-page .overall-report h2,
+body.pi-light .reports-page .individual-header h2,
+body.pi-light .reports-page .report-section h3 {
+    color:#111827 !important;
+    -webkit-text-fill-color:#111827 !important;
+}
+
+/* ---------- VALIDATION: LIGHT MODE ---------- */
+body.pi-light .validation-container,
+body.pi-light .validation-container * {
+    opacity:1 !important;
+    visibility:visible !important;
+}
+
+body.pi-light .validation-container .validation-card {
+    background:rgba(255,255,255,.86) !important;
+    color:#172033 !important;
+    border:1px solid rgba(15,23,42,.10) !important;
+    box-shadow:0 18px 50px rgba(15,23,42,.08) !important;
+}
+
+body.pi-light .validation-container .select-label,
+body.pi-light .validation-container .result-header h2,
+body.pi-light .validation-container .checks h3,
+body.pi-light .validation-container .product-preview h3 {
+    color:#111827 !important;
+    -webkit-text-fill-color:#111827 !important;
+}
+
+body.pi-light .validation-container .result-header p,
+body.pi-light .validation-container .check-message,
+body.pi-light .validation-container .loading,
+body.pi-light .validation-container .empty {
+    color:#667085 !important;
+    -webkit-text-fill-color:#667085 !important;
+}
+
+body.pi-light .validation-container .product-select {
+    background:#ffffff !important;
+    color:#172033 !important;
+    -webkit-text-fill-color:#172033 !important;
+    border:1px solid #cfd7e3 !important;
+}
+
+body.pi-light .validation-container .score-box {
+    background:#f7f9fc !important;
+    color:#172033 !important;
+    border:1px solid #e1e6ee !important;
+}
+
+body.pi-light .validation-container .score-number {
+    color:#4f46e5 !important;
+    -webkit-text-fill-color:#4f46e5 !important;
+}
+
+body.pi-light .validation-container .progress {
+    background:#e5e7eb !important;
+}
+
+body.pi-light .validation-container .check-item {
+    background:#ffffff !important;
+    color:#172033 !important;
+    border-color:#dbe1ea !important;
+}
+
+body.pi-light .validation-container .check-pass {
+    background:#f0fdf4 !important;
+    border-left-color:#22c55e !important;
+}
+body.pi-light .validation-container .check-warning {
+    background:#fffbeb !important;
+    border-left-color:#f59e0b !important;
+}
+body.pi-light .validation-container .check-fail {
+    background:#fef2f2 !important;
+    border-left-color:#ef4444 !important;
+}
+
+body.pi-light .validation-container .check-title {
+    color:#172033 !important;
+    -webkit-text-fill-color:#172033 !important;
+}
+
+body.pi-light .validation-container .product-preview table,
+body.pi-light .validation-container .product-preview th,
+body.pi-light .validation-container .product-preview td {
+    color:#344054 !important;
+    -webkit-text-fill-color:#344054 !important;
+}
+
+body.pi-light .validation-container .product-preview th {
+    background:#f3f6fa !important;
+}
+body.pi-light .validation-container .product-preview td {
+    background:#ffffff !important;
+    border-color:#e5e7eb !important;
+}
+
+body.pi-light .validation-container .status-verified {
+    background:#dcfce7 !important;
+    color:#166534 !important;
+}
+body.pi-light .validation-container .status-review {
+    background:#fef3c7 !important;
+    color:#92400e !important;
+}
+body.pi-light .validation-container .status-critical {
+    background:#fee2e2 !important;
+    color:#991b1b !important;
+}
+
+/* Responsive metrics strip */
+@media (max-width: 850px) {
+    .summary-grid {
+        grid-template-columns:repeat(2,minmax(0,1fr)) !important;
+    }
+    .summary-card:nth-child(2n) {
+        border-right:0 !important;
+    }
+}
+
+@media (max-width: 520px) {
+    .summary-grid {
+        grid-template-columns:1fr !important;
+    }
+    .summary-card {
+        border-right:0 !important;
+        border-bottom:1px solid rgba(148,163,184,.18) !important;
+    }
+    .summary-card:last-child {
+        border-bottom:0 !important;
+    }
+}
+
+/* ============================================================
+   FINAL LIGHT THEME — DASHBOARD + UPLOAD CONTRAST FIX
+   Keeps the existing dark theme unchanged.
+============================================================ */
+
+body.pi-light .dashboard-header h1,
+body.pi-light .dashboard-header h1 *,
+body.pi-light .dashboard-header p,
+body.pi-light .dashboard-header p *,
+body.pi-light .dashboard-card,
+body.pi-light .dashboard-card *,
+body.pi-light .dashboard-hero,
+body.pi-light .dashboard-hero *,
+body.pi-light .hero-text,
+body.pi-light .hero-text *,
+body.pi-light .stat-card,
+body.pi-light .stat-card *,
+body.pi-light .quality-box,
+body.pi-light .quality-box *,
+body.pi-light .quality-text,
+body.pi-light .quality-text *,
+body.pi-light .dataset-info,
+body.pi-light .dataset-info *,
+body.pi-light .dataset-item,
+body.pi-light .dataset-item *,
+body.pi-light .card-title,
+body.pi-light .card-title *,
+body.pi-light .action-card,
+body.pi-light .action-card * {
+    opacity: 1 !important;
+    visibility: visible !important;
+}
+
+/* Dashboard headings */
+body.pi-light .dashboard-header h1,
+body.pi-light .dashboard-header h1 * {
+    color:#172033 !important;
+    -webkit-text-fill-color:#172033 !important;
+}
+
+body.pi-light .dashboard-header p,
+body.pi-light .dashboard-header p * {
+    color:#667085 !important;
+    -webkit-text-fill-color:#667085 !important;
+}
+
+/* Hero */
+body.pi-light .dashboard-hero {
+    background:linear-gradient(135deg,#5b4fe8,#7165ee 48%,#159fc0) !important;
+    border-color:rgba(79,70,229,.20) !important;
+}
+
+body.pi-light .dashboard-hero .hero-text h2,
+body.pi-light .dashboard-hero .hero-text h2 *,
+body.pi-light .dashboard-hero .hero-text p,
+body.pi-light .dashboard-hero .hero-text p *,
+body.pi-light .dashboard-hero .hero-score,
+body.pi-light .dashboard-hero .hero-score * {
+    color:#ffffff !important;
+    -webkit-text-fill-color:#ffffff !important;
+}
+
+body.pi-light .dashboard-hero .hero-text p {
+    color:rgba(255,255,255,.88) !important;
+}
+
+/* KPI cards */
+body.pi-light .stat-card {
+    background:rgba(255,255,255,.88) !important;
+    border-color:rgba(15,23,42,.10) !important;
+}
+
+body.pi-light .stat-card .stat-label,
+body.pi-light .stat-card .stat-label * {
+    color:#667085 !important;
+    -webkit-text-fill-color:#667085 !important;
+}
+
+body.pi-light .stat-card .stat-value,
+body.pi-light .stat-card .stat-value * {
+    color:#111827 !important;
+    -webkit-text-fill-color:#111827 !important;
+    font-weight:800 !important;
+}
+
+body.pi-light .stat-card .stat-sub,
+body.pi-light .stat-card .stat-sub * {
+    color:#7a8598 !important;
+    -webkit-text-fill-color:#7a8598 !important;
+}
+
+body.pi-light .stat-icon {
+    color:#4338ca !important;
+    -webkit-text-fill-color:#4338ca !important;
+    background:rgba(99,102,241,.10) !important;
+}
+
+/* Dashboard lower cards */
+body.pi-light .dashboard-card {
+    background:rgba(255,255,255,.86) !important;
+    border-color:rgba(15,23,42,.09) !important;
+}
+
+body.pi-light .dashboard-card .card-title h3,
+body.pi-light .dashboard-card .card-title h3 * {
+    color:#172033 !important;
+    -webkit-text-fill-color:#172033 !important;
+}
+
+body.pi-light .dashboard-card .card-title span {
+    color:#667085 !important;
+    -webkit-text-fill-color:#667085 !important;
+}
+
+/* Quick actions */
+body.pi-light .action-card {
+    background:linear-gradient(145deg,rgba(255,255,255,.94),rgba(244,247,255,.88)) !important;
+    border-color:rgba(99,102,241,.14) !important;
+}
+
+body.pi-light .action-card strong,
+body.pi-light .action-card strong * {
+    color:#172033 !important;
+    -webkit-text-fill-color:#172033 !important;
+}
+
+body.pi-light .action-card span,
+body.pi-light .action-card span * {
+    color:#667085 !important;
+    -webkit-text-fill-color:#667085 !important;
+}
+
+body.pi-light .action-card:hover {
+    background:linear-gradient(145deg,rgba(245,247,255,.98),rgba(232,237,255,.95)) !important;
+}
+
+/* Dataset information */
+body.pi-light .dataset-info,
+body.pi-light .dataset-item {
+    background:rgba(255,255,255,.84) !important;
+    border-color:rgba(15,23,42,.09) !important;
+}
+
+body.pi-light .dataset-item strong,
+body.pi-light .dataset-item strong * {
+    color:#172033 !important;
+    -webkit-text-fill-color:#172033 !important;
+}
+
+body.pi-light .dataset-item span,
+body.pi-light .dataset-item span * {
+    color:#667085 !important;
+    -webkit-text-fill-color:#667085 !important;
+}
+
+/* ============================================================
+   UPLOAD PAGE — LIGHT THEME
+============================================================ */
+
+body.pi-light .page,
+body.pi-light .upload-card,
+body.pi-light .current-card,
+body.pi-light .upload-card *,
+body.pi-light .current-card * {
+    opacity:1 !important;
+    visibility:visible !important;
+}
+
+body.pi-light .navbar {
+    background:rgba(255,255,255,.86) !important;
+    color:#172033 !important;
+}
+
+body.pi-light .navbar .logo,
+body.pi-light .navbar .logo * {
+    color:#172033 !important;
+    -webkit-text-fill-color:#172033 !important;
+}
+
+body.pi-light .navbar .nav a,
+body.pi-light .navbar .nav a * {
+    color:#4b5565 !important;
+    -webkit-text-fill-color:#4b5565 !important;
+}
+
+body.pi-light .navbar .nav a:hover {
+    color:#4338ca !important;
+    -webkit-text-fill-color:#4338ca !important;
+}
+
+body.pi-light .heading h1,
+body.pi-light .heading h1 * {
+    color:#172033 !important;
+    -webkit-text-fill-color:#172033 !important;
+}
+
+body.pi-light .heading p,
+body.pi-light .heading p * {
+    color:#667085 !important;
+    -webkit-text-fill-color:#667085 !important;
+}
+
+body.pi-light .upload-card,
+body.pi-light .current-card {
+    background:rgba(255,255,255,.88) !important;
+    color:#172033 !important;
+    border:1px solid rgba(15,23,42,.09) !important;
+    box-shadow:0 20px 55px rgba(31,41,55,.09) !important;
+}
+
+body.pi-light .upload-card h2,
+body.pi-light .upload-card h3,
+body.pi-light .upload-card strong,
+body.pi-light .upload-card label,
+body.pi-light .current-card h2,
+body.pi-light .current-card h3,
+body.pi-light .current-card strong,
+body.pi-light .current-card label {
+    color:#172033 !important;
+    -webkit-text-fill-color:#172033 !important;
+}
+
+body.pi-light .upload-card p,
+body.pi-light .upload-card span,
+body.pi-light .current-card p,
+body.pi-light .current-card span,
+body.pi-light .current-description,
+body.pi-light .format,
+body.pi-light .formats {
+    color:#667085 !important;
+    -webkit-text-fill-color:#667085 !important;
+}
+
+body.pi-light .drop-zone {
+    background:linear-gradient(145deg,rgba(99,102,241,.055),rgba(34,211,238,.045)) !important;
+    border-color:rgba(99,102,241,.38) !important;
+    color:#172033 !important;
+}
+
+body.pi-light .drop-zone h2,
+body.pi-light .drop-zone h2 * {
+    color:#172033 !important;
+    -webkit-text-fill-color:#172033 !important;
+}
+
+body.pi-light .drop-zone p,
+body.pi-light .drop-zone p * {
+    color:#667085 !important;
+    -webkit-text-fill-color:#667085 !important;
+}
+
+body.pi-light .file-info,
+body.pi-light .dataset-box,
+body.pi-light .dataset-details {
+    background:#f7f9fc !important;
+    color:#172033 !important;
+    border-color:#dfe4ec !important;
+}
+
+body.pi-light .file-name,
+body.pi-light .file-size,
+body.pi-light .dataset-name,
+body.pi-light .dataset-meta,
+body.pi-light .dataset-status {
+    color:#344054 !important;
+    -webkit-text-fill-color:#344054 !important;
+}
+
+body.pi-light .success-icon {
+    color:#16a34a !important;
+    -webkit-text-fill-color:#16a34a !important;
+}
+
+body.pi-light .message {
+    color:#344054 !important;
+    -webkit-text-fill-color:#344054 !important;
+}
+
+body.pi-light .refresh-btn,
+body.pi-light .delete-btn,
+body.pi-light .modal-btn {
+    color:#344054 !important;
+    -webkit-text-fill-color:#344054 !important;
+}
+
+/* Theme button remains visible */
+body.pi-light #piThemeBtn {
+    color:#172033 !important;
+    -webkit-text-fill-color:#172033 !important;
+    background:rgba(255,255,255,.92) !important;
+    border-color:rgba(15,23,42,.12) !important;
+}
+
+
+/* ============================================================
+   FINAL REPORTS VISIBILITY / BLUE BACKGROUND FIX
+============================================================ */
+
+/* Reports uses the same blue-toned canvas as the other pages. */
+body.reports-body{
+  background:
+    radial-gradient(760px 520px at 8% -8%, rgba(79,125,255,.24), transparent 62%),
+    radial-gradient(700px 520px at 92% 2%, rgba(35,190,255,.16), transparent 62%),
+    radial-gradient(650px 500px at 72% 100%, rgba(91,82,255,.14), transparent 62%),
+    linear-gradient(135deg,#061127 0%,#081a38 48%,#061329 100%) !important;
+}
+
+body.pi-light.reports-body{
+  background:
+    radial-gradient(760px 520px at 8% -8%, rgba(99,102,241,.13), transparent 62%),
+    radial-gradient(700px 520px at 92% 2%, rgba(34,211,238,.10), transparent 62%),
+    linear-gradient(135deg,#eef4ff 0%,#e8f0fb 52%,#f4f8ff 100%) !important;
+}
+
+/* Page title must never disappear. */
+.reports-body .reports-page > .page-title{
+  display:block !important;
+  visibility:visible !important;
+  opacity:1 !important;
+  color:#ffffff !important;
+  font-size:32px !important;
+  font-weight:800 !important;
+  letter-spacing:-.5px !important;
+  margin:0 0 22px !important;
+}
+body.pi-light.reports-body .reports-page > .page-title{
+  color:#14213d !important;
+}
+
+/* Main report surfaces */
+.reports-body .overall-report,
+.reports-body .product-group,
+.reports-body .individual-report,
+.reports-body .empty-box{
+  background:linear-gradient(145deg,rgba(12,30,63,.78),rgba(7,20,43,.70)) !important;
+  border:1px solid rgba(123,177,255,.20) !important;
+  color:#f5f8ff !important;
+  box-shadow:0 20px 60px rgba(0,0,0,.24), inset 0 1px rgba(255,255,255,.06) !important;
+  backdrop-filter:blur(22px) saturate(135%) !important;
+}
+
+body.pi-light.reports-body .overall-report,
+body.pi-light.reports-body .product-group,
+body.pi-light.reports-body .individual-report,
+body.pi-light.reports-body .empty-box{
+  background:rgba(255,255,255,.78) !important;
+  border:1px solid rgba(69,91,145,.13) !important;
+  color:#172033 !important;
+}
+
+.reports-body .overall-report h2,
+.reports-body .product-group h2,
+.reports-body .individual-report h2,
+.reports-body .individual-report h3{
+  color:#ffffff !important;
+}
+body.pi-light.reports-body .overall-report h2,
+body.pi-light.reports-body .product-group h2,
+body.pi-light.reports-body .individual-report h2,
+body.pi-light.reports-body .individual-report h3{
+  color:#172033 !important;
+}
+
+.reports-body #datasetName,
+.reports-body .product-group p,
+.reports-body .report-label{
+  color:#aebdd5 !important;
+}
+body.pi-light.reports-body #datasetName,
+body.pi-light.reports-body .product-group p,
+body.pi-light.reports-body .report-label{
+  color:#667085 !important;
+}
+
+/* SIMPLE SUMMARY — no excessive cards */
+.reports-body .summary-grid{
+  display:grid !important;
+  grid-template-columns:repeat(5,minmax(120px,1fr)) !important;
+  gap:0 !important;
+  margin-top:22px !important;
+  padding:0 !important;
+  border-top:1px solid rgba(123,177,255,.16) !important;
+  border-bottom:1px solid rgba(123,177,255,.16) !important;
+}
+.reports-body .summary-card{
+  background:transparent !important;
+  border:0 !important;
+  border-right:1px solid rgba(123,177,255,.14) !important;
+  border-radius:0 !important;
+  box-shadow:none !important;
+  padding:18px 20px !important;
+}
+.reports-body .summary-card:last-child{border-right:0 !important}
+.reports-body .summary-card h3{
+  color:#8fa4c2 !important;
+  font-size:12px !important;
+  text-transform:uppercase !important;
+  letter-spacing:.7px !important;
+}
+.reports-body .summary-card p{
+  color:#ffffff !important;
+  font-size:26px !important;
+  font-weight:800 !important;
+}
+body.pi-light.reports-body .summary-grid{
+  border-color:rgba(69,91,145,.13) !important;
+}
+body.pi-light.reports-body .summary-card{
+  border-right-color:rgba(69,91,145,.13) !important;
+}
+body.pi-light.reports-body .summary-card h3{color:#667085 !important}
+body.pi-light.reports-body .summary-card p{color:#172033 !important}
+
+/* Product buttons: visible before and during hover */
+.reports-body .product-report-button{
+  background:rgba(8,23,48,.62) !important;
+  border:1px solid rgba(123,177,255,.18) !important;
+  color:#f7f9ff !important;
+}
+.reports-body .product-report-button *{
+  color:inherit !important;
+  visibility:visible !important;
+  opacity:1 !important;
+}
+.reports-body .product-report-button:hover{
+  background:rgba(63,106,190,.28) !important;
+  border-color:rgba(112,185,255,.48) !important;
+  color:#ffffff !important;
+}
+.reports-body .product-report-button:hover *{color:#ffffff !important}
+.reports-body .product-number{color:#8fa4c2 !important}
+.reports-body .product-name{color:#ffffff !important;font-weight:700 !important}
+body.pi-light.reports-body .product-report-button{
+  background:rgba(255,255,255,.72) !important;
+  border-color:#d8e0ed !important;
+  color:#172033 !important;
+}
+body.pi-light.reports-body .product-report-button:hover{background:#eef3ff !important;border-color:#7c83ef !important;color:#172033 !important}
+body.pi-light.reports-body .product-report-button:hover *{color:#172033 !important}
+body.pi-light.reports-body .product-number{color:#667085 !important}
+body.pi-light.reports-body .product-name{color:#172033 !important}
+
+/* Individual report: force it visible when JS sets display:block. */
+.reports-body #individualReport[style*="display: block"]{
+  display:block !important;
+  visibility:visible !important;
+  opacity:1 !important;
+  position:relative !important;
+  z-index:10 !important;
+}
+.reports-body #individualProductName,
+.reports-body #productReportTable,
+.reports-body #productReportTable th,
+.reports-body #productReportTable td,
+.reports-body #productSummary,
+.reports-body #productSummary p,
+.reports-body #productSummary strong{
+  visibility:visible !important;
+  opacity:1 !important;
+}
+.reports-body #productReportTable th{
+  background:rgba(47,91,155,.22) !important;
+  color:#a9bdd9 !important;
+  border-color:rgba(123,177,255,.13) !important;
+}
+.reports-body #productReportTable td{
+  background:rgba(5,18,39,.40) !important;
+  color:#f2f6ff !important;
+  border-color:rgba(123,177,255,.10) !important;
+}
+.reports-body #productSummary{
+  background:rgba(5,19,42,.50) !important;
+  color:#c5d2e6 !important;
+  border:1px solid rgba(123,177,255,.13) !important;
+}
+.reports-body #productSummary *{color:#c5d2e6 !important}
+body.pi-light.reports-body #productReportTable th{background:#f1f5fb !important;color:#344054 !important;border-color:#dfe5ee !important}
+body.pi-light.reports-body #productReportTable td{background:rgba(255,255,255,.60) !important;color:#344054 !important;border-color:#e3e8f0 !important}
+body.pi-light.reports-body #productSummary{background:#f7f9fc !important;color:#475467 !important;border-color:#dfe5ee !important}
+body.pi-light.reports-body #productSummary *{color:#475467 !important}
+
+.reports-body .navigation-buttons button{color:#fff !important}
+body.pi-light.reports-body .navigation-buttons button{color:#fff !important}
+
+@media(max-width:850px){
+  .reports-body .summary-grid{grid-template-columns:repeat(2,1fr) !important}
+  .reports-body .summary-card:nth-child(2n){border-right:0 !important}
+}
+@media(max-width:520px){
+  .reports-body .summary-grid{grid-template-columns:1fr !important}
+  .reports-body .summary-card{border-right:0 !important;border-bottom:1px solid rgba(123,177,255,.14) !important}
+}
+
+/* ============================================================
+   REPORTS — FINAL DARK MODE REDESIGN
+   Light mode is intentionally left intact.
+============================================================ */
+
+body.reports-body:not(.pi-light){
+  background:
+    radial-gradient(900px 620px at 5% 0%, rgba(47,105,214,.34), transparent 60%),
+    radial-gradient(780px 560px at 100% 8%, rgba(0,190,255,.18), transparent 58%),
+    radial-gradient(760px 620px at 70% 100%, rgba(73,83,210,.18), transparent 60%),
+    linear-gradient(135deg,#071a3a 0%,#0a2450 45%,#071936 100%) !important;
+  background-attachment:fixed !important;
+}
+
+/* Keep the main title visible and give it a stronger hierarchy. */
+body.reports-body:not(.pi-light) .reports-page > .page-title{
+  color:#ffffff !important;
+  text-shadow:0 3px 24px rgba(70,150,255,.22) !important;
+  margin-bottom:28px !important;
+}
+
+/* Overall report: one clean surface, not a pile of cards. */
+body.reports-body:not(.pi-light) .overall-report{
+  background:rgba(13,38,79,.52) !important;
+  border:1px solid rgba(125,183,255,.18) !important;
+  border-radius:22px !important;
+  box-shadow:0 18px 55px rgba(0,0,0,.18), inset 0 1px rgba(255,255,255,.06) !important;
+  backdrop-filter:blur(22px) !important;
+  padding:26px 28px !important;
+}
+
+/* The product list is intentionally simple. */
+body.reports-body:not(.pi-light) .product-group{
+  background:transparent !important;
+  border:0 !important;
+  box-shadow:none !important;
+  padding:28px 0 !important;
+  backdrop-filter:none !important;
+}
+
+body.reports-body:not(.pi-light) .product-group > div:first-child h2{
+  color:#ffffff !important;
+}
+
+body.reports-body:not(.pi-light) .product-group > div:first-child p,
+body.reports-body:not(.pi-light) .product-group > div:first-child > div:last-child{
+  color:#aebfd8 !important;
+}
+
+/* Product buttons remain individual, compact glass rows. */
+body.reports-body:not(.pi-light) .product-report-button{
+  background:rgba(17,48,94,.64) !important;
+  border:1px solid rgba(132,190,255,.16) !important;
+  border-radius:14px !important;
+  min-height:76px !important;
+  box-shadow:0 8px 24px rgba(0,0,0,.12) !important;
+}
+
+body.reports-body:not(.pi-light) .product-report-button:hover{
+  background:rgba(37,91,165,.72) !important;
+  border-color:rgba(108,190,255,.42) !important;
+  box-shadow:0 12px 28px rgba(0,0,0,.18) !important;
+}
+
+/* ------------------------------------------------------------
+   INDIVIDUAL REPORT — NO GIANT OUTER CARD
+------------------------------------------------------------ */
+body.reports-body:not(.pi-light) #individualReport,
+body.reports-body:not(.pi-light) #individualReport[style*="display: block"]{
+  display:block !important;
+  background:transparent !important;
+  border:0 !important;
+  box-shadow:none !important;
+  border-radius:0 !important;
+  padding:0 !important;
+  margin-top:36px !important;
+  backdrop-filter:none !important;
+}
+
+/* Dedicated report heading. */
+body.reports-body:not(.pi-light) #individualReport::before{
+  content:"Product Intelligence Report";
+  display:block !important;
+  color:#ffffff !important;
+  font-size:28px !important;
+  font-weight:800 !important;
+  letter-spacing:-.4px !important;
+  margin:0 0 22px !important;
+  padding-bottom:18px !important;
+  border-bottom:1px solid rgba(128,184,255,.18) !important;
+}
+
+body.reports-body:not(.pi-light) .individual-header{
+  background:rgba(13,42,87,.62) !important;
+  border:1px solid rgba(125,183,255,.17) !important;
+  border-radius:18px !important;
+  padding:22px 24px !important;
+  margin-bottom:22px !important;
+  box-shadow:0 12px 35px rgba(0,0,0,.14) !important;
+}
+
+body.reports-body:not(.pi-light) .individual-header .report-label{
+  color:#8fa9ca !important;
+}
+
+body.reports-body:not(.pi-light) #individualProductName{
+  color:#ffffff !important;
+  font-size:25px !important;
+}
+
+/* Each inner section stands on its own instead of one huge card. */
+body.reports-body:not(.pi-light) #individualReport .report-section{
+  background:rgba(12,37,77,.58) !important;
+  border:1px solid rgba(125,183,255,.15) !important;
+  border-radius:18px !important;
+  padding:22px !important;
+  margin:0 0 20px !important;
+  box-shadow:0 10px 32px rgba(0,0,0,.12) !important;
+}
+
+body.reports-body:not(.pi-light) #individualReport .report-section h3{
+  color:#ffffff !important;
+  margin-top:0 !important;
+}
+
+/* Product information table — strong contrast. */
+body.reports-body:not(.pi-light) #productReportTable{
+  width:100% !important;
+  background:transparent !important;
+}
+
+body.reports-body:not(.pi-light) #productReportTable th{
+  width:30% !important;
+  background:rgba(39,83,145,.52) !important;
+  color:#b9d0ee !important;
+  font-weight:700 !important;
+  font-size:15px !important;
+  padding:15px 18px !important;
+  border-bottom:1px solid rgba(132,190,255,.14) !important;
+}
+
+body.reports-body:not(.pi-light) #productReportTable td{
+  background:rgba(7,25,54,.58) !important;
+  color:#f5f8ff !important;
+  font-size:15px !important;
+  padding:15px 18px !important;
+  border-bottom:1px solid rgba(132,190,255,.10) !important;
+}
+
+body.reports-body:not(.pi-light) #productReportTable tr:last-child th,
+body.reports-body:not(.pi-light) #productReportTable tr:last-child td{
+  border-bottom:0 !important;
+}
+
+/* Summary is a separate, simple section. */
+body.reports-body:not(.pi-light) #productSummary{
+  background:rgba(7,25,54,.52) !important;
+  color:#cbd8ea !important;
+  border:0 !important;
+  border-radius:12px !important;
+  padding:18px !important;
+  line-height:1.7 !important;
+}
+
+body.reports-body:not(.pi-light) #productSummary *{
+  color:#cbd8ea !important;
+}
+
+/* Navigation outside cards. */
+body.reports-body:not(.pi-light) .navigation-buttons{
+  padding:4px 0 30px !important;
+}
+
+/* Score badge. */
+body.reports-body:not(.pi-light) #individualScore.score-good{
+  background:rgba(52,211,153,.15) !important;
+  color:#6ee7b7 !important;
+  border:1px solid rgba(110,231,183,.22) !important;
+}
+body.reports-body:not(.pi-light) #individualScore.score-medium{
+  background:rgba(251,191,36,.15) !important;
+  color:#fcd34d !important;
+  border:1px solid rgba(252,211,77,.22) !important;
+}
+body.reports-body:not(.pi-light) #individualScore.score-low{
+  background:rgba(251,113,133,.15) !important;
+  color:#fda4af !important;
+  border:1px solid rgba(253,164,175,.22) !important;
+}
+
+@media(max-width:700px){
+  body.reports-body:not(.pi-light) #individualReport::before{
+    font-size:24px !important;
+  }
+  body.reports-body:not(.pi-light) #individualReport .report-section{
+    padding:16px !important;
+  }
+  body.reports-body:not(.pi-light) #productReportTable th,
+  body.reports-body:not(.pi-light) #productReportTable td{
+    padding:12px !important;
+  }
+}
+
+/* ============================================================
+   FINAL REPORTS + VALIDATION SYNC
+   Keep these overrides at the end so old inline/page rules
+   cannot make the pages look different from the main UI.
+============================================================ */
+
+/* REPORTS: same blue/aurora canvas as the rest of the app */
+body.reports-body,
+body.reports-body.pi-dark {
+  background:
+    radial-gradient(circle at 15% 10%, rgba(65,105,180,.22), transparent 34%),
+    radial-gradient(circle at 85% 20%, rgba(34,211,238,.11), transparent 30%),
+    linear-gradient(135deg,#0a1830 0%,#0b2140 46%,#07172d 100%) !important;
+  color:#f7f8ff !important;
+}
+
+body.reports-body.pi-dark::before,
+body.reports-body.pi-dark::after{
+  opacity:.65;
+}
+
+/* Reports heading */
+body.reports-body .reports-intro .page-title,
+body.reports-body.pi-dark .reports-intro .page-title,
+body.reports-body.pi-light .reports-intro .page-title{
+  display:block !important;
+  color:inherit !important;
+  -webkit-text-fill-color:inherit !important;
+  background:none !important;
+  text-shadow:none !important;
+  opacity:1 !important;
+  visibility:visible !important;
+}
+body.reports-body.pi-dark .reports-intro .page-title{
+  color:#ffffff !important;
+}
+body.reports-body.pi-light .reports-intro .page-title{
+  color:#172033 !important;
+}
+
+/* Overall report: one clean section, not five cards */
+body.reports-body .report-overview{
+  background:linear-gradient(145deg,rgba(18,35,64,.78),rgba(8,24,47,.68)) !important;
+  border:1px solid rgba(129,169,220,.18) !important;
+  border-radius:22px !important;
+  padding:24px !important;
+  box-shadow:0 20px 55px rgba(0,0,0,.24),inset 0 1px rgba(255,255,255,.06) !important;
+  backdrop-filter:blur(22px) !important;
+}
+body.reports-body.pi-dark .report-overview h2{color:#fff !important}
+body.reports-body.pi-dark .dataset-line{color:#aebbd0 !important}
+body.reports-body.pi-dark .summary-strip{
+  background:rgba(255,255,255,.07) !important;
+  border:1px solid rgba(255,255,255,.10) !important;
+}
+body.reports-body.pi-dark .summary-item{
+  background:rgba(18,39,70,.70) !important;
+}
+body.reports-body.pi-dark .summary-item .label{color:#91a5c1 !important}
+body.reports-body.pi-dark .summary-item .value{color:#fff !important}
+
+/* Product list section: clean glass surface */
+body.reports-body.pi-dark .products-section{
+  background:rgba(10,28,53,.42) !important;
+  border:1px solid rgba(129,169,220,.14) !important;
+  border-radius:22px !important;
+  padding:24px !important;
+  backdrop-filter:blur(20px) !important;
+}
+body.reports-body.pi-dark .products-section .section-head h2,
+body.reports-body.pi-dark .products-section .section-head p,
+body.reports-body.pi-dark .products-section .product-number,
+body.reports-body.pi-dark .products-section .product-name,
+body.reports-body.pi-dark .products-section #pageNumber{
+  color:#fff !important;
+}
+body.reports-body.pi-dark .products-section .section-head p,
+body.reports-body.pi-dark .products-section .product-number{
+  color:#94a8c2 !important;
+}
+body.reports-body.pi-dark .product-report-button{
+  background:linear-gradient(145deg,rgba(24,49,84,.74),rgba(11,29,54,.72)) !important;
+  border:1px solid rgba(130,166,213,.17) !important;
+  color:#fff !important;
+  border-radius:15px !important;
+  box-shadow:inset 0 1px rgba(255,255,255,.04) !important;
+}
+body.reports-body.pi-dark .product-report-button:hover{
+  background:linear-gradient(145deg,rgba(37,72,120,.88),rgba(15,39,72,.84)) !important;
+  border-color:rgba(74,211,255,.34) !important;
+}
+
+/* Individual report: separate sections, never one giant card */
+body.reports-body.pi-dark #individualReport{
+  display:none;
+  background:transparent !important;
+  border:0 !important;
+  box-shadow:none !important;
+  padding:0 !important;
+  margin-top:30px !important;
+}
+body.reports-body.pi-dark #individualReport[style*="block"]{display:block !important}
+body.reports-body.pi-dark .individual-head{
+  padding:4px 2px 18px !important;
+  border-bottom:1px solid rgba(129,169,220,.16) !important;
+}
+body.reports-body.pi-dark .individual-title .report-label{color:#8fa4bf !important}
+body.reports-body.pi-dark .individual-title h2{color:#fff !important;margin:0 !important}
+body.reports-body.pi-dark .report-content-grid{align-items:start !important}
+body.reports-body.pi-dark .report-panel{
+  background:linear-gradient(145deg,rgba(18,39,70,.72),rgba(8,26,50,.68)) !important;
+  border:1px solid rgba(129,169,220,.15) !important;
+  border-radius:20px !important;
+  padding:20px !important;
+  box-shadow:0 18px 45px rgba(0,0,0,.20),inset 0 1px rgba(255,255,255,.04) !important;
+}
+body.reports-body.pi-dark .report-panel-title{color:#fff !important}
+body.reports-body.pi-dark .product-report-table{
+  border:1px solid rgba(129,169,220,.14) !important;
+  background:rgba(5,18,35,.55) !important;
+}
+body.reports-body.pi-dark .product-report-table th{
+  background:rgba(49,83,124,.30) !important;
+  color:#9eb5d3 !important;
+  border-bottom:1px solid rgba(129,169,220,.13) !important;
+}
+body.reports-body.pi-dark .product-report-table td{
+  background:rgba(8,24,46,.55) !important;
+  color:#f4f7fc !important;
+  border-bottom:1px solid rgba(129,169,220,.10) !important;
+}
+body.reports-body.pi-dark .report-description{
+  background:rgba(6,21,41,.58) !important;
+  border:1px solid rgba(129,169,220,.13) !important;
+  color:#c8d4e5 !important;
+}
+body.reports-body.pi-dark .report-description p,
+body.reports-body.pi-dark .report-description strong{color:#c8d4e5 !important}
+body.reports-body.pi-dark .score-good{background:rgba(52,211,153,.15) !important;color:#6ee7b7 !important}
+body.reports-body.pi-dark .score-medium{background:rgba(251,191,36,.15) !important;color:#fcd34d !important}
+body.reports-body.pi-dark .score-low{background:rgba(251,113,133,.15) !important;color:#fda4af !important}
+body.reports-body.pi-dark .navigation-buttons .button{
+  min-height:44px !important;
+}
+
+/* Light Reports remains clean and matches the same structure */
+body.reports-body.pi-light{
+  background:
+    radial-gradient(circle at 15% 10%,rgba(111,143,214,.13),transparent 34%),
+    linear-gradient(135deg,#eef4ff,#f7f9ff 55%,#eaf4ff) !important;
+}
+body.reports-body.pi-light .report-overview,
+body.reports-body.pi-light .products-section{
+  background:rgba(255,255,255,.68) !important;
+  border:1px solid rgba(70,95,140,.11) !important;
+  color:#172033 !important;
+  box-shadow:0 18px 50px rgba(42,60,95,.08) !important;
+}
+body.reports-body.pi-light .report-overview h2,
+body.reports-body.pi-light .products-section h2,
+body.reports-body.pi-light .product-name{color:#172033 !important}
+body.reports-body.pi-light .dataset-line,
+body.reports-body.pi-light .products-section p,
+body.reports-body.pi-light .product-number{color:#667085 !important}
+body.reports-body.pi-light .summary-strip{background:#e8edf5 !important}
+body.reports-body.pi-light .summary-item{background:rgba(255,255,255,.82) !important}
+body.reports-body.pi-light .summary-item .label{color:#667085 !important}
+body.reports-body.pi-light .summary-item .value{color:#172033 !important}
+body.reports-body.pi-light .product-report-button{background:rgba(255,255,255,.82) !important;border-color:#dfe5ee !important;color:#172033 !important}
+body.reports-body.pi-light .product-report-button:hover{background:#f2f5ff !important;border-color:#8b7cf6 !important}
+body.reports-body.pi-light #individualReport{background:transparent !important;border:0 !important;box-shadow:none !important;padding:0 !important}
+body.reports-body.pi-light .report-panel{background:rgba(255,255,255,.78) !important;border:1px solid #dfe5ee !important;box-shadow:0 16px 40px rgba(42,60,95,.07) !important}
+body.reports-body.pi-light .report-panel-title{color:#172033 !important}
+body.reports-body.pi-light .product-report-table{border-color:#dfe5ee !important}
+body.reports-body.pi-light .product-report-table th{background:#f1f4f8 !important;color:#475467 !important}
+body.reports-body.pi-light .product-report-table td{background:#fff !important;color:#344054 !important}
+body.reports-body.pi-light .report-description{background:#f7f9fc !important;border-color:#e1e6ee !important;color:#475467 !important}
+
+/* VALIDATION: the selected product follows the same global theme. */
+body.pi-dark .validation-container .product-select{
+  background:#10172a !important;
+  color:#f7f8ff !important;
+  -webkit-text-fill-color:#f7f8ff !important;
+  color-scheme:dark;
+  border:1px solid rgba(255,255,255,.14) !important;
+  box-shadow:0 8px 28px rgba(0,0,0,.22) !important;
+}
+body.pi-dark .validation-container .product-select option{
+  background:#10172a !important;
+  color:#f7f8ff !important;
+  -webkit-text-fill-color:#f7f8ff !important;
+}
+body.pi-light .validation-container .product-select{
+  background:#ffffff !important;
+  color:#172033 !important;
+  -webkit-text-fill-color:#172033 !important;
+  color-scheme:light;
+  border:1px solid #cbd5e1 !important;
+  box-shadow:0 5px 20px rgba(15,23,42,.08) !important;
+}
+body.pi-light .validation-container .product-select option{
+  background:#ffffff !important;
+  color:#172033 !important;
+  -webkit-text-fill-color:#172033 !important;
+}
+body.pi-dark .validation-container .select-label{color:#b8c7da !important}
+body.pi-dark .validation-container .validation-card h2,
+body.pi-dark .validation-container .validation-card h3,
+body.pi-dark .validation-container .validation-card p,
+body.pi-dark .validation-container .validation-card .check-title{color:#fff !important}
+body.pi-dark .validation-container .validation-card .check-message{color:#aebdd0 !important}
+body.pi-dark .validation-container .score-box{background:rgba(15,39,70,.72) !important;color:#fff !important;border-color:rgba(129,169,220,.16) !important}
+body.pi-dark .validation-container .product-preview th{background:rgba(49,83,124,.30) !important;color:#b7c9df !important}
+body.pi-dark .validation-container .product-preview td{background:rgba(8,24,46,.60) !important;color:#f4f7fc !important}
+
+
+/* ============================================================
+   REPORTS — FINAL DARK MODE + INDIVIDUAL REPORT VISIBILITY
+   This block intentionally targets only reports-body.
+============================================================ */
+
+/* Never show the individual report template before a product is selected. */
+body.reports-body .report-hidden {
+  display: none !important;
+  visibility: hidden !important;
+}
+
+/* Once JS removes report-hidden, the report is shown. */
+body.reports-body #individualReport:not(.report-hidden) {
+  display: block !important;
+  visibility: visible !important;
+  opacity: 1 !important;
+}
+
+/* -------- DARK REPORTS CANVAS -------- */
+body.reports-body:not(.pi-light) {
+  color: #f7fbff !important;
+  background:
+    radial-gradient(760px 520px at 8% 0%, rgba(48, 111, 225, .30), transparent 62%),
+    radial-gradient(700px 520px at 94% 8%, rgba(25, 190, 255, .14), transparent 60%),
+    linear-gradient(135deg, #071a3a 0%, #0a2550 48%, #071a37 100%) !important;
+  background-attachment: fixed !important;
+}
+
+body.reports-body:not(.pi-light) .reports-page > .page-title {
+  color: #ffffff !important;
+  -webkit-text-fill-color: #ffffff !important;
+  text-shadow: 0 2px 20px rgba(68, 150, 255, .20) !important;
+}
+
+body.reports-body:not(.pi-light) .reports-intro > p {
+  color: #b9c9df !important;
+}
+
+/* Overall report is one clean section. */
+body.reports-body:not(.pi-light) .report-overview {
+  background: rgba(13, 40, 82, .56) !important;
+  border: 1px solid rgba(130, 188, 255, .17) !important;
+  border-radius: 22px !important;
+  padding: 26px 28px !important;
+  box-shadow: 0 18px 55px rgba(0, 0, 0, .18), inset 0 1px rgba(255,255,255,.05) !important;
+  backdrop-filter: blur(20px) saturate(130%) !important;
+}
+
+body.reports-body:not(.pi-light) .report-overview-head h2 {
+  color: #ffffff !important;
+}
+
+body.reports-body:not(.pi-light) .dataset-line {
+  color: #a9bdd8 !important;
+}
+
+/* Simple metric strip — no separate floating cards. */
+body.reports-body:not(.pi-light) .summary-strip {
+  background: rgba(6, 24, 51, .46) !important;
+  border: 1px solid rgba(130, 188, 255, .13) !important;
+}
+
+body.reports-body:not(.pi-light) .summary-item {
+  background: transparent !important;
+  border-right: 1px solid rgba(130, 188, 255, .12) !important;
+}
+
+body.reports-body:not(.pi-light) .summary-item:last-child {
+  border-right: 0 !important;
+}
+
+body.reports-body:not(.pi-light) .summary-item .label {
+  color: #8fa8c6 !important;
+}
+
+body.reports-body:not(.pi-light) .summary-item .value {
+  color: #ffffff !important;
+}
+
+/* Product section is visually connected to the same page. */
+body.reports-body:not(.pi-light) .products-section {
+  background: transparent !important;
+  border: 0 !important;
+  box-shadow: none !important;
+  padding: 4px 0 0 !important;
+}
+
+body.reports-body:not(.pi-light) .products-section .section-head h2 {
+  color: #ffffff !important;
+}
+
+body.reports-body:not(.pi-light) .products-section .section-head p {
+  color: #a9bdd8 !important;
+}
+
+body.reports-body:not(.pi-light) .products-section .section-head > div:last-child {
+  color: #a9bdd8 !important;
+}
+
+body.reports-body:not(.pi-light) .product-report-button {
+  background: linear-gradient(145deg, rgba(19, 53, 100, .72), rgba(9, 31, 63, .72)) !important;
+  border: 1px solid rgba(130, 188, 255, .15) !important;
+  color: #ffffff !important;
+  min-height: 76px !important;
+  border-radius: 15px !important;
+  box-shadow: 0 8px 24px rgba(0,0,0,.10), inset 0 1px rgba(255,255,255,.04) !important;
+}
+
+body.reports-body:not(.pi-light) .product-report-button .product-number {
+  color: #8fa9c7 !important;
+}
+
+body.reports-body:not(.pi-light) .product-report-button .product-name {
+  color: #ffffff !important;
+}
+
+body.reports-body:not(.pi-light) .product-report-button:hover {
+  background: linear-gradient(145deg, rgba(34, 82, 151, .82), rgba(12, 42, 81, .84)) !important;
+  border-color: rgba(79, 206, 255, .40) !important;
+  color: #ffffff !important;
+}
+
+body.reports-body:not(.pi-light) .page-navigation,
+body.reports-body:not(.pi-light) .page-navigation span {
+  color: #a9bdd8 !important;
+}
+
+/* -------- INDIVIDUAL REPORT: ONLY AFTER CLICK -------- */
+body.reports-body:not(.pi-light) #individualReport:not(.report-hidden) {
+  margin-top: 34px !important;
+  padding: 0 !important;
+  background: transparent !important;
+  border: 0 !important;
+  box-shadow: none !important;
+  backdrop-filter: none !important;
+}
+
+body.reports-body:not(.pi-light) #individualReport::before {
+  content: "Product Intelligence Report";
+  display: block !important;
+  color: #ffffff !important;
+  font-size: 29px !important;
+  font-weight: 800 !important;
+  letter-spacing: -.4px !important;
+  padding-bottom: 16px !important;
+  margin-bottom: 20px !important;
+  border-bottom: 1px solid rgba(130,188,255,.16) !important;
+}
+
+body.reports-body:not(.pi-light) .individual-head {
+  background: rgba(13, 42, 87, .55) !important;
+  border: 1px solid rgba(130, 188, 255, .15) !important;
+  border-radius: 18px !important;
+  padding: 20px 22px !important;
+  margin-bottom: 18px !important;
+}
+
+body.reports-body:not(.pi-light) .individual-title .report-label {
+  color: #8fa9c7 !important;
+}
+
+body.reports-body:not(.pi-light) .individual-title h2 {
+  color: #ffffff !important;
+}
+
+body.reports-body:not(.pi-light) #individualScore {
+  color: #ffffff !important;
+}
+
+body.reports-body:not(.pi-light) .report-panel {
+  background: rgba(12, 38, 77, .54) !important;
+  border: 1px solid rgba(130, 188, 255, .14) !important;
+  border-radius: 18px !important;
+  padding: 20px !important;
+  box-shadow: 0 14px 38px rgba(0,0,0,.14) !important;
+}
+
+body.reports-body:not(.pi-light) .report-panel-title {
+  color: #ffffff !important;
+}
+
+body.reports-body:not(.pi-light) .product-report-table {
+  background: transparent !important;
+  border: 1px solid rgba(130,188,255,.12) !important;
+}
+
+body.reports-body:not(.pi-light) .product-report-table th {
+  background: rgba(46, 91, 153, .45) !important;
+  color: #b9cee9 !important;
+  border-color: rgba(130,188,255,.12) !important;
+}
+
+body.reports-body:not(.pi-light) .product-report-table td {
+  background: rgba(6, 23, 48, .58) !important;
+  color: #f5f8ff !important;
+  border-color: rgba(130,188,255,.09) !important;
+}
+
+body.reports-body:not(.pi-light) .report-description {
+  background: rgba(6, 23, 48, .55) !important;
+  color: #cbd9ea !important;
+  border: 1px solid rgba(130,188,255,.12) !important;
+}
+
+body.reports-body:not(.pi-light) .report-description * {
+  color: #cbd9ea !important;
+}
+
+body.reports-body:not(.pi-light) .navigation-buttons {
+  padding: 4px 0 30px !important;
+}
+
+/* Keep light mode as-is; only ensure the hidden state works there too. */
+body.reports-body.pi-light .report-hidden {
+  display: none !important;
+  visibility: hidden !important;
+}

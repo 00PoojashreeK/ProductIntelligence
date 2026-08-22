@@ -29,10 +29,24 @@ let currentProductIndex = -1;
 
 async function loadReport() {
 
+    const initialReport =
+        document.getElementById("individualReport");
+
+    if (initialReport) {
+        initialReport.classList.add("report-hidden");
+        initialReport.style.display = "none";
+    }
+
     const productGroups =
         document.getElementById("productGroups");
 
     try {
+
+        if (!productGroups) {
+            console.error("productGroups element not found.");
+            return;
+        }
+
 
         productGroups.innerHTML = `
             <div class="empty-box">
@@ -89,23 +103,64 @@ async function loadReport() {
         // OVERALL REPORT
         // ====================================================
 
-        document.getElementById(
-            "datasetName"
-        ).innerText =
-            `Dataset: ${data.dataset.filename}`;
+        const datasetName =
+            document.getElementById("datasetName");
+
+        if (datasetName) {
+
+            datasetName.innerText =
+                `Dataset: ${data.dataset.filename || "Unknown Dataset"}`;
+
+        }
 
 
-        document.getElementById(
-            "totalProducts"
-        ).innerText =
-            products.length;
+        const datasetNameCard =
+            document.getElementById("datasetNameCard");
+
+        if (datasetNameCard) {
+
+            datasetNameCard.innerText =
+                data.dataset.filename || "—";
+
+        }
 
 
-        document.getElementById(
-            "totalColumns"
-        ).innerText =
-            data.dataset.columns || 0;
+        const datasetStatusText =
+            document.getElementById("datasetStatusText");
 
+        if (datasetStatusText) {
+
+            datasetStatusText.innerText =
+                "Ready";
+
+        }
+
+
+        const totalProducts =
+            document.getElementById("totalProducts");
+
+        if (totalProducts) {
+
+            totalProducts.innerText =
+                products.length;
+
+        }
+
+
+        const totalColumns =
+            document.getElementById("totalColumns");
+
+        if (totalColumns) {
+
+            totalColumns.innerText =
+                data.dataset.columns || 0;
+
+        }
+
+
+        // ====================================================
+        // VERIFIED / NEEDS REVIEW
+        // ====================================================
 
         const verified =
             products.filter(
@@ -115,25 +170,54 @@ async function loadReport() {
 
 
         const needsReview =
-            products.length - verified;
+            products.filter(
+                product =>
+                    product.status !== "Verified"
+            ).length;
 
 
-        document.getElementById(
-            "verifiedProducts"
-        ).innerText =
-            verified;
+        const verifiedProducts =
+            document.getElementById("verifiedProducts");
+
+        if (verifiedProducts) {
+
+            verifiedProducts.innerText =
+                verified;
+
+        }
 
 
-        document.getElementById(
-            "needsReview"
-        ).innerText =
-            needsReview;
+        const needsReviewElement =
+            document.getElementById("needsReview");
+
+        if (needsReviewElement) {
+
+            needsReviewElement.innerText =
+                needsReview;
+
+        }
 
 
-        document.getElementById(
-            "averageConfidence"
-        ).innerText =
-            `${data.summary.average_confidence || 0}%`;
+        // ====================================================
+        // AVERAGE CONFIDENCE
+        // ====================================================
+
+        const averageConfidence =
+            calculateAverageConfidence(
+                data,
+                products
+            );
+
+
+        console.log(
+            "Final Average Confidence:",
+            averageConfidence
+        );
+
+
+        setAverageConfidence(
+            averageConfidence
+        );
 
 
         // ====================================================
@@ -165,7 +249,7 @@ async function loadReport() {
 
 
     }
-    catch(error) {
+    catch (error) {
 
         console.error(
             "Report loading error:",
@@ -173,32 +257,311 @@ async function loadReport() {
         );
 
 
-        productGroups.innerHTML = `
+        if (productGroups) {
 
-            <div class="empty-box">
+            productGroups.innerHTML = `
 
-                <h2>
-                    Unable to Load Reports
-                </h2>
+                <div class="empty-box">
 
-                <p>
-                    ${escapeHTML(
-                        error.message
-                    )}
-                </p>
+                    <h2>
+                        Unable to Load Reports
+                    </h2>
 
-                <button
-                    class="button"
-                    onclick="loadReport()"
-                >
-                    Try Again
-                </button>
+                    <p>
+                        ${escapeHTML(
+                            error.message
+                        )}
+                    </p>
 
-            </div>
+                    <button
+                        class="button"
+                        onclick="loadReport()"
+                    >
+                        Try Again
+                    </button>
 
-        `;
+                </div>
+
+            `;
+
+        }
 
     }
+
+}
+
+
+// ============================================================
+// CALCULATE AVERAGE CONFIDENCE
+// ============================================================
+
+function calculateAverageConfidence(
+    data,
+    productList
+) {
+
+    // --------------------------------------------------------
+    // First try backend summary
+    // --------------------------------------------------------
+
+    if (
+        data &&
+        data.summary &&
+        data.summary.average_confidence !== undefined &&
+        data.summary.average_confidence !== null
+    ) {
+
+        const backendValue =
+            parseConfidence(
+                data.summary.average_confidence
+            );
+
+
+        if (
+            !isNaN(backendValue)
+        ) {
+
+            return backendValue;
+
+        }
+
+    }
+
+
+    // --------------------------------------------------------
+    // Otherwise calculate from products
+    // --------------------------------------------------------
+
+    if (
+        !Array.isArray(productList) ||
+        productList.length === 0
+    ) {
+
+        return 0;
+
+    }
+
+
+    let total = 0;
+
+    let count = 0;
+
+
+    productList.forEach(
+        product => {
+
+            if (!product) {
+                return;
+            }
+
+
+            const confidence =
+                parseConfidence(
+                    product.confidence ??
+                    product.score ??
+                    product.quality_score
+                );
+
+
+            if (!isNaN(confidence)) {
+
+                total += confidence;
+
+                count++;
+
+            }
+
+        }
+    );
+
+
+    if (count === 0) {
+
+        return 0;
+
+    }
+
+
+    return total / count;
+
+}
+
+
+// ============================================================
+// PARSE CONFIDENCE
+// ============================================================
+
+function parseConfidence(value) {
+
+    if (
+        value === null ||
+        value === undefined
+    ) {
+
+        return NaN;
+
+    }
+
+
+    if (
+        typeof value === "number"
+    ) {
+
+        return value;
+
+    }
+
+
+    const cleaned =
+        String(value)
+            .replace("%", "")
+            .trim();
+
+
+    const number =
+        parseFloat(cleaned);
+
+
+    return number;
+
+}
+
+
+// ============================================================
+// SET AVERAGE CONFIDENCE
+// ============================================================
+
+function setAverageConfidence(
+    value
+) {
+
+    const element =
+        document.getElementById(
+            "averageConfidence"
+        );
+
+
+    if (!element) {
+
+        console.error(
+            "averageConfidence element was not found in HTML."
+        );
+
+        return;
+
+    }
+
+
+    let confidence =
+        parseFloat(value);
+
+
+    if (
+        isNaN(confidence)
+    ) {
+
+        confidence = 0;
+
+    }
+
+
+    // Keep value between 0 and 100
+
+    confidence =
+        Math.max(
+            0,
+            Math.min(
+                100,
+                confidence
+            )
+        );
+
+
+    // Round to 1 decimal only when needed
+
+    const displayConfidence =
+        Number.isInteger(confidence)
+            ? confidence
+            : confidence.toFixed(1);
+
+
+    // ========================================================
+    // SET TEXT
+    // ========================================================
+
+    element.textContent =
+        `${displayConfidence}%`;
+
+
+    // ========================================================
+    // FORCE VISIBILITY
+    // ========================================================
+
+    element.style.display =
+        "block";
+
+    element.style.visibility =
+        "visible";
+
+    element.style.opacity =
+        "1";
+
+    element.style.color =
+        "#111827";
+
+    element.style.fontSize =
+        "2.2rem";
+
+    element.style.fontWeight =
+        "800";
+
+    element.style.lineHeight =
+        "1.2";
+
+    element.style.position =
+        "relative";
+
+    element.style.zIndex =
+        "10";
+
+    element.style.textAlign =
+        "center";
+
+
+    // ========================================================
+    // ALSO MAKE PARENT VISIBLE
+    // ========================================================
+
+    const reportScore =
+        element.closest(
+            ".report-score"
+        );
+
+
+    if (reportScore) {
+
+        reportScore.style.visibility =
+            "visible";
+
+        reportScore.style.opacity =
+            "1";
+
+        reportScore.style.color =
+            "#111827";
+
+        reportScore.style.position =
+            "relative";
+
+        reportScore.style.zIndex =
+            "5";
+
+    }
+
+
+    console.log(
+        "Average confidence displayed:",
+        `${displayConfidence}%`
+    );
 
 }
 
@@ -213,6 +576,13 @@ function buildProductPage() {
         document.getElementById(
             "productGroups"
         );
+
+
+    if (!container) {
+
+        return;
+
+    }
 
 
     container.innerHTML =
@@ -276,69 +646,40 @@ function buildProductPage() {
 
     const group =
         document.createElement(
-            "div"
+            "section"
         );
 
 
     group.className =
-        "product-group";
+        "products-report-card";
 
 
     group.innerHTML = `
 
-        <div
-            style="
-                display:flex;
-                justify-content:space-between;
-                align-items:center;
-                gap:15px;
-                flex-wrap:wrap;
-                margin-bottom:20px;
-            "
-        >
+        <div class="report-card-title">
 
             <div>
 
-                <h2 style="margin:0;">
+                <span class="section-eyebrow">
+                    PRODUCT REPORTS
+                </span>
 
-                    Products
-                    ${startIndex + 1}
-                    -
-                    ${endIndex}
-
+                <h2>
+                    Product Reports
                 </h2>
 
-                <p
-                    style="
-                        margin:5px 0 0;
-                        color:#64748b;
-                    "
-                >
-
-                    Showing
-                    ${startIndex + 1}
-                    -
-                    ${endIndex}
-                    of
-                    ${products.length}
-                    products
-
+                <p>
+                    Showing ${startIndex + 1}–${endIndex}
+                    of ${products.length} products
                 </p>
 
             </div>
 
 
-            <div
-                style="
-                    font-weight:600;
-                    color:#475569;
-                "
-            >
+            <div class="report-page-indicator">
 
-                Page
-                ${currentPage}
-                of
-                ${totalPages}
+                Page ${currentPage}
+                of ${totalPages}
 
             </div>
 
@@ -348,41 +689,25 @@ function buildProductPage() {
         <div
             class="product-list"
             id="productList"
-        >
-        </div>
+        ></div>
 
 
-        <div
-            class="page-navigation"
-            style="
-                display:flex;
-                justify-content:space-between;
-                align-items:center;
-                margin-top:25px;
-                gap:15px;
-            "
-        >
+        <div class="page-navigation">
 
             <button
                 id="previousPage"
-                class="button"
+                class="button secondary-button"
                 onclick="previousPage()"
             >
-                ← Previous 50
+                ← Previous
             </button>
 
 
-            <span
-                id="pageNumber"
-                style="
-                    font-weight:600;
-                    color:#475569;
-                "
-            >
-                Page
-                ${currentPage}
-                of
-                ${totalPages}
+            <span id="pageNumber">
+
+                Page ${currentPage}
+                of ${totalPages}
+
             </span>
 
 
@@ -391,7 +716,7 @@ function buildProductPage() {
                 class="button"
                 onclick="nextPage()"
             >
-                Next 50 →
+                Next →
             </button>
 
         </div>
@@ -428,6 +753,10 @@ function buildProductPage() {
                 );
 
 
+            button.type =
+                "button";
+
+
             button.className =
                 "product-report-button";
 
@@ -457,6 +786,7 @@ function buildProductPage() {
                     ${actualIndex + 1}
 
                 </div>
+
 
                 <div class="product-name">
 
@@ -493,12 +823,20 @@ function buildProductPage() {
         );
 
 
-    previousButton.disabled =
-        currentPage === 1;
+    if (previousButton) {
+
+        previousButton.disabled =
+            currentPage === 1;
+
+    }
 
 
-    nextButton.disabled =
-        currentPage === totalPages;
+    if (nextButton) {
+
+        nextButton.disabled =
+            currentPage === totalPages;
+
+    }
 
 }
 
@@ -524,14 +862,23 @@ function nextPage() {
     buildProductPage();
 
 
-    // Scroll to product list
+    const productGroups =
+        document.getElementById(
+            "productGroups"
+        );
 
-    document.getElementById(
-        "productGroups"
-    ).scrollIntoView({
-        behavior: "smooth",
-        block: "start"
-    });
+
+    if (productGroups) {
+
+        productGroups.scrollIntoView({
+
+            behavior: "smooth",
+
+            block: "start"
+
+        });
+
+    }
 
 }
 
@@ -557,12 +904,23 @@ function previousPage() {
     buildProductPage();
 
 
-    document.getElementById(
-        "productGroups"
-    ).scrollIntoView({
-        behavior: "smooth",
-        block: "start"
-    });
+    const productGroups =
+        document.getElementById(
+            "productGroups"
+        );
+
+
+    if (productGroups) {
+
+        productGroups.scrollIntoView({
+
+            behavior: "smooth",
+
+            block: "start"
+
+        });
+
+    }
 
 }
 
@@ -577,6 +935,7 @@ function getProductName(
 ) {
 
     if (
+        product &&
         product.name &&
         product.name !== "Not Available"
     ) {
@@ -587,11 +946,23 @@ function getProductName(
 
 
     if (
+        product &&
         product.product_name &&
         product.product_name !== "Not Available"
     ) {
 
         return product.product_name;
+
+    }
+
+
+    if (
+        product &&
+        product.title &&
+        product.title !== "Not Available"
+    ) {
+
+        return product.title;
 
     }
 
@@ -633,22 +1004,51 @@ function showProductReport(
         );
 
 
+    if (!report) {
+
+        console.error(
+            "individualReport element not found."
+        );
+
+        return;
+
+    }
+
+
+    report.classList.remove(
+        "report-hidden"
+    );
+
+
     report.style.display =
         "block";
+
+    report.style.visibility =
+        "visible";
+
+    report.style.opacity =
+        "1";
 
 
     // ========================================================
     // NAME
     // ========================================================
 
-    document.getElementById(
-        "individualProductName"
-    ).innerText =
-
-        getProductName(
-            product,
-            index
+    const nameElement =
+        document.getElementById(
+            "individualProductName"
         );
+
+
+    if (nameElement) {
+
+        nameElement.innerText =
+            getProductName(
+                product,
+                index
+            );
+
+    }
 
 
     // ========================================================
@@ -656,9 +1056,17 @@ function showProductReport(
     // ========================================================
 
     const confidence =
-        Number(
-            product.confidence || 0
+        parseConfidence(
+            product.confidence ??
+            product.score ??
+            product.quality_score
         );
+
+
+    const finalConfidence =
+        isNaN(confidence)
+            ? 0
+            : confidence;
 
 
     const score =
@@ -667,39 +1075,53 @@ function showProductReport(
         );
 
 
-    score.innerText =
-        `${confidence}%`;
+    if (score) {
+
+        score.innerText =
+            `${finalConfidence}%`;
 
 
-    score.className =
-        "score-box";
+        score.className =
+            "score-box";
 
 
-    if (
-        confidence >= 80
-    ) {
+        score.style.display =
+            "flex";
 
-        score.classList.add(
-            "score-good"
-        );
+        score.style.visibility =
+            "visible";
 
-    }
+        score.style.opacity =
+            "1";
 
-    else if (
-        confidence >= 50
-    ) {
 
-        score.classList.add(
-            "score-medium"
-        );
+        if (
+            finalConfidence >= 80
+        ) {
 
-    }
+            score.classList.add(
+                "score-good"
+            );
 
-    else {
+        }
 
-        score.classList.add(
-            "score-low"
-        );
+        else if (
+            finalConfidence >= 50
+        ) {
+
+            score.classList.add(
+                "score-medium"
+            );
+
+        }
+
+        else {
+
+            score.classList.add(
+                "score-low"
+            );
+
+        }
 
     }
 
@@ -733,9 +1155,18 @@ function showProductReport(
     // SHOW REPORT
     // ========================================================
 
-    report.scrollIntoView({
-        behavior: "smooth",
-        block: "start"
+    const top =
+        report.getBoundingClientRect().top +
+        window.pageYOffset -
+        24;
+
+
+    window.scrollTo({
+
+        top: top,
+
+        behavior: "smooth"
+
     });
 
 }
@@ -755,47 +1186,177 @@ function buildProductInformation(
         );
 
 
+    if (!table) {
+
+        return;
+
+    }
+
+
     table.innerHTML =
         "";
 
 
+    const get =
+        (...keys) => {
+
+            for (
+                const key of keys
+            ) {
+
+                const value =
+                    product?.[key];
+
+
+                if (
+                    value !== undefined &&
+                    value !== null &&
+                    String(value).trim() !== "" &&
+                    String(value) !== "Not Available"
+                ) {
+
+                    return value;
+
+                }
+
+            }
+
+
+            return "Not Available";
+
+        };
+
+
+    const confidence =
+        parseConfidence(
+            product?.confidence ??
+            product?.score ??
+            product?.quality_score
+        );
+
+
+    const confidenceDisplay =
+        isNaN(confidence)
+            ? "Not Available"
+            : `${confidence}%`;
+
+
     const fields = [
 
-        ["Product Name", product.name],
+        [
+            "Product Name",
+            get(
+                "name",
+                "product_name",
+                "title"
+            )
+        ],
 
-        ["Brand", product.brand],
+        [
+            "Brand",
+            get("brand")
+        ],
 
-        ["Model", product.model],
+        [
+            "Model",
+            get(
+                "model",
+                "model_number"
+            )
+        ],
 
-        ["Category", product.category],
+        [
+            "Category",
+            get("category")
+        ],
 
-        ["Power", product.power],
+        [
+            "Power",
+            get(
+                "power",
+                "power_rating"
+            )
+        ],
 
-        ["Voltage", product.voltage],
+        [
+            "Voltage",
+            get("voltage")
+        ],
 
-        ["Weight", product.weight],
+        [
+            "Weight",
+            get("weight")
+        ],
 
-        ["Material", product.material],
+        [
+            "Material",
+            get("material")
+        ],
 
-        ["Applications", product.applications],
+        [
+            "Applications",
+            get(
+                "applications",
+                "application"
+            )
+        ],
 
-        ["Flow Rate", product.flow_rate],
+        [
+            "Flow Rate",
+            get(
+                "flow_rate",
+                "flowrate"
+            )
+        ],
 
-        ["RPM / Speed", product.rpm],
+        [
+            "RPM / Speed",
+            get(
+                "rpm",
+                "speed"
+            )
+        ],
 
-        ["Country of Origin", product.country],
+        [
+            "Country of Origin",
+            get(
+                "country",
+                "country_of_origin"
+            )
+        ],
 
-        ["Warranty", product.warranty],
+        [
+            "Warranty",
+            get("warranty")
+        ],
 
-        ["Price", product.price],
+        [
+            "Price",
+            get("price")
+        ],
 
-        ["Rating", product.rating],
+        [
+            "Rating",
+            get("rating")
+        ],
 
-        ["Stock", product.stock],
+        [
+            "Stock",
+            get(
+                "stock",
+                "availability"
+            )
+        ],
 
-        ["Status", product.status],
+        [
+            "Status",
+            get("status")
+        ],
 
-        ["Confidence", `${product.confidence || 0}%`]
+        [
+            "Confidence",
+            confidenceDisplay
+        ]
 
     ];
 
@@ -805,21 +1366,30 @@ function buildProductInformation(
 
             const row =
                 document.createElement(
-                    "tr"
+                    "div"
                 );
+
+
+            row.className =
+                "product-info-row";
 
 
             row.innerHTML = `
 
-                <th>
+                <span
+                    class="product-info-label"
+                >
                     ${escapeHTML(label)}
-                </th>
+                </span>
 
-                <td>
+
+                <strong
+                    class="product-info-value"
+                >
                     ${escapeHTML(
                         displayValue(value)
                     )}
-                </td>
+                </strong>
 
             `;
 
@@ -848,6 +1418,13 @@ function buildProductSummary(
         );
 
 
+    if (!summary) {
+
+        return;
+
+    }
+
+
     const name =
         getProductName(
             product,
@@ -855,10 +1432,18 @@ function buildProductSummary(
         );
 
 
-    const confidence =
-        Number(
-            product.confidence || 0
+    const parsedConfidence =
+        parseConfidence(
+            product.confidence ??
+            product.score ??
+            product.quality_score
         );
+
+
+    const confidence =
+        isNaN(parsedConfidence)
+            ? 0
+            : parsedConfidence;
 
 
     let qualityMessage;
@@ -1022,7 +1607,10 @@ function updateProductNavigation() {
         );
 
 
-    if (!previous || !next) {
+    if (
+        !previous ||
+        !next
+    ) {
 
         return;
 
@@ -1090,61 +1678,111 @@ function displayValue(
 
 function showNoDataset() {
 
-    document.getElementById(
-        "datasetName"
-    ).innerText =
-        "No dataset uploaded";
+    const datasetName =
+        document.getElementById(
+            "datasetName"
+        );
+
+    if (datasetName) {
+
+        datasetName.innerText =
+            "No dataset uploaded";
+
+    }
 
 
-    document.getElementById(
-        "totalProducts"
-    ).innerText = "0";
+    const totalProducts =
+        document.getElementById(
+            "totalProducts"
+        );
+
+    if (totalProducts) {
+
+        totalProducts.innerText =
+            "0";
+
+    }
 
 
-    document.getElementById(
-        "totalColumns"
-    ).innerText = "0";
+    const totalColumns =
+        document.getElementById(
+            "totalColumns"
+        );
+
+    if (totalColumns) {
+
+        totalColumns.innerText =
+            "0";
+
+    }
 
 
-    document.getElementById(
-        "verifiedProducts"
-    ).innerText = "0";
+    const verifiedProducts =
+        document.getElementById(
+            "verifiedProducts"
+        );
+
+    if (verifiedProducts) {
+
+        verifiedProducts.innerText =
+            "0";
+
+    }
 
 
-    document.getElementById(
-        "needsReview"
-    ).innerText = "0";
+    const needsReview =
+        document.getElementById(
+            "needsReview"
+        );
+
+    if (needsReview) {
+
+        needsReview.innerText =
+            "0";
+
+    }
 
 
-    document.getElementById(
-        "averageConfidence"
-    ).innerText = "0%";
+    // IMPORTANT:
+    // Use the same function that forces visibility.
+
+    setAverageConfidence(
+        0
+    );
 
 
-    document.getElementById(
-        "productGroups"
-    ).innerHTML = `
+    const productGroups =
+        document.getElementById(
+            "productGroups"
+        );
 
-        <div class="empty-box">
 
-            <h2>
-                No Dataset Available
-            </h2>
+    if (productGroups) {
 
-            <p>
-                Please upload a dataset first.
-            </p>
+        productGroups.innerHTML = `
 
-            <a
-                href="upload.html"
-                class="button"
-            >
-                Upload Dataset
-            </a>
+            <div class="empty-box">
 
-        </div>
+                <h2>
+                    No Dataset Available
+                </h2>
 
-    `;
+                <p>
+                    Please upload a dataset first.
+                </p>
+
+                <a
+                    href="upload.html"
+                    class="button"
+                >
+                    Upload Dataset
+                </a>
+
+            </div>
+
+        `;
+
+    }
 
 }
 
@@ -1198,7 +1836,48 @@ function escapeHTML(
 
 
 // ============================================================
+// CLOSE INDIVIDUAL REPORT
+// ============================================================
+
+function closeIndividualReport() {
+
+    const report =
+        document.getElementById(
+            "individualReport"
+        );
+
+
+    if (!report) {
+
+        return;
+
+    }
+
+
+    report.classList.add(
+        "report-hidden"
+    );
+
+
+    report.style.display =
+        "none";
+
+
+    currentProductIndex =
+        -1;
+
+}
+
+
+// ============================================================
 // START
 // ============================================================
 
-loadReport();
+document.addEventListener(
+    "DOMContentLoaded",
+    function() {
+
+        loadReport();
+
+    }
+);
