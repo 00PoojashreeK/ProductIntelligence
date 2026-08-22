@@ -372,3 +372,95 @@ body.pi-dark .pi-msg.user {
     background: #2563eb;
     color: #ffffff;
 }
+/* =========================================================
+   GEMINI AI - DARK MODE COMPLETE FIX
+   ========================================================= */
+
+body.pi-dark .pi-assistant {
+    background: #111827 !important;
+    color: #ffffff !important;
+    border: 1px solid #374151 !important;
+}
+
+/* Header */
+body.pi-dark .pi-assistant .pi-panel-head {
+    background: #111827 !important;
+    color: #ffffff !important;
+    border-bottom: 1px solid #374151 !important;
+}
+
+body.pi-dark .pi-assistant .pi-panel-title {
+    color: #ffffff !important;
+}
+
+body.pi-dark .pi-assistant .pi-muted {
+    color: #cbd5e1 !important;
+}
+
+/* Chat area */
+body.pi-dark .pi-assistant .pi-chat {
+    background: #0f172a !important;
+    color: #ffffff !important;
+}
+
+/* All chat text */
+body.pi-dark .pi-assistant .pi-msg {
+    color: #ffffff !important;
+}
+
+/* AI message */
+body.pi-dark .pi-assistant .pi-msg.ai {
+    background: #1e293b !important;
+    color: #ffffff !important;
+    border: 1px solid #334155 !important;
+}
+
+/* User message */
+body.pi-dark .pi-assistant .pi-msg.user {
+    background: #2563eb !important;
+    color: #ffffff !important;
+}
+
+/* Bottom input area */
+body.pi-dark .pi-assistant .pi-chat-form {
+    background: #111827 !important;
+    border-top: 1px solid #374151 !important;
+}
+
+/* Input box */
+body.pi-dark .pi-assistant #piChatInput {
+    background: #1f2937 !important;
+    color: #ffffff !important;
+    border: 1px solid #475569 !important;
+}
+
+/* Placeholder */
+body.pi-dark .pi-assistant #piChatInput::placeholder {
+    color: #94a3b8 !important;
+}
+
+/* Ask button */
+body.pi-dark .pi-assistant .pi-chat-form button {
+    background: #2563eb !important;
+    color: #ffffff !important;
+    border: none !important;
+}
+
+/* Close button */
+body.pi-dark .pi-assistant .pi-icon-btn {
+    color: #ffffff !important;
+    background: transparent !important;
+}
+
+/* Every text element inside Gemini */
+body.pi-dark .pi-assistant div,
+body.pi-dark .pi-assistant span,
+body.pi-dark .pi-assistant p,
+body.pi-dark .pi-assistant strong {
+    color: #ffffff !important;
+}
+
+/* Keep placeholder slightly grey */
+body.pi-dark .pi-assistant #piChatInput::placeholder {
+    color: #94a3b8 !important;
+}
