@@ -1,7 +1,7 @@
 /* Product Intelligence AI - intelligent feature layer
    Works with the existing FastAPI endpoints and keeps existing page JS intact. */
 (function(){
-  const API='http://127.0.0.1:8000';
+  const API='https://productintelligence-lzcn.onrender.com/';
   const state={products:[],dashboard:null};
   const esc=v=>String(v??'').replace(/[&<>'"]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;',"'":'&#039;','"':'&quot;'}[c]));
   const val=(p,...keys)=>{for(const k of keys){if(p&&p[k]!==undefined&&p[k]!==null&&String(p[k]).trim()!==''&&String(p[k])!=='Not Available')return p[k]}return ''};
