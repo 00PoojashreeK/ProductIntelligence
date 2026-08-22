@@ -14,6 +14,10 @@
 
     <style>
 
+        /* =====================================================
+           GLOBAL
+        ===================================================== */
+
         * {
             box-sizing: border-box;
         }
@@ -24,6 +28,7 @@
             background: #ffffff;
             color: #172033;
         }
+
 
         /* =====================================================
            NAVBAR
@@ -62,6 +67,7 @@
             color: #93c5fd;
         }
 
+
         /* =====================================================
            PAGE
         ===================================================== */
@@ -87,21 +93,23 @@
             line-height: 1.6;
         }
 
+
         /* =====================================================
            CARDS
         ===================================================== */
 
         .upload-card,
         .current-card {
-            background: white;
+            background: #ffffff;
             border-radius: 18px;
             padding: 40px;
 
             box-shadow:
-                0 8px 30px rgba(0, 0, 0, .07);
+                0 8px 30px rgba(0, 0, 0, 0.07);
 
             margin-bottom: 25px;
         }
+
 
         /* =====================================================
            DROP ZONE
@@ -116,15 +124,11 @@
             text-align: center;
             cursor: pointer;
 
-            transition: .2s;
-            
-            background: #ffffff !important;
-            border: 2px dashed #cbd5e1;
-            border-radius: 16px;
-            padding: 55px 30px;
-            text-align: center;
+            transition: 0.2s;
+
+            background: #ffffff;
+            color: #172033;
         }
-        
 
         .drop-zone:hover,
         .drop-zone.dragover {
@@ -139,6 +143,7 @@
 
         .drop-zone h2 {
             margin: 0 0 10px;
+            color: #172033;
         }
 
         .drop-zone p {
@@ -150,7 +155,7 @@
             display: inline-block;
 
             background: #2563eb;
-            color: white;
+            color: #ffffff;
 
             padding: 12px 24px;
 
@@ -169,6 +174,7 @@
             display: none;
         }
 
+
         /* =====================================================
            SELECTED FILE
         ===================================================== */
@@ -184,12 +190,15 @@
 
             display: none;
 
-            border: 1px solid #e5e7eb;
+            border: 1px solid #d1d5db;
+
+            color: #172033;
         }
 
         .file-name {
             font-weight: 600;
             word-break: break-word;
+            color: #172033;
         }
 
         .file-size {
@@ -197,6 +206,7 @@
             font-size: 13px;
             margin-top: 5px;
         }
+
 
         /* =====================================================
            UPLOAD BUTTON
@@ -215,7 +225,7 @@
 
             background: #111827;
 
-            color: white;
+            color: #ffffff;
 
             font-size: 16px;
 
@@ -233,6 +243,7 @@
             cursor: not-allowed;
         }
 
+
         /* =====================================================
            MESSAGE
         ===================================================== */
@@ -246,6 +257,7 @@
 
             min-height: 22px;
         }
+
 
         /* =====================================================
            FORMAT LABELS
@@ -275,6 +287,7 @@
             font-weight: 600;
         }
 
+
         /* =====================================================
            CURRENT DATASET
         ===================================================== */
@@ -293,6 +306,7 @@
 
         .current-header h2 {
             margin: 0;
+            color: #172033;
         }
 
         .current-description {
@@ -316,11 +330,13 @@
 
             padding: 20px;
 
-            border: 1px solid #e5e7eb;
+            border: 1px solid #d1d5db;
 
             border-radius: 12px;
 
             background: #ffffff;
+
+            color: #172033;
         }
 
         .dataset-info {
@@ -362,6 +378,8 @@
             font-size: 16px;
 
             word-break: break-word;
+
+            color: #172033;
         }
 
         .dataset-meta {
@@ -392,8 +410,9 @@
             font-weight: 700;
         }
 
+
         /* =====================================================
-           BUTTONS
+           DATASET BUTTONS
         ===================================================== */
 
         .dataset-actions {
@@ -444,6 +463,7 @@
             background: #fecaca;
         }
 
+
         /* =====================================================
            NO DATASET
         ===================================================== */
@@ -464,6 +484,7 @@
             line-height: 1.6;
         }
 
+
         /* =====================================================
            SUCCESS MODAL
         ===================================================== */
@@ -473,7 +494,7 @@
 
             inset: 0;
 
-            background: rgba(15, 23, 42, .55);
+            background: rgba(15, 23, 42, 0.55);
 
             display: none;
 
@@ -493,7 +514,7 @@
 
             max-width: 90%;
 
-            background: white;
+            background: #ffffff;
 
             border-radius: 20px;
 
@@ -502,7 +523,7 @@
             text-align: center;
 
             box-shadow:
-                0 25px 70px rgba(0, 0, 0, .2);
+                0 25px 70px rgba(0, 0, 0, 0.2);
         }
 
         .success-icon {
@@ -547,7 +568,7 @@
 
             background: #2563eb;
 
-            color: white;
+            color: #ffffff;
 
             font-weight: 700;
 
@@ -557,6 +578,395 @@
         .modal-btn:hover {
             background: #1d4ed8;
         }
+
+
+        /* =====================================================
+           LIGHT THEME
+        ===================================================== */
+
+        body.pi-light {
+            background: #ffffff !important;
+            color: #172033 !important;
+        }
+
+        body.pi-light .navbar {
+            background: #ffffff !important;
+            color: #172033 !important;
+            border-bottom: 1px solid #e5e7eb !important;
+        }
+
+        body.pi-light .navbar .logo {
+            color: #172033 !important;
+        }
+
+        body.pi-light .navbar .nav a {
+            color: #172033 !important;
+        }
+
+        body.pi-light .navbar .nav a:hover {
+            color: #2563eb !important;
+        }
+
+        body.pi-light .heading h1 {
+            color: #172033 !important;
+        }
+
+        body.pi-light .heading p {
+            color: #667085 !important;
+        }
+
+        body.pi-light .upload-card,
+        body.pi-light .current-card {
+            background: #ffffff !important;
+            color: #172033 !important;
+        }
+
+        body.pi-light .drop-zone {
+            background: #ffffff !important;
+            border: 2px dashed #cbd5e1 !important;
+            color: #172033 !important;
+        }
+
+        body.pi-light .drop-zone:hover,
+        body.pi-light .drop-zone.dragover {
+            background: #eff6ff !important;
+            border-color: #2563eb !important;
+        }
+
+        body.pi-light .drop-zone h2 {
+            color: #172033 !important;
+        }
+
+        body.pi-light .drop-zone p {
+            color: #667085 !important;
+        }
+
+        body.pi-light .file-info {
+            background: #ffffff !important;
+            border: 1px solid #d1d5db !important;
+            color: #172033 !important;
+        }
+
+        body.pi-light .file-name {
+            color: #172033 !important;
+        }
+
+        body.pi-light .file-size {
+            color: #667085 !important;
+        }
+
+        body.pi-light .current-header h2 {
+            color: #172033 !important;
+        }
+
+        body.pi-light .current-description {
+            color: #667085 !important;
+        }
+
+        body.pi-light .dataset-box {
+            background: #ffffff !important;
+            border: 1px solid #d1d5db !important;
+            color: #172033 !important;
+        }
+
+        body.pi-light .dataset-name {
+            color: #172033 !important;
+        }
+
+        body.pi-light .dataset-meta {
+            color: #667085 !important;
+        }
+
+        body.pi-light .dataset-icon {
+            background: #dbeafe !important;
+            color: #172033 !important;
+        }
+
+        body.pi-light .dataset-status {
+            background: #dcfce7 !important;
+            color: #15803d !important;
+        }
+
+        body.pi-light .no-dataset {
+            background: #ffffff !important;
+            color: #667085 !important;
+            border: 1px dashed #cbd5e1 !important;
+        }
+
+        body.pi-light .format {
+            background: #eef2ff !important;
+            color: #3730a3 !important;
+        }
+
+
+        /* =====================================================
+           DARK THEME
+           Covers the common theme class names used by the
+           existing project.
+        ===================================================== */
+
+        body.pi-dark,
+        body.dark,
+        body.dark-mode,
+        body[data-theme="dark"] {
+            background: #0f172a !important;
+            color: #f8fafc !important;
+        }
+
+        body.pi-dark .navbar,
+        body.dark .navbar,
+        body.dark-mode .navbar,
+        body[data-theme="dark"] .navbar {
+            background: #111827 !important;
+            color: #ffffff !important;
+            border-bottom: 1px solid #334155 !important;
+        }
+
+        body.pi-dark .navbar .logo,
+        body.dark .navbar .logo,
+        body.dark-mode .navbar .logo,
+        body[data-theme="dark"] .navbar .logo {
+            color: #ffffff !important;
+        }
+
+        body.pi-dark .navbar .nav a,
+        body.dark .navbar .nav a,
+        body.dark-mode .navbar .nav a,
+        body[data-theme="dark"] .navbar .nav a {
+            color: #ffffff !important;
+        }
+
+        body.pi-dark .navbar .nav a:hover,
+        body.dark .navbar .nav a:hover,
+        body.dark-mode .navbar .nav a:hover,
+        body[data-theme="dark"] .navbar .nav a:hover {
+            color: #93c5fd !important;
+        }
+
+        body.pi-dark .heading h1,
+        body.dark .heading h1,
+        body.dark-mode .heading h1,
+        body[data-theme="dark"] .heading h1 {
+            color: #f8fafc !important;
+        }
+
+        body.pi-dark .heading p,
+        body.dark .heading p,
+        body.dark-mode .heading p,
+        body[data-theme="dark"] .heading p {
+            color: #cbd5e1 !important;
+        }
+
+        body.pi-dark .upload-card,
+        body.pi-dark .current-card,
+        body.dark .upload-card,
+        body.dark .current-card,
+        body.dark-mode .upload-card,
+        body.dark-mode .current-card,
+        body[data-theme="dark"] .upload-card,
+        body[data-theme="dark"] .current-card {
+            background: #111827 !important;
+            color: #f8fafc !important;
+            box-shadow:
+                0 8px 30px rgba(0, 0, 0, 0.35) !important;
+        }
+
+        body.pi-dark .drop-zone,
+        body.dark .drop-zone,
+        body.dark-mode .drop-zone,
+        body[data-theme="dark"] .drop-zone {
+            background: #1e293b !important;
+            border: 2px dashed #475569 !important;
+            color: #f8fafc !important;
+        }
+
+        body.pi-dark .drop-zone:hover,
+        body.pi-dark .drop-zone.dragover,
+        body.dark .drop-zone:hover,
+        body.dark .drop-zone.dragover,
+        body.dark-mode .drop-zone:hover,
+        body.dark-mode .drop-zone.dragover,
+        body[data-theme="dark"] .drop-zone:hover,
+        body[data-theme="dark"] .drop-zone.dragover {
+            background: #172554 !important;
+            border-color: #60a5fa !important;
+        }
+
+        body.pi-dark .drop-zone h2,
+        body.dark .drop-zone h2,
+        body.dark-mode .drop-zone h2,
+        body[data-theme="dark"] .drop-zone h2 {
+            color: #f8fafc !important;
+        }
+
+        body.pi-dark .drop-zone p,
+        body.dark .drop-zone p,
+        body.dark-mode .drop-zone p,
+        body[data-theme="dark"] .drop-zone p {
+            color: #cbd5e1 !important;
+        }
+
+
+        /* =====================================================
+           DARK SELECTED FILE
+        ===================================================== */
+
+        body.pi-dark .file-info,
+        body.dark .file-info,
+        body.dark-mode .file-info,
+        body[data-theme="dark"] .file-info {
+            background: #1e293b !important;
+            border: 1px solid #475569 !important;
+            color: #f8fafc !important;
+        }
+
+        body.pi-dark .file-name,
+        body.dark .file-name,
+        body.dark-mode .file-name,
+        body[data-theme="dark"] .file-name {
+            color: #f8fafc !important;
+        }
+
+        body.pi-dark .file-size,
+        body.dark .file-size,
+        body.dark-mode .file-size,
+        body[data-theme="dark"] .file-size {
+            color: #cbd5e1 !important;
+        }
+
+
+        /* =====================================================
+           DARK CURRENT DATASET
+        ===================================================== */
+
+        body.pi-dark .current-header h2,
+        body.dark .current-header h2,
+        body.dark-mode .current-header h2,
+        body[data-theme="dark"] .current-header h2 {
+            color: #f8fafc !important;
+        }
+
+        body.pi-dark .current-description,
+        body.dark .current-description,
+        body.dark-mode .current-description,
+        body[data-theme="dark"] .current-description {
+            color: #cbd5e1 !important;
+        }
+
+        body.pi-dark .dataset-box,
+        body.dark .dataset-box,
+        body.dark-mode .dataset-box,
+        body[data-theme="dark"] .dataset-box {
+            background: #1e293b !important;
+            border: 1px solid #475569 !important;
+            color: #f8fafc !important;
+        }
+
+        body.pi-dark .dataset-name,
+        body.dark .dataset-name,
+        body.dark-mode .dataset-name,
+        body[data-theme="dark"] .dataset-name {
+            color: #f8fafc !important;
+        }
+
+        body.pi-dark .dataset-meta,
+        body.dark .dataset-meta,
+        body.dark-mode .dataset-meta,
+        body[data-theme="dark"] .dataset-meta {
+            color: #cbd5e1 !important;
+        }
+
+        body.pi-dark .dataset-icon,
+        body.dark .dataset-icon,
+        body.dark-mode .dataset-icon,
+        body[data-theme="dark"] .dataset-icon {
+            background: #334155 !important;
+            color: #f8fafc !important;
+        }
+
+        body.pi-dark .dataset-status,
+        body.dark .dataset-status,
+        body.dark-mode .dataset-status,
+        body[data-theme="dark"] .dataset-status {
+            background: #14532d !important;
+            color: #bbf7d0 !important;
+        }
+
+
+        /* =====================================================
+           DARK NO DATASET
+        ===================================================== */
+
+        body.pi-dark .no-dataset,
+        body.dark .no-dataset,
+        body.dark-mode .no-dataset,
+        body[data-theme="dark"] .no-dataset {
+            background: #1e293b !important;
+            border: 1px dashed #475569 !important;
+            color: #cbd5e1 !important;
+        }
+
+
+        /* =====================================================
+           DARK FORMAT LABELS
+        ===================================================== */
+
+        body.pi-dark .format,
+        body.dark .format,
+        body.dark-mode .format,
+        body[data-theme="dark"] .format {
+            background: #312e81 !important;
+            color: #e0e7ff !important;
+        }
+
+
+        /* =====================================================
+           DARK BUTTONS
+        ===================================================== */
+
+        body.pi-dark .refresh-btn,
+        body.dark .refresh-btn,
+        body.dark-mode .refresh-btn,
+        body[data-theme="dark"] .refresh-btn {
+            background: #312e81 !important;
+            color: #e0e7ff !important;
+        }
+
+        body.pi-dark .delete-btn,
+        body.dark .delete-btn,
+        body.dark-mode .delete-btn,
+        body[data-theme="dark"] .delete-btn {
+            background: #450a0a !important;
+            color: #fecaca !important;
+        }
+
+
+        /* =====================================================
+           MODAL
+        ===================================================== */
+
+        body.pi-dark .modal-box,
+        body.dark .modal-box,
+        body.dark-mode .modal-box,
+        body[data-theme="dark"] .modal-box {
+            background: #1e293b !important;
+            color: #f8fafc !important;
+        }
+
+        body.pi-dark .modal-box h2,
+        body.dark .modal-box h2,
+        body.dark-mode .modal-box h2,
+        body[data-theme="dark"] .modal-box h2 {
+            color: #f8fafc !important;
+        }
+
+        body.pi-dark .modal-box p,
+        body.dark .modal-box p,
+        body.dark-mode .modal-box p,
+        body[data-theme="dark"] .modal-box p {
+            color: #cbd5e1 !important;
+        }
+
 
         /* =====================================================
            RESPONSIVE
@@ -613,91 +1023,129 @@
             }
 
         }
-        /* =====================================================
-   LIGHT MODE - UPLOAD PAGE FIX
-===================================================== */
 
-body.pi-light .navbar {
-    background: #ffffff !important;
-    color: #172033 !important;
-    border-bottom: 1px solid #e5e7eb;
-}
-
-body.pi-light .navbar .logo {
-    color: #172033 !important;
-}
-
-body.pi-light .navbar .nav a {
-    color: #172033 !important;
-}
-
-body.pi-light .navbar .nav a:hover {
-    color: #2563eb !important;
-}
-
-
-/* Upload your dataset box */
-body.pi-light .upload-card {
-    background: #ffffff !important;
-}
-
-
-/* Drag and drop area */
-body.pi-light .drop-zone {
-    background: #ffffff !important;
-    border: 2px dashed #cbd5e1 !important;
-    color: #172033 !important;
-}
-
-body.pi-light .drop-zone h2 {
-    color: #172033 !important;
-}
-
-body.pi-light .drop-zone p {
-    color: #667085 !important;
-}
-
-
-/* Current Dataset main card */
-body.pi-light .current-card {
-    background: #ffffff !important;
-}
-
-
-/* Currently uploaded dataset information box */
-body.pi-light .dataset-box {
-    background: #ffffff !important;
-    border: 1px solid #e5e7eb !important;
-    color: #172033 !important;
-}
-
-
-/* Dataset text */
-body.pi-light .dataset-name {
-    color: #172033 !important;
-}
-
-body.pi-light .dataset-meta {
-    color: #667085 !important;
-}
-
-
-/* No dataset / loading box */
-body.pi-light .no-dataset {
-    background: #ffffff !important;
-    color: #667085 !important;
-    border: 1px dashed #cbd5e1 !important;
-}
     </style>
+
+
+    <!-- EXISTING PROJECT CSS -->
 
     <link rel="stylesheet" href="css/innovative.css">
     <link rel="stylesheet" href="css/premium.css">
     <link rel="stylesheet" href="css/theme-contrast-fix.css">
-
     <link rel="stylesheet" href="css/global-polish.css">
     <link rel="stylesheet" href="css/final-theme-fix.css">
+
     <script src="js/global-theme.js"></script>
+
     <link rel="stylesheet" href="css/theme-repair-v2.css">
+
+
+    <!-- =====================================================
+         FINAL OVERRIDE
+         This comes AFTER all external CSS so our upload-page
+         visibility fixes take priority.
+    ===================================================== -->
+
+    <style>
+
+        /* LIGHT */
+
+        body.pi-light .file-info {
+            background: #ffffff !important;
+            border: 1px solid #d1d5db !important;
+            color: #172033 !important;
+        }
+
+        body.pi-light .file-name {
+            color: #172033 !important;
+        }
+
+        body.pi-light .file-size {
+            color: #667085 !important;
+        }
+
+        body.pi-light .dataset-box {
+            background: #ffffff !important;
+            border: 1px solid #d1d5db !important;
+            color: #172033 !important;
+        }
+
+        body.pi-light .dataset-name {
+            color: #172033 !important;
+        }
+
+        body.pi-light .dataset-meta {
+            color: #667085 !important;
+        }
+
+
+        /* DARK */
+
+        body.pi-dark .file-info,
+        body.dark .file-info,
+        body.dark-mode .file-info,
+        body[data-theme="dark"] .file-info {
+            background: #1e293b !important;
+            border: 1px solid #475569 !important;
+            color: #f8fafc !important;
+        }
+
+        body.pi-dark .file-name,
+        body.dark .file-name,
+        body.dark-mode .file-name,
+        body[data-theme="dark"] .file-name {
+            color: #f8fafc !important;
+        }
+
+        body.pi-dark .file-size,
+        body.dark .file-size,
+        body.dark-mode .file-size,
+        body[data-theme="dark"] .file-size {
+            color: #cbd5e1 !important;
+        }
+
+        body.pi-dark .dataset-box,
+        body.dark .dataset-box,
+        body.dark-mode .dataset-box,
+        body[data-theme="dark"] .dataset-box {
+            background: #1e293b !important;
+            border: 1px solid #475569 !important;
+            color: #f8fafc !important;
+        }
+
+        body.pi-dark .dataset-name,
+        body.dark .dataset-name,
+        body.dark-mode .dataset-name,
+        body[data-theme="dark"] .dataset-name {
+            color: #f8fafc !important;
+        }
+
+        body.pi-dark .dataset-meta,
+        body.dark .dataset-meta,
+        body.dark-mode .dataset-meta,
+        body[data-theme="dark"] .dataset-meta {
+            color: #cbd5e1 !important;
+        }
+
+        body.pi-dark .dataset-status,
+        body.dark .dataset-status,
+        body.dark-mode .dataset-status,
+        body[data-theme="dark"] .dataset-status {
+            background: #14532d !important;
+            color: #bbf7d0 !important;
+        }
+
+        body.pi-dark .no-dataset,
+        body.dark .no-dataset,
+        body.dark-mode .no-dataset,
+        body[data-theme="dark"] .no-dataset {
+            background: #1e293b !important;
+            color: #cbd5e1 !important;
+            border-color: #475569 !important;
+        }
+
+    </style>
+
 </head>
 
 
@@ -752,6 +1200,10 @@ body.pi-light .no-dataset {
 <div class="page">
 
 
+    <!-- =================================================
+         HEADING
+    ================================================= -->
+
     <div class="heading">
 
         <h1>
@@ -772,14 +1224,13 @@ body.pi-light .no-dataset {
 
     <div class="upload-card">
 
-
         <div
             class="drop-zone"
             id="dropZone"
         >
 
             <div class="upload-icon">
-                
+                📁
             </div>
 
             <h2>
@@ -880,7 +1331,6 @@ body.pi-light .no-dataset {
 
     <div class="current-card">
 
-
         <div class="current-header">
 
             <h2>
@@ -932,7 +1382,7 @@ body.pi-light .no-dataset {
     <div class="modal-box">
 
         <div class="success-icon">
-            
+            ✓
         </div>
 
         <h2>
@@ -961,32 +1411,43 @@ body.pi-light .no-dataset {
    API CONFIGURATION
 ===================================================== */
 
-const API = "https://productintelligence-lzcn.onrender.com";
+const API =
+    "https://productintelligence-lzcn.onrender.com";
 
 
 /* =====================================================
    ELEMENTS
 ===================================================== */
 
-const fileInput = document.getElementById("fileInput");
+const fileInput =
+    document.getElementById("fileInput");
 
-const dropZone = document.getElementById("dropZone");
+const dropZone =
+    document.getElementById("dropZone");
 
-const fileInfo = document.getElementById("fileInfo");
+const fileInfo =
+    document.getElementById("fileInfo");
 
-const fileName = document.getElementById("fileName");
+const fileName =
+    document.getElementById("fileName");
 
-const fileSize = document.getElementById("fileSize");
+const fileSize =
+    document.getElementById("fileSize");
 
-const uploadBtn = document.getElementById("uploadBtn");
+const uploadBtn =
+    document.getElementById("uploadBtn");
 
-const message = document.getElementById("message");
+const message =
+    document.getElementById("message");
 
-const successModal = document.getElementById("successModal");
+const successModal =
+    document.getElementById("successModal");
 
-const successText = document.getElementById("successText");
+const successText =
+    document.getElementById("successText");
 
-const currentDataset = document.getElementById("currentDataset");
+const currentDataset =
+    document.getElementById("currentDataset");
 
 
 /* =====================================================
@@ -1003,13 +1464,14 @@ async function loadCurrentDataset() {
 
     try {
 
-        const response = await fetch(
-            `${API}/dataset`,
-            {
-                method: "GET",
-                cache: "no-store"
-            }
-        );
+        const response =
+            await fetch(
+                `${API}/dataset`,
+                {
+                    method: "GET",
+                    cache: "no-store"
+                }
+            );
 
         if (!response.ok) {
 
@@ -1019,7 +1481,8 @@ async function loadCurrentDataset() {
 
         }
 
-        const data = await response.json();
+        const data =
+            await response.json();
 
         console.log(
             "Current dataset response:",
@@ -1027,12 +1490,9 @@ async function loadCurrentDataset() {
         );
 
 
-        /*
-         * =================================================
-         * CASE 1:
-         * Backend says there is no dataset
-         * =================================================
-         */
+        /* =================================================
+           NO DATASET
+        ================================================= */
 
         if (
             data.uploaded === false ||
@@ -1046,30 +1506,17 @@ async function loadCurrentDataset() {
         }
 
 
-        /*
-         * =================================================
-         * CASE 2:
-         * Backend returned a dataset object
-         * =================================================
-         */
+        /* =================================================
+           GET DATASET OBJECT
+        ================================================= */
 
-        let dataset = data.dataset || null;
+        let dataset =
+            data.dataset || null;
 
 
-        /*
-         * =================================================
-         * CASE 3:
-         * Backend returned dataset information directly
-         *
-         * Example:
-         *
-         * {
-         *     uploaded: true,
-         *     dataset_name: "products.csv",
-         *     rows: 20
-         * }
-         * =================================================
-         */
+        /* =================================================
+           DIRECT DATASET RESPONSE
+        ================================================= */
 
         if (!dataset) {
 
@@ -1116,11 +1563,9 @@ async function loadCurrentDataset() {
         }
 
 
-        /*
-         * =================================================
-         * If there is still no dataset
-         * =================================================
-         */
+        /* =================================================
+           STILL NO DATASET
+        ================================================= */
 
         if (!dataset) {
 
@@ -1131,11 +1576,9 @@ async function loadCurrentDataset() {
         }
 
 
-        /*
-         * =================================================
-         * NORMALIZE DATASET FIELDS
-         * =================================================
-         */
+        /* =================================================
+           NORMALIZE FIELDS
+        ================================================= */
 
         dataset.filename =
             dataset.filename ||
@@ -1144,7 +1587,6 @@ async function loadCurrentDataset() {
             data.filename ||
             "Uploaded Dataset";
 
-
         dataset.rows_count =
             dataset.rows_count ??
             dataset.rows ??
@@ -1152,14 +1594,12 @@ async function loadCurrentDataset() {
             data.rows ??
             0;
 
-
         dataset.columns_count =
             dataset.columns_count ??
             dataset.columns ??
             data.columns_count ??
             data.columns ??
             0;
-
 
         dataset.file_type =
             dataset.file_type ||
@@ -1169,7 +1609,6 @@ async function loadCurrentDataset() {
             getFileExtension(
                 dataset.filename
             );
-
 
         dataset.uploaded_at =
             dataset.uploaded_at ||
@@ -1183,11 +1622,9 @@ async function loadCurrentDataset() {
         );
 
 
-        /*
-         * =================================================
-         * DISPLAY DATASET
-         * =================================================
-         */
+        /* =================================================
+           DISPLAY
+        ================================================= */
 
         showCurrentDataset(dataset);
 
@@ -1199,7 +1636,6 @@ async function loadCurrentDataset() {
             "Dataset loading error:",
             error
         );
-
 
         currentDataset.innerHTML = `
 
@@ -1243,16 +1679,11 @@ function showCurrentDataset(dataset) {
             "Unnamed Dataset"
         );
 
-
     const rows =
-        dataset.rows_count ??
-        0;
-
+        dataset.rows_count ?? 0;
 
     const columns =
-        dataset.columns_count ??
-        0;
-
+        dataset.columns_count ?? 0;
 
     const fileType =
         escapeHTML(
@@ -1338,7 +1769,7 @@ function showCurrentDataset(dataset) {
 
                     <span class="dataset-status">
 
-                         Currently Active
+                        Currently Active
 
                     </span>
 
@@ -1379,7 +1810,9 @@ function showNoDataset() {
 
         <div class="no-dataset">
 
-             <strong>No dataset uploaded.</strong>
+            <strong>
+                No dataset uploaded.
+            </strong>
 
             <br>
 
@@ -1466,13 +1899,11 @@ async function deleteCurrentDataset() {
             message.style.color =
                 "#16a34a";
 
-
             message.innerText =
                 "✅ Dataset deleted successfully.";
 
 
             fileInput.value = "";
-
 
             fileInfo.style.display =
                 "none";
@@ -1485,7 +1916,6 @@ async function deleteCurrentDataset() {
 
         message.style.color =
             "#dc2626";
-
 
         message.innerText =
             "❌ " +
@@ -1510,7 +1940,6 @@ async function deleteCurrentDataset() {
 
         message.style.color =
             "#dc2626";
-
 
         message.innerText =
             "❌ Cannot connect to FastAPI.";
@@ -1669,11 +2098,13 @@ dropZone.addEventListener(
 
 
         const allowed = [
+
             ".csv",
             ".xlsx",
             ".xls",
             ".json",
             ".tsv"
+
         ];
 
 
@@ -1697,10 +2128,6 @@ dropZone.addEventListener(
 
         }
 
-
-        /*
-         * Assign dropped file to input.
-         */
 
         try {
 
@@ -1739,9 +2166,9 @@ uploadBtn.addEventListener(
     async function() {
 
 
-        /*
-         * CHECK FILE
-         */
+        /* =================================================
+           CHECK FILE
+        ================================================= */
 
         if (
             fileInput.files.length === 0
@@ -1760,13 +2187,12 @@ uploadBtn.addEventListener(
             fileInput.files[0];
 
 
-        /*
-         * DISABLE BUTTON
-         */
+        /* =================================================
+           DISABLE BUTTON
+        ================================================= */
 
         uploadBtn.disabled =
             true;
-
 
         uploadBtn.innerText =
             "Processing Dataset...";
@@ -1775,18 +2201,16 @@ uploadBtn.addEventListener(
         message.style.color =
             "#2563eb";
 
-
         message.innerText =
             "Uploading and analysing your dataset...";
 
 
-        /*
-         * CREATE FORM DATA
-         */
+        /* =================================================
+           FORM DATA
+        ================================================= */
 
         const formData =
             new FormData();
-
 
         formData.append(
             "file",
@@ -1830,11 +2254,9 @@ uploadBtn.addEventListener(
             );
 
 
-            /*
-             * =================================================
-             * ACCEPT MULTIPLE SUCCESS RESPONSE FORMATS
-             * =================================================
-             */
+            /* =================================================
+               SUCCESS
+            ================================================= */
 
             const uploadSuccessful =
                 response.ok &&
@@ -1850,7 +2272,6 @@ uploadBtn.addEventListener(
 
                 message.style.color =
                     "#16a34a";
-
 
                 message.innerText =
                     "✅ Dataset uploaded successfully!";
@@ -1895,9 +2316,9 @@ uploadBtn.addEventListener(
                     0;
 
 
-                /*
-                 * SUCCESS MODAL
-                 */
+                /* =================================================
+                   SUCCESS MODAL
+                ================================================= */
 
                 successText.innerHTML = `
 
@@ -1914,11 +2335,13 @@ uploadBtn.addEventListener(
                     <strong>
                         ${uploadedRows}
                     </strong>
+
                     rows and
 
                     <strong>
                         ${uploadedColumns}
                     </strong>
+
                     columns were detected.
 
                 `;
@@ -1929,20 +2352,19 @@ uploadBtn.addEventListener(
                 );
 
 
-                /*
-                 * CLEAR SELECTED FILE
-                 */
+                /* =================================================
+                   CLEAR SELECTED FILE
+                ================================================= */
 
                 fileInput.value = "";
-
 
                 fileInfo.style.display =
                     "none";
 
 
-                /*
-                 * LOAD CURRENT DATASET
-                 */
+                /* =================================================
+                   REFRESH CURRENT DATASET
+                ================================================= */
 
                 await loadCurrentDataset();
 
@@ -1976,13 +2398,12 @@ uploadBtn.addEventListener(
         }
 
 
-        /*
-         * ENABLE BUTTON AGAIN
-         */
+        /* =================================================
+           ENABLE BUTTON
+        ================================================= */
 
         uploadBtn.disabled =
             false;
-
 
         uploadBtn.innerText =
             "Upload Dataset";
@@ -2108,6 +2529,7 @@ document.addEventListener(
 
 
 <script src="js/intelligence.js"></script>
+
 </body>
 
 </html>
