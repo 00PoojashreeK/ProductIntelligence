@@ -1,4 +1,4 @@
-const API = "https://productintelligence-lzcn.onrender.com";
+const API = ((window.location.protocol === "file:" || window.location.hostname === "localhost" || window.location.hostname === "127.0.0.1") ? "http://127.0.0.1:8000" : "https://productintelligence-lzcn.onrender.com");
 
 
 // ============================================================
@@ -31,6 +31,8 @@ let datasetColumns = [];
 // ============================================================
 
 async function loadReport() {
+
+    const reportStartedAt = performance.now();
 
     const individualReport =
         document.getElementById("individualReport");
@@ -71,10 +73,34 @@ async function loadReport() {
         `;
 
 
-        const response =
-            await fetch(
-                `${API}/report`
+        // Use the same backend that received the uploaded dataset.
+        // A local frontend must never silently call the deployed backend.
+        const controller = new AbortController();
+        const timeoutId = setTimeout(() => controller.abort(), 30000);
+
+        let response;
+        try {
+            response = await fetch(
+                `${API}/report?summary=true`,
+                {
+                    method: "GET",
+                    cache: "no-store",
+                    headers: { "Accept": "application/json" },
+                    signal: controller.signal
+                }
             );
+        } catch (fetchError) {
+            if (fetchError && fetchError.name === "AbortError") {
+                throw new Error(
+                    "Report request timed out after 30 seconds. Make sure FastAPI is running on http://127.0.0.1:8000 and that a dataset has been uploaded."
+                );
+            }
+            throw new Error(
+                `Cannot connect to the report server at ${API}. Start FastAPI and try again.`
+            );
+        } finally {
+            clearTimeout(timeoutId);
+        }
 
 
         if (!response.ok) {
@@ -95,11 +121,93 @@ async function loadReport() {
         );
 
 
-        if (
-            !data ||
-            !data.success ||
-            !data.dataset
-        ) {
+        if (!data || data.success !== true) {
+            throw new Error(
+                data?.detail ||
+                data?.message ||
+                "Report data could not be generated."
+            );
+        }
+
+
+        // --------------------------------------------------------
+        // NORMALIZE REPORT RESPONSE
+        //
+        // New backend returns:
+        //   dataset + products + report
+        //
+        // Older backend returned only:
+        //   report
+        //
+        // This keeps the page working with either response.
+        // --------------------------------------------------------
+
+        if (!data.dataset && data.report) {
+
+            data.dataset = {
+                dataset_id: data.report.dataset_id || "",
+                filename:
+                    data.report.dataset_name ||
+                    "Uploaded Dataset",
+                file_type:
+                    data.report.file_type || "",
+                rows:
+                    data.report.total_products || 0,
+                columns:
+                    Array.isArray(data.report.columns)
+                        ? data.report.columns
+                        : [],
+                columns_count:
+                    data.report.total_columns || 0,
+                uploaded_at:
+                    data.report.uploaded_at || ""
+            };
+        }
+
+
+        // Product records are intentionally fetched separately from the
+        // small report summary. This prevents large datasets from leaving
+        // the report page waiting on a huge /report JSON response.
+        if (!Array.isArray(data.products) || data.products.length === 0) {
+
+            const productsController = new AbortController();
+            const productsTimeoutId = setTimeout(() => productsController.abort(), 30000);
+
+            try {
+                const productsResponse = await fetch(
+                    `${API}/products`,
+                    {
+                        method: "GET",
+                        cache: "no-store",
+                        headers: { "Accept": "application/json" },
+                        signal: productsController.signal
+                    }
+                );
+
+                if (!productsResponse.ok) {
+                    throw new Error(`Products endpoint returned ${productsResponse.status}`);
+                }
+
+                const productsData = await productsResponse.json();
+
+                if (Array.isArray(productsData)) {
+                    data.products = productsData;
+                } else if (Array.isArray(productsData.products)) {
+                    data.products = productsData.products;
+                } else {
+                    data.products = [];
+                }
+            } catch (productsError) {
+                if (productsError && productsError.name === "AbortError") {
+                    throw new Error("Product records took too long to load. Please make sure FastAPI is running and try again.");
+                }
+                throw productsError;
+            } finally {
+                clearTimeout(productsTimeoutId);
+            }
+        }
+
+        if (!data.dataset) {
 
             showNoDataset();
 
@@ -201,6 +309,8 @@ async function loadReport() {
         // ====================================================
 
         buildProductPage();
+
+        console.log(`Report rendered successfully in ${Math.round(performance.now() - reportStartedAt)} ms.`);
 
     }
 

@@ -1,141 +1,176 @@
-const API_URL =
-    "https://productintelligence-lzcn.onrender.com";
+const API_URL = ((window.location.protocol === "file:" || window.location.hostname === "localhost" || window.location.hostname === "127.0.0.1") ? "http://127.0.0.1:8000" : "https://productintelligence-lzcn.onrender.com");
 
+document.addEventListener("DOMContentLoaded", function () {
 
-const loginForm =
-    document.getElementById(
-        "loginForm"
-    );
+    const loginForm = document.getElementById("loginForm");
 
+    if (!loginForm) {
+        console.error("loginForm not found.");
+        return;
+    }
 
-if (loginForm) {
+    loginForm.addEventListener("submit", async function (event) {
 
-    loginForm.addEventListener(
-        "submit",
-        async function(event) {
+        event.preventDefault();
 
-            event.preventDefault();
+        const emailElement = document.getElementById("email");
+        const passwordElement = document.getElementById("password");
+        const messageElement = document.getElementById("message");
 
+        if (!emailElement || !passwordElement || !messageElement) {
+            console.error("Login elements not found.");
+            return;
+        }
 
-            const email =
-                document
-                    .getElementById(
-                        "email"
-                    )
-                    .value
-                    .trim();
+        const email = emailElement.value.trim();
+        const password = passwordElement.value;
 
+        console.log("LOGIN DEBUG");
+        console.log("Email:", email);
+        console.log("Password entered:", password.length > 0);
 
-            const password =
-                document
-                    .getElementById(
-                        "password"
-                    )
-                    .value;
+        // ----------------------------------------------------
+        // CHECK EMPTY FIELDS
+        // ----------------------------------------------------
 
+        if (email === "" || password === "") {
 
-            const message =
-                document.getElementById(
-                    "message"
-                );
+            messageElement.style.color = "#dc2626";
+            messageElement.textContent =
+                "Please enter your email and password.";
 
+            return;
+        }
 
-            message.innerText =
-                "Logging in...";
+        // ----------------------------------------------------
+        // SHOW LOGIN MESSAGE
+        // ----------------------------------------------------
 
+        messageElement.style.color = "#94a3b8";
+        messageElement.textContent = "Logging in...";
 
-            const formData =
-                new FormData();
+        try {
 
+            // ------------------------------------------------
+            // SEND DATA AS QUERY PARAMETERS
+            // This matches the current FastAPI /login endpoint
+            // ------------------------------------------------
 
-            formData.append(
-                "email",
-                email
+            const loginURL =
+                `${API_URL}/login` +
+                `?email=${encodeURIComponent(email)}` +
+                `&username=${encodeURIComponent(email)}` +
+                `&password=${encodeURIComponent(password)}`;
+
+            const response = await fetch(
+                loginURL,
+                {
+                    method: "POST"
+                }
             );
 
-
-            formData.append(
-                "password",
-                password
+            console.log(
+                "Login status:",
+                response.status
             );
 
+            // ------------------------------------------------
+            // READ RESPONSE
+            // ------------------------------------------------
 
-            try {
+            const data = await response.json();
 
-                const response =
-                    await fetch(
-                        API_URL + "/login",
-                        {
-                            method: "POST",
-                            body: formData
-                        }
-                    );
+            console.log(
+                "Login response:",
+                data
+            );
 
+            // ------------------------------------------------
+            // SUCCESS
+            // ------------------------------------------------
 
-                const data =
-                    await response.json();
+            if (
+                response.ok &&
+                data.success === true
+            ) {
 
+                messageElement.style.color = "#16a34a";
 
-                if (data.success) {
+                messageElement.textContent =
+                    "Login successful!";
+
+                // --------------------------------------------
+                // SAVE USER
+                // --------------------------------------------
+
+                if (data.user) {
 
                     localStorage.setItem(
                         "user",
-                        JSON.stringify(
-                            data.user
-                        )
+                        JSON.stringify(data.user)
                     );
-
-
-                    message.style.color =
-                        "#16a34a";
-
-
-                    message.innerText =
-                        "Login successful!";
-
-
-                    setTimeout(
-                        function() {
-
-                            window.location.href =
-                                "dashboard.html";
-
-                        },
-                        500
-                    );
-
 
                 } else {
 
-                    message.style.color =
-                        "#dc2626";
-
-
-                    message.innerText =
-                        data.message ||
-                        "Login failed.";
-
+                    localStorage.setItem(
+                        "user",
+                        JSON.stringify({
+                            email: email,
+                            username: email
+                        })
+                    );
                 }
 
+                // --------------------------------------------
+                // REDIRECT
+                // --------------------------------------------
 
-            } catch (error) {
+                setTimeout(function () {
 
-                console.error(
-                    "Login error:",
-                    error
-                );
+                    window.location.href =
+                        "dashboard.html";
 
+                }, 500);
 
-                message.style.color =
+            }
+
+            // ------------------------------------------------
+            // LOGIN FAILED
+            // ------------------------------------------------
+
+            else {
+
+                messageElement.style.color =
                     "#dc2626";
 
-
-                message.innerText =
-                    "Cannot connect to FastAPI.";
+                messageElement.textContent =
+                    data.message ||
+                    data.detail ||
+                    "Invalid username or password.";
 
             }
 
         }
-    );
 
-}
+        // ----------------------------------------------------
+        // SERVER CONNECTION ERROR
+        // ----------------------------------------------------
+
+        catch (error) {
+
+            console.error(
+                "LOGIN ERROR:",
+                error
+            );
+
+            messageElement.style.color =
+                "#dc2626";
+
+            messageElement.textContent =
+                "Cannot connect to the server.";
+
+        }
+
+    });
+
+});

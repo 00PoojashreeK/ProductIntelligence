@@ -1,8 +1,15 @@
-const API = "https://productintelligence-lzcn.onrender.com";
+// ============================================================
+// PRODUCT DETAILS.JS
+// Dynamic Dataset Record Details
+// Works with ANY dataset structure
+// ============================================================
+
+const API_BASE_URL =
+    ((window.location.protocol === "file:" || window.location.hostname === "localhost" || window.location.hostname === "127.0.0.1") ? "http://127.0.0.1:8000" : "https://productintelligence-lzcn.onrender.com");
 
 
 // ============================================================
-// GET PRODUCT ID
+// GET RECORD ID FROM URL
 // ============================================================
 
 const urlParams =
@@ -10,19 +17,17 @@ const urlParams =
         window.location.search
     );
 
-
-const productId =
+const recordId =
     urlParams.get("id");
 
-
 console.log(
-    "Product ID from URL:",
-    productId
+    "Record ID from URL:",
+    recordId
 );
 
 
 // ============================================================
-// ELEMENT
+// MAIN CONTAINER
 // ============================================================
 
 const container =
@@ -32,7 +37,701 @@ const container =
 
 
 // ============================================================
-// LOAD PRODUCT
+// SAFE VALUE
+// ============================================================
+
+function getValue(
+    value,
+    fallback = "Not Available"
+) {
+
+    if (
+        value === null ||
+        value === undefined
+    ) {
+        return fallback;
+    }
+
+    if (
+        typeof value === "string" &&
+        value.trim() === ""
+    ) {
+        return fallback;
+    }
+
+    return String(value);
+}
+
+
+// ============================================================
+// ESCAPE HTML
+// ============================================================
+
+function escapeHTML(value) {
+
+    if (
+        value === null ||
+        value === undefined
+    ) {
+        return "";
+    }
+
+    return String(value)
+        .replace(/&/g, "&amp;")
+        .replace(/</g, "&lt;")
+        .replace(/>/g, "&gt;")
+        .replace(/"/g, "&quot;")
+        .replace(/'/g, "&#039;");
+}
+
+
+// ============================================================
+// FORMAT FIELD NAME
+// ============================================================
+
+function formatFieldName(field) {
+
+    return String(field)
+
+        .replace(/_/g, " ")
+
+        .replace(/-/g, " ")
+
+        .replace(
+            /([a-z])([A-Z])/g,
+            "$1 $2"
+        )
+
+        .replace(/\s+/g, " ")
+
+        .trim()
+
+        .replace(
+            /\b\w/g,
+            letter =>
+                letter.toUpperCase()
+        );
+}
+
+
+// ============================================================
+// GET RECORD DATA
+// ============================================================
+
+function getRecordData(record) {
+
+    if (
+        record &&
+        record.raw_data &&
+        typeof record.raw_data === "object" &&
+        !Array.isArray(record.raw_data)
+    ) {
+
+        return record.raw_data;
+
+    }
+
+
+    if (
+        record &&
+        record.data &&
+        typeof record.data === "object" &&
+        !Array.isArray(record.data)
+    ) {
+
+        return record.data;
+
+    }
+
+
+    if (
+        record &&
+        record.fields &&
+        typeof record.fields === "object" &&
+        !Array.isArray(record.fields)
+    ) {
+
+        return record.fields;
+
+    }
+
+
+    return record || {};
+}
+
+
+// ============================================================
+// GET DISPLAY NAME
+// ============================================================
+
+function getDisplayName(record) {
+
+    const data =
+        getRecordData(record);
+
+    const keys =
+        Object.keys(data);
+
+
+    if (keys.length === 0) {
+        return "Record";
+    }
+
+
+    // --------------------------------------------------------
+    // Common name fields
+    // --------------------------------------------------------
+
+    const preferredFields = [
+
+        "product_name",
+        "product name",
+
+        "name",
+
+        "title",
+
+        "full_name",
+        "full name",
+
+        "student_name",
+        "student name",
+
+        "employee_name",
+        "employee name",
+
+        "customer_name",
+        "customer name",
+
+        "item_name",
+        "item name",
+
+        "company_name",
+        "company name",
+
+        "description",
+
+        "label"
+
+    ];
+
+
+    for (
+        const preferred
+        of preferredFields
+    ) {
+
+        const matchingKey =
+            keys.find(
+                key =>
+                    key
+                        .toLowerCase()
+                        .trim() ===
+                    preferred
+                        .toLowerCase()
+                        .trim()
+            );
+
+
+        if (
+            matchingKey &&
+            hasDisplayValue(
+                data[matchingKey]
+            )
+        ) {
+
+            return String(
+                data[matchingKey]
+            );
+
+        }
+
+    }
+
+
+    // --------------------------------------------------------
+    // Any field containing "name"
+    // --------------------------------------------------------
+
+    const nameKey =
+        keys.find(key => {
+
+            const normalized =
+                key
+                    .toLowerCase()
+                    .replace(/[_-]/g, " ")
+                    .trim();
+
+            return (
+                normalized.includes("name") &&
+                hasDisplayValue(data[key])
+            );
+
+        });
+
+
+    if (nameKey) {
+
+        return String(
+            data[nameKey]
+        );
+
+    }
+
+
+    // --------------------------------------------------------
+    // Title / label
+    // --------------------------------------------------------
+
+    const titleKey =
+        keys.find(key => {
+
+            const normalized =
+                key
+                    .toLowerCase()
+                    .replace(/[_-]/g, " ")
+                    .trim();
+
+            return (
+                (
+                    normalized.includes("title") ||
+                    normalized.includes("label")
+                ) &&
+                hasDisplayValue(data[key])
+            );
+
+        });
+
+
+    if (titleKey) {
+
+        return String(
+            data[titleKey]
+        );
+
+    }
+
+
+    // --------------------------------------------------------
+    // First meaningful text value
+    // --------------------------------------------------------
+
+    for (
+        const key of keys
+    ) {
+
+        const value =
+            data[key];
+
+
+        if (
+            hasDisplayValue(value) &&
+            isNaN(Number(value))
+        ) {
+
+            return String(value);
+
+        }
+
+    }
+
+
+    // --------------------------------------------------------
+    // First meaningful value
+    // --------------------------------------------------------
+
+    for (
+        const key of keys
+    ) {
+
+        const value =
+            data[key];
+
+
+        if (
+            hasDisplayValue(value)
+        ) {
+
+            return String(value);
+
+        }
+
+    }
+
+
+    return "Record";
+}
+
+
+// ============================================================
+// CHECK DISPLAY VALUE
+// ============================================================
+
+function hasDisplayValue(value) {
+
+    if (
+        value === null ||
+        value === undefined
+    ) {
+        return false;
+    }
+
+
+    const text =
+        String(value).trim();
+
+
+    if (
+        text === "" ||
+        text.toLowerCase() === "null" ||
+        text.toLowerCase() === "undefined" ||
+        text.toLowerCase() === "n/a" ||
+        text.toLowerCase() === "not available"
+    ) {
+
+        return false;
+
+    }
+
+
+    return true;
+}
+
+
+// ============================================================
+// GET CONFIDENCE
+// ============================================================
+
+function getConfidence(record) {
+
+    let confidence;
+
+
+    if (
+        record &&
+        record.confidence !== undefined &&
+        record.confidence !== null
+    ) {
+
+        confidence =
+            Number(
+                record.confidence
+            );
+
+    }
+
+
+    // --------------------------------------------------------
+    // Calculate from actual fields if backend
+    // confidence does not exist
+    // --------------------------------------------------------
+
+    if (
+        confidence === undefined ||
+        Number.isNaN(confidence)
+    ) {
+
+        const data =
+            getRecordData(record);
+
+        const keys =
+            Object.keys(data);
+
+
+        if (keys.length === 0) {
+            return 0;
+        }
+
+
+        const populated =
+            keys.filter(
+                key =>
+                    hasDisplayValue(
+                        data[key]
+                    )
+            ).length;
+
+
+        confidence =
+            (
+                populated /
+                keys.length
+            ) * 100;
+
+    }
+
+
+    // Backend may return 0.85 instead of 85
+
+    if (
+        confidence >= 0 &&
+        confidence <= 1
+    ) {
+
+        confidence =
+            confidence * 100;
+
+    }
+
+
+    return Math.max(
+        0,
+        Math.min(
+            100,
+            Math.round(
+                confidence
+            )
+        )
+    );
+}
+
+
+// ============================================================
+// GET STATUS
+// ============================================================
+
+function getStatus(record) {
+
+    if (
+        record &&
+        record.status !== undefined &&
+        record.status !== null &&
+        String(record.status).trim() !== ""
+    ) {
+
+        return String(
+            record.status
+        );
+
+    }
+
+
+    const confidence =
+        getConfidence(record);
+
+
+    if (confidence >= 85) {
+        return "Verified";
+    }
+
+
+    if (confidence >= 60) {
+        return "Needs Review";
+    }
+
+
+    return "Incomplete";
+}
+
+
+// ============================================================
+// STATUS CLASS
+// ============================================================
+
+function getStatusClass(status) {
+
+    const value =
+        String(status || "")
+            .toLowerCase();
+
+
+    if (
+        value.includes("verified") ||
+        value.includes("pass") ||
+        value.includes("complete")
+    ) {
+
+        return "status-verified";
+
+    }
+
+
+    if (
+        value.includes("critical") ||
+        value.includes("incomplete") ||
+        value.includes("fail")
+    ) {
+
+        return "status-critical";
+
+    }
+
+
+    return "status-review";
+}
+
+
+// ============================================================
+// GET RECORD ID
+// ============================================================
+
+function getRecordIdentifier(record) {
+
+    return (
+        record.id ??
+        record.product_id ??
+        record.record_id ??
+        record.row_number ??
+        record.row ??
+        "-"
+    );
+
+}
+
+
+// ============================================================
+// BUILD INFORMATION CARDS
+// ============================================================
+
+function buildInformationCards(
+    data
+) {
+
+    const entries =
+        Object.entries(data);
+
+
+    if (
+        entries.length === 0
+    ) {
+
+        return `
+
+            <div class="no-data-message">
+
+                No dataset fields are available.
+
+            </div>
+
+        `;
+
+    }
+
+
+    return entries
+
+        .filter(
+            ([key, value]) =>
+                hasDisplayValue(value)
+        )
+
+        .map(
+            ([key, value]) => `
+
+                <div
+                    style="
+                        padding:18px;
+                        border:1px solid #e2e8f0;
+                        border-radius:12px;
+                        background:#f8fafc;
+                    "
+                >
+
+                    <div
+                        style="
+                            color:#64748b;
+                            font-size:13px;
+                            margin-bottom:7px;
+                        "
+                    >
+                        ${escapeHTML(
+                            formatFieldName(key)
+                        )}
+                    </div>
+
+                    <div
+                        style="
+                            font-weight:600;
+                            color:#0f172a;
+                            word-break:break-word;
+                        "
+                    >
+                        ${escapeHTML(
+                            getValue(value)
+                        )}
+                    </div>
+
+                </div>
+
+            `
+        )
+
+        .join("");
+
+}
+
+
+// ============================================================
+// BUILD RAW DATA TABLE
+// ============================================================
+
+function buildRawData(
+    data
+) {
+
+    const entries =
+        Object.entries(data);
+
+
+    if (
+        entries.length === 0
+    ) {
+
+        return `
+
+            <tr>
+
+                <td colspan="2">
+
+                    No original dataset information available.
+
+                </td>
+
+            </tr>
+
+        `;
+
+    }
+
+
+    return entries
+
+        .map(
+            ([key, value]) => `
+
+                <tr>
+
+                    <td>
+
+                        <strong>
+                            ${escapeHTML(
+                                formatFieldName(key)
+                            )}
+                        </strong>
+
+                    </td>
+
+
+                    <td>
+
+                        ${escapeHTML(
+                            getValue(value)
+                        )}
+
+                    </td>
+
+                </tr>
+
+            `
+        )
+
+        .join("");
+
+}
+
+
+// ============================================================
+// LOAD RECORD
 // ============================================================
 
 async function loadProduct() {
@@ -49,17 +748,17 @@ async function loadProduct() {
 
 
     // --------------------------------------------------------
-    // Check product ID
+    // Check ID
     // --------------------------------------------------------
 
     if (
-        !productId ||
-        productId === "undefined" ||
-        productId === "null"
+        !recordId ||
+        recordId === "undefined" ||
+        recordId === "null"
     ) {
 
         showError(
-            "No product ID was provided."
+            "No record ID was provided."
         );
 
         return;
@@ -76,11 +775,11 @@ async function loadProduct() {
         <div class="product-card">
 
             <h2>
-                Loading Product...
+                Loading Record...
             </h2>
 
             <p>
-                Fetching product information.
+                Fetching record information.
             </p>
 
         </div>
@@ -90,30 +789,29 @@ async function loadProduct() {
 
     try {
 
-        // ----------------------------------------------------
-        // Request product
-        // ----------------------------------------------------
-
         const response =
             await fetch(
-                `${API}/products/${encodeURIComponent(productId)}`
+                `${API_BASE_URL}/products/${encodeURIComponent(recordId)}`,
+                {
+                    method: "GET",
+                    headers: {
+                        "Accept":
+                            "application/json"
+                    }
+                }
             );
 
 
         console.log(
-            "Product API response:",
+            "Product API status:",
             response.status
         );
 
 
-        // ----------------------------------------------------
-        // Handle error
-        // ----------------------------------------------------
-
         if (!response.ok) {
 
-            let errorMessage =
-                "Unable to load product.";
+            let message =
+                `Unable to load record. HTTP ${response.status}`;
 
 
             try {
@@ -123,61 +821,64 @@ async function loadProduct() {
 
 
                 if (
+                    errorData &&
                     errorData.detail
                 ) {
 
-                    errorMessage =
+                    message =
                         errorData.detail;
 
                 }
 
             }
-
             catch {
-
-                // Ignore JSON parsing error
-
+                // Ignore JSON parsing errors
             }
 
 
             throw new Error(
-                errorMessage
+                message
             );
 
         }
 
-
-        // ----------------------------------------------------
-        // Read product
-        // ----------------------------------------------------
 
         const product =
             await response.json();
 
 
         console.log(
-            "Product received:",
+            "Record received:",
             product
         );
+
+
+        // Some APIs return:
+        // { product: {...} }
+
+        const record =
+            product.product ||
+            product.record ||
+            product.data ||
+            product;
 
 
         displayProduct(
-            product
+            record
         );
 
     }
-
-    catch(error) {
+    catch (error) {
 
         console.error(
-            "Product loading error:",
+            "Record loading error:",
             error
         );
 
 
         showError(
             error.message ||
-            "Unable to load product."
+            "Unable to load record."
         );
 
     }
@@ -186,31 +887,31 @@ async function loadProduct() {
 
 
 // ============================================================
-// DISPLAY PRODUCT
+// DISPLAY RECORD
 // ============================================================
 
 function displayProduct(
-    product
+    record
 ) {
 
+    const data =
+        getRecordData(record);
+
+
     const name =
-        getValue(
-            product.name,
-            "Unnamed Product"
-        );
+        getDisplayName(record);
 
 
     const status =
-        getValue(
-            product.status,
-            "Needs Review"
-        );
+        getStatus(record);
 
 
     const confidence =
-        Number(
-            product.confidence || 0
-        );
+        getConfidence(record);
+
+
+    const identifier =
+        getRecordIdentifier(record);
 
 
     container.innerHTML = `
@@ -240,10 +941,8 @@ function displayProduct(
                             font-size:14px;
                         "
                     >
-                        Product #${escapeHTML(
-                            product.row_number ||
-                            product.id ||
-                            "-"
+                        Record #${escapeHTML(
+                            identifier
                         )}
                     </p>
 
@@ -275,186 +974,6 @@ function displayProduct(
 
 
         <!-- ==================================================
-             PRODUCT OVERVIEW
-        =================================================== -->
-
-        <div class="product-card">
-
-            <h2>
-                Product Overview
-            </h2>
-
-
-            <div
-                style="
-                    display:grid;
-                    grid-template-columns:
-                        repeat(auto-fit,minmax(220px,1fr));
-                    gap:18px;
-                    margin-top:20px;
-                "
-            >
-
-                ${infoCard(
-                    "Brand",
-                    product.brand
-                )}
-
-                ${infoCard(
-                    "Model",
-                    product.model
-                )}
-
-                ${infoCard(
-                    "Category",
-                    product.category
-                )}
-
-                ${infoCard(
-                    "Power",
-                    product.power
-                )}
-
-                ${infoCard(
-                    "Voltage",
-                    product.voltage
-                )}
-
-                ${infoCard(
-                    "Weight",
-                    product.weight
-                )}
-
-                ${infoCard(
-                    "Material",
-                    product.material
-                )}
-
-                ${infoCard(
-                    "Country of Origin",
-                    product.country
-                )}
-
-            </div>
-
-        </div>
-
-
-        <!-- ==================================================
-             TECHNICAL INFORMATION
-        =================================================== -->
-
-        <div class="product-card">
-
-            <h2>
-                Technical Information
-            </h2>
-
-
-            <div
-                style="
-                    display:grid;
-                    grid-template-columns:
-                        repeat(auto-fit,minmax(220px,1fr));
-                    gap:18px;
-                    margin-top:20px;
-                "
-            >
-
-                ${infoCard(
-                    "Flow Rate",
-                    product.flow_rate
-                )}
-
-                ${infoCard(
-                    "RPM / Speed",
-                    product.rpm
-                )}
-
-                ${infoCard(
-                    "Warranty",
-                    product.warranty
-                )}
-
-                ${infoCard(
-                    "Price",
-                    product.price
-                )}
-
-                ${infoCard(
-                    "Rating",
-                    product.rating
-                )}
-
-                ${infoCard(
-                    "Stock",
-                    product.stock
-                )}
-
-            </div>
-
-        </div>
-
-
-        <!-- ==================================================
-             DESCRIPTION
-        =================================================== -->
-
-        <div class="product-card">
-
-            <h2>
-                Product Description
-            </h2>
-
-
-            <p
-                style="
-                    line-height:1.7;
-                    color:#475569;
-                    margin-top:15px;
-                "
-            >
-                ${escapeHTML(
-                    getValue(
-                        product.description,
-                        "No product description is available."
-                    )
-                )}
-            </p>
-
-        </div>
-
-
-        <!-- ==================================================
-             APPLICATIONS
-        =================================================== -->
-
-        <div class="product-card">
-
-            <h2>
-                Applications & Usage
-            </h2>
-
-
-            <p
-                style="
-                    line-height:1.7;
-                    color:#475569;
-                    margin-top:15px;
-                "
-            >
-                ${escapeHTML(
-                    getValue(
-                        product.applications,
-                        "Applications are not specified in the uploaded dataset."
-                    )
-                )}
-            </p>
-
-        </div>
-
-
-        <!-- ==================================================
              DATA QUALITY
         =================================================== -->
 
@@ -469,6 +988,7 @@ function displayProduct(
                 style="
                     display:flex;
                     justify-content:space-between;
+                    align-items:center;
                     margin-top:20px;
                     margin-bottom:8px;
                 "
@@ -513,63 +1033,12 @@ function displayProduct(
                     color:#64748b;
                     font-size:14px;
                     margin-top:12px;
+                    line-height:1.6;
                 "
             >
-                This score represents how many important
-                product information fields are available
-                in the uploaded dataset.
+                This score represents the completeness of the
+                information available for this record.
             </p>
-
-        </div>
-
-
-        <!-- ==================================================
-             ORIGINAL DATA
-        =================================================== -->
-
-        <div class="product-card">
-
-            <h2>
-                Original Dataset Information
-            </h2>
-
-
-            <div
-                class="product-table-wrapper"
-                style="margin-top:20px;"
-            >
-
-                <table>
-
-                    <thead>
-
-                        <tr>
-
-                            <th>
-                                Field
-                            </th>
-
-                            <th>
-                                Value
-                            </th>
-
-                        </tr>
-
-                    </thead>
-
-
-                    <tbody>
-
-                        ${buildRawData(
-                            product.raw_data ||
-                            {}
-                        )}
-
-                    </tbody>
-
-                </table>
-
-            </div>
 
         </div>
 
@@ -591,7 +1060,7 @@ function displayProduct(
                 href="products.html"
                 class="button"
             >
-                ← Back to Products
+                ← Back to Records
             </a>
 
 
@@ -599,286 +1068,12 @@ function displayProduct(
                 href="validation.html"
                 class="button"
             >
-                🔍 Validate Product
+                🔍 Validate Record
             </a>
 
         </div>
 
     `;
-
-}
-
-
-// ============================================================
-// INFO CARD
-// ============================================================
-
-function infoCard(
-    title,
-    value
-) {
-
-    return `
-
-        <div
-            style="
-                padding:18px;
-                border:1px solid #e2e8f0;
-                border-radius:12px;
-                background:#f8fafc;
-            "
-        >
-
-            <div
-                style="
-                    color:#64748b;
-                    font-size:13px;
-                    margin-bottom:7px;
-                "
-            >
-                ${escapeHTML(title)}
-            </div>
-
-
-            <div
-                style="
-                    font-weight:600;
-                    color:#0f172a;
-                "
-            >
-                ${escapeHTML(
-                    getValue(value)
-                )}
-            </div>
-
-        </div>
-
-    `;
-
-}
-
-
-// ============================================================
-// RAW DATA TABLE
-// ============================================================
-
-function buildRawData(
-    data
-) {
-
-    const entries =
-        Object.entries(data);
-
-
-    if (
-        entries.length === 0
-    ) {
-
-        return `
-
-            <tr>
-
-                <td colspan="2">
-                    No original dataset information available.
-                </td>
-
-            </tr>
-
-        `;
-
-    }
-
-
-    return entries
-        .map(
-            ([key, value]) => `
-
-                <tr>
-
-                    <td>
-
-                        <strong>
-                            ${escapeHTML(
-                                formatFieldName(key)
-                            )}
-                        </strong>
-
-                    </td>
-
-
-                    <td>
-
-                        ${escapeHTML(
-                            getValue(value)
-                        )}
-
-                    </td>
-
-                </tr>
-
-            `
-        )
-        .join("");
-
-}
-
-
-// ============================================================
-// STATUS CLASS
-// ============================================================
-
-function getStatusClass(
-    status
-) {
-
-    const normalized =
-        String(status)
-            .toLowerCase();
-
-
-    if (
-        normalized.includes(
-            "verified"
-        )
-    ) {
-
-        return "status-verified";
-
-    }
-
-
-    if (
-        normalized.includes(
-            "incomplete"
-        ) ||
-        normalized.includes(
-            "critical"
-        )
-    ) {
-
-        return "status-critical";
-
-    }
-
-
-    return "status-review";
-
-}
-
-
-// ============================================================
-// GET VALUE
-// ============================================================
-
-function getValue(
-    value,
-    fallback = "Not Available"
-) {
-
-    if (
-        value === null ||
-        value === undefined
-    ) {
-
-        return fallback;
-
-    }
-
-
-    const text =
-        String(value).trim();
-
-
-    if (
-        text === ""
-    ) {
-
-        return fallback;
-
-    }
-
-
-    return text;
-
-}
-
-
-// ============================================================
-// FORMAT FIELD NAME
-// ============================================================
-
-function formatFieldName(
-    field
-) {
-
-    return String(field)
-
-        .replace(
-            /_/g,
-            " "
-        )
-
-        .replace(
-            /([A-Z])/g,
-            " $1"
-        )
-
-        .replace(
-            /^./,
-            function(str) {
-
-                return str.toUpperCase();
-
-            }
-        );
-
-}
-
-
-// ============================================================
-// ESCAPE HTML
-// ============================================================
-
-function escapeHTML(
-    value
-) {
-
-    if (
-        value === null ||
-        value === undefined
-    ) {
-
-        return "";
-
-    }
-
-
-    return String(value)
-
-        .replaceAll(
-            "&",
-            "&amp;"
-        )
-
-        .replaceAll(
-            "<",
-            "&lt;"
-        )
-
-        .replaceAll(
-            ">",
-            "&gt;"
-        )
-
-        .replaceAll(
-            '"',
-            "&quot;"
-        )
-
-        .replaceAll(
-            "'",
-            "&#039;"
-        );
 
 }
 
@@ -891,12 +1086,17 @@ function showError(
     message
 ) {
 
+    if (!container) {
+        return;
+    }
+
+
     container.innerHTML = `
 
         <div class="product-card">
 
             <h2>
-                Unable to load product
+                Unable to load record
             </h2>
 
 
@@ -906,7 +1106,9 @@ function showError(
                     margin-top:12px;
                 "
             >
-                ${escapeHTML(message)}
+                ${escapeHTML(
+                    message
+                )}
             </p>
 
 
@@ -920,7 +1122,7 @@ function showError(
                     href="products.html"
                     class="button"
                 >
-                    ← Back to Products
+                    ← Back to Records
                 </a>
 
             </div>

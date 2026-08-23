@@ -1244,7 +1244,7 @@
 ===================================================== */
 
 const API =
-    "https://productintelligence-lzcn.onrender.com";
+    ((window.location.protocol === "file:" || window.location.hostname === "localhost" || window.location.hostname === "127.0.0.1") ? "http://127.0.0.1:8000" : "https://productintelligence-lzcn.onrender.com");
 
 
 /* =====================================================
@@ -1400,362 +1400,130 @@ const nextButton =
 
 async function loadProducts() {
 
+    loading.style.display = "block";
+    empty.style.display = "none";
+    errorBox.style.display = "none";
+    tableContainer.style.display = "none";
+    tableTopbar.style.display = "none";
+    pagination.style.display = "none";
+    noResults.style.display = "none";
+    datasetStatus.style.display = "none";
 
-    /* ---------------------------------------------
-       RESET UI
-    --------------------------------------------- */
-
-    loading.style.display =
-        "block";
-
-
-    empty.style.display =
-        "none";
-
-
-    errorBox.style.display =
-        "none";
-
-
-    tableContainer.style.display =
-        "none";
-
-
-    tableTopbar.style.display =
-        "none";
-
-
-    pagination.style.display =
-        "none";
-
-
-    noResults.style.display =
-        "none";
-
-
-    datasetStatus.style.display =
-        "none";
-
-
-    datasetName.innerText =
-        "Checking current dataset...";
-
-
-    rowCount.innerText =
-        "0";
-
-
-    columnCount.innerText =
-        "0";
-
+    datasetName.innerText = "Loading product records...";
+    rowCount.innerText = "0";
+    columnCount.innerText = "0";
 
     try {
+        /*
+         * Use /products for the Product Records page.
+         * The endpoint returns one complete product object per record.
+         * We also request /dataset for the dataset filename/counts.
+         */
+        const [productsResponse, datasetResponse] = await Promise.all([
+            fetch(`${API}/products`, {
+                method: "GET",
+                cache: "no-store",
+                headers: { "Accept": "application/json" }
+            }),
+            fetch(`${API}/dataset`, {
+                method: "GET",
+                cache: "no-store",
+                headers: { "Accept": "application/json" }
+            })
+        ]);
 
+        if (!productsResponse.ok) {
+            throw new Error(`Products API returned HTTP ${productsResponse.status}`);
+        }
 
-        console.log(
-            "Loading dataset from:",
-            `${API}/dataset`
-        );
+        const productsPayload = await productsResponse.json();
+        const products = Array.isArray(productsPayload)
+            ? productsPayload
+            : (Array.isArray(productsPayload?.products)
+                ? productsPayload.products
+                : []);
 
+        if (!products.length) {
+            showEmpty("The current dataset contains no product records.");
+            return;
+        }
 
-        /* -----------------------------------------
-           GET DATASET
-        ----------------------------------------- */
+        /* Flatten each product's data so the table displays the real
+           dataset fields rather than IDs/numbers or empty placeholders. */
+        allRows = products.map((product, index) => {
+            const raw = product && typeof product.data === "object" && product.data !== null
+                ? product.data
+                : (product && typeof product.raw_data === "object" && product.raw_data !== null
+                    ? product.raw_data
+                    : {});
 
-        const response =
-            await fetch(
-                `${API}/dataset`,
-                {
-                    method: "GET",
+            return {
+                ...raw,
+                id: product.id ?? index + 1,
+                row_number: product.row_number ?? index + 1,
+                __productName: product.name || product.product_name || raw.product_name || `Product ${index + 1}`,
+                __status: product.status || raw.validation_status || "Needs Review",
+                __confidence: product.confidence ?? raw.ai_confidence_score ?? 0
+            };
+        });
 
-                    cache: "no-store",
-
-                    headers: {
-                        "Accept":
-                            "application/json"
-                    }
+        /* Build a stable column list from the actual dataset fields. */
+        const discoveredColumns = new Set();
+        allRows.forEach(row => {
+            Object.keys(row).forEach(key => {
+                if (!key.startsWith("__") && key !== "id" && key !== "row_number") {
+                    discoveredColumns.add(key);
                 }
-            );
+            });
+        });
 
+        columns = [...discoveredColumns];
 
-        console.log(
-            "Dataset API status:",
-            response.status
-        );
-
-
-        if (!response.ok) {
-
-            throw new Error(
-                `FastAPI returned HTTP ${response.status}`
-            );
-
+        if (!columns.length) {
+            throw new Error("Product records were returned, but no product fields were found.");
         }
 
-
-        /* -----------------------------------------
-           READ JSON
-        ----------------------------------------- */
-
-        const data =
-            await response.json();
-
-
-        console.log(
-            "Dataset response:",
-            data
-        );
-
-
-        /* -----------------------------------------
-           CHECK SUCCESS
-        ----------------------------------------- */
-
-        if (
-            !data ||
-            data.success !== true
-        ) {
-
-            showEmpty();
-
-            return;
-
-        }
-
-
-        /* -----------------------------------------
-           CHECK DATASET
-        ----------------------------------------- */
-
-        if (
-            !data.dataset
-        ) {
-
-            showEmpty();
-
-            return;
-
-        }
-
-
-        /* -----------------------------------------
-           STORE DATASET INFO
-        ----------------------------------------- */
-
-        datasetInfo =
-            data.dataset;
-
-
-        /* -----------------------------------------
-           STORE COLUMNS
-        ----------------------------------------- */
-
-        columns =
-            Array.isArray(
-                data.columns
-            )
-                ? data.columns
-                : [];
-
-
-        /* -----------------------------------------
-           STORE ROWS
-        ----------------------------------------- */
-
-        allRows =
-            Array.isArray(
-                data.rows
-            )
-                ? data.rows
-                : [];
-
-
-        /* -----------------------------------------
-           NORMALIZE ROWS
-        ----------------------------------------- */
-
-        allRows =
-            allRows.map(
-                row => {
-
-                    if (
-                        row &&
-                        typeof row === "object" &&
-                        !Array.isArray(row)
-                    ) {
-
-                        return row;
-
-                    }
-
-                    return {};
-
-                }
-            );
-
-
-        filteredRows =
-            [...allRows];
-
-
-        console.log(
-            "Dataset information:",
-            datasetInfo
-        );
-
-
-        console.log(
-            "Columns:",
-            columns
-        );
-
-
-        console.log(
-            "Rows:",
-            allRows.length
-        );
-
-
-        /* -----------------------------------------
-           CHECK COLUMNS
-        ----------------------------------------- */
-
-        if (
-            columns.length === 0
-        ) {
-
-            showEmpty(
-                "Dataset was found, but no columns were detected."
-            );
-
-            return;
-
-        }
-
-
-        /* -----------------------------------------
-           CHECK ROWS
-        ----------------------------------------- */
-
-        if (
-            allRows.length === 0
-        ) {
-
-            showEmpty(
-                "Dataset was found, but it contains no product records."
-            );
-
-            return;
-
-        }
-
-
-        /* -----------------------------------------
-           DATASET INFORMATION
-        ----------------------------------------- */
-
-        datasetName.innerHTML = `
-
-            Dataset:
-
-            <strong>
-                ${escapeHTML(
-                    datasetInfo.filename ||
-                    "Unnamed Dataset"
-                )}
-            </strong>
-
-        `;
-
-
-        rowCount.innerText =
-            datasetInfo.rows_count ??
-            allRows.length;
-
-
-        columnCount.innerText =
-            datasetInfo.columns_count ??
-            columns.length;
-
-
-        datasetStatus.style.display =
-            "inline-block";
-
-
-        /* -----------------------------------------
-           SHOW TABLE
-        ----------------------------------------- */
-
-        loading.style.display =
-            "none";
-
-
-        tableTopbar.style.display =
-            "flex";
-
-
-        tableContainer.style.display =
-            "block";
-
-
-        pagination.style.display =
-            "flex";
-
-
-        /* -----------------------------------------
-           BUILD HEADER
-        ----------------------------------------- */
+        filteredRows = [...allRows];
+
+        const datasetPayload = datasetResponse.ok
+            ? await datasetResponse.json()
+            : null;
+
+        datasetInfo = datasetPayload?.dataset || {
+            filename: "Current Dataset",
+            rows_count: allRows.length,
+            columns_count: columns.length
+        };
+
+        datasetName.innerHTML = `Dataset: <strong>${escapeHTML(
+            datasetInfo.filename || "Current Dataset"
+        )}</strong>`;
+
+        rowCount.innerText = datasetInfo.rows_count ?? allRows.length;
+        columnCount.innerText = datasetInfo.columns_count ?? columns.length;
+        datasetStatus.style.display = "inline-block";
+
+        loading.style.display = "none";
+        tableTopbar.style.display = "flex";
+        tableContainer.style.display = "block";
+        pagination.style.display = "flex";
 
         buildTableHeader();
-
-
-        /* -----------------------------------------
-           FIRST PAGE
-        ----------------------------------------- */
-
         currentPage = 1;
-
         renderCurrentPage();
 
-
+        console.log(`Loaded ${allRows.length} product records successfully.`);
     }
-
-
     catch (error) {
+        console.error("Product loading error:", error);
 
-
-        console.error(
-            "Product loading error:",
-            error
-        );
-
-
-        loading.style.display =
-            "none";
-
-
-        tableContainer.style.display =
-            "none";
-
-
-        tableTopbar.style.display =
-            "none";
-
-
-        pagination.style.display =
-            "none";
-
-
-        errorBox.style.display =
-            "block";
-
-
-        errorMessage.innerText =
-            error.message ||
-            "Make sure FastAPI is running.";
-
+        loading.style.display = "none";
+        tableContainer.style.display = "none";
+        tableTopbar.style.display = "none";
+        pagination.style.display = "none";
+        errorBox.style.display = "block";
+        errorMessage.innerText = error.message || "Unable to load product records.";
     }
-
 }
 
 
@@ -2098,7 +1866,7 @@ function renderCurrentPage() {
 
 
             viewButton.href =
-                `product-details.html?id=${actualRowIndex + 1}`;
+                `product-details.html?id=${encodeURIComponent(row.id ?? actualRowIndex + 1)}`;
 
 
             viewButton.className =

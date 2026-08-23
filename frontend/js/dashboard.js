@@ -1,64 +1,72 @@
 // ============================================================
 // DASHBOARD.JS
-// Dynamic Data Intelligence Dashboard
+// Dynamic Dataset Intelligence Dashboard
+// Works with ANY dataset
 // ============================================================
 
-const API_BASE_URL = "https://productintelligence-lzcn.onrender.com";
+const API_BASE_URL =
+    ((window.location.protocol === "file:" || window.location.hostname === "localhost" || window.location.hostname === "127.0.0.1") ? "http://127.0.0.1:8000" : "https://productintelligence-lzcn.onrender.com");
 
 
 // ============================================================
 // API REQUEST
 // ============================================================
 
-async function fetchAPI(endpoint) {
+async function fetchAPI(
+    endpoint
+) {
 
-    const response = await fetch(
-        `${API_BASE_URL}${endpoint}`,
-        {
-            method: "GET",
-            headers: {
-                "Accept": "application/json"
+    const response =
+        await fetch(
+            `${API_BASE_URL}${endpoint}`,
+            {
+                method: "GET",
+
+                headers: {
+                    "Accept":
+                        "application/json"
+                }
             }
-        }
-    );
+        );
+
 
     if (!response.ok) {
 
-        let message = `HTTP ${response.status}`;
+        let message =
+            `HTTP ${response.status}`;
+
 
         try {
-            const errorData = await response.json();
 
-            if (errorData.detail) {
-                message = errorData.detail;
+            const errorData =
+                await response.json();
+
+
+            if (
+                errorData &&
+                errorData.detail
+            ) {
+
+                message =
+                    errorData.detail;
+
             }
 
-        } catch (error) {
-            // Ignore JSON parsing error
+        }
+        catch {
+            // Ignore JSON parsing errors
         }
 
-        throw new Error(message);
+
+        throw new Error(
+            message
+        );
+
     }
+
 
     return await response.json();
-}
 
-
-// ============================================================
-// SAFE VALUE
-// ============================================================
-
-function safeValue(value, fallback = 0) {
-
-    if (
-        value === null ||
-        value === undefined ||
-        value === ""
-    ) {
-        return fallback;
-    }
-
-    return value;
 }
 
 
@@ -66,15 +74,23 @@ function safeValue(value, fallback = 0) {
 // SET TEXT
 // ============================================================
 
-function setText(id, value) {
+function setText(
+    id,
+    value
+) {
 
-    const element = document.getElementById(id);
+    const element =
+        document.getElementById(id);
+
 
     if (!element) {
         return;
     }
 
-    element.textContent = value;
+
+    element.textContent =
+        value;
+
 }
 
 
@@ -82,17 +98,28 @@ function setText(id, value) {
 // SET MULTIPLE IDS
 // ============================================================
 
-function setMultiple(ids, value) {
+function setMultiple(
+    ids,
+    value
+) {
 
-    ids.forEach(id => {
+    ids.forEach(
+        id => {
 
-        const element = document.getElementById(id);
+            const element =
+                document.getElementById(id);
 
-        if (element) {
-            element.textContent = value;
+
+            if (element) {
+
+                element.textContent =
+                    value;
+
+            }
+
         }
+    );
 
-    });
 }
 
 
@@ -100,23 +127,36 @@ function setMultiple(ids, value) {
 // FORMAT NUMBER
 // ============================================================
 
-function formatNumber(value) {
+function formatNumber(
+    value
+) {
 
     if (
         value === null ||
         value === undefined ||
         value === ""
     ) {
+
         return "0";
+
     }
 
-    const number = Number(value);
 
-    if (Number.isNaN(number)) {
+    const number =
+        Number(value);
+
+
+    if (
+        Number.isNaN(number)
+    ) {
+
         return String(value);
+
     }
+
 
     return number.toLocaleString();
+
 }
 
 
@@ -124,21 +164,47 @@ function formatNumber(value) {
 // ESCAPE HTML
 // ============================================================
 
-function escapeHTML(value) {
+function escapeHTML(
+    value
+) {
 
     if (
         value === null ||
         value === undefined
     ) {
+
         return "";
+
     }
 
+
     return String(value)
-        .replace(/&/g, "&amp;")
-        .replace(/</g, "&lt;")
-        .replace(/>/g, "&gt;")
-        .replace(/"/g, "&quot;")
-        .replace(/'/g, "&#039;");
+
+        .replace(
+            /&/g,
+            "&amp;"
+        )
+
+        .replace(
+            /</g,
+            "&lt;"
+        )
+
+        .replace(
+            />/g,
+            "&gt;"
+        )
+
+        .replace(
+            /"/g,
+            "&quot;"
+        )
+
+        .replace(
+            /'/g,
+            "&#039;"
+        );
+
 }
 
 
@@ -146,16 +212,40 @@ function escapeHTML(value) {
 // FORMAT FIELD NAME
 // ============================================================
 
-function formatFieldName(field) {
+function formatFieldName(
+    field
+) {
 
     return String(field)
-        .replace(/_/g, " ")
-        .replace(/-/g, " ")
-        .replace(/\s+/g, " ")
+
+        .replace(
+            /_/g,
+            " "
+        )
+
+        .replace(
+            /-/g,
+            " "
+        )
+
+        .replace(
+            /([a-z])([A-Z])/g,
+            "$1 $2"
+        )
+
+        .replace(
+            /\s+/g,
+            " "
+        )
+
         .trim()
-        .replace(/\b\w/g, letter =>
-            letter.toUpperCase()
+
+        .replace(
+            /\b\w/g,
+            letter =>
+                letter.toUpperCase()
         );
+
 }
 
 
@@ -163,7 +253,9 @@ function formatFieldName(field) {
 // GET RECORD DATA
 // ============================================================
 
-function getRecordData(record) {
+function getRecordData(
+    record
+) {
 
     if (
         record &&
@@ -171,8 +263,11 @@ function getRecordData(record) {
         typeof record.raw_data === "object" &&
         !Array.isArray(record.raw_data)
     ) {
+
         return record.raw_data;
+
     }
+
 
     if (
         record &&
@@ -180,55 +275,86 @@ function getRecordData(record) {
         typeof record.data === "object" &&
         !Array.isArray(record.data)
     ) {
+
         return record.data;
+
     }
 
+
+    if (
+        record &&
+        record.fields &&
+        typeof record.fields === "object" &&
+        !Array.isArray(record.fields)
+    ) {
+
+        return record.fields;
+
+    }
+
+
     return record || {};
+
 }
 
 
 // ============================================================
-// CHECK DISPLAY VALUE
+// DISPLAY VALUE CHECK
 // ============================================================
 
-function hasDisplayValue(value) {
+function hasDisplayValue(
+    value
+) {
 
     if (
         value === null ||
         value === undefined
     ) {
+
         return false;
+
     }
 
-    const text = String(value).trim();
 
-    if (
+    const text =
+        String(value).trim();
+
+
+    return !(
         text === "" ||
-        text.toLowerCase() === "not available" ||
-        text.toLowerCase() === "n/a" ||
         text.toLowerCase() === "null" ||
-        text.toLowerCase() === "undefined"
-    ) {
-        return false;
-    }
+        text.toLowerCase() === "undefined" ||
+        text.toLowerCase() === "n/a" ||
+        text.toLowerCase() === "not available"
+    );
 
-    return true;
 }
 
 
 // ============================================================
-// GET DISPLAY NAME
+// DISPLAY NAME
 // ============================================================
 
-function getDisplayName(record) {
+function getDisplayName(
+    record
+) {
 
-    const data = getRecordData(record);
+    const data =
+        getRecordData(record);
 
-    const keys = Object.keys(data);
 
-    if (keys.length === 0) {
+    const keys =
+        Object.keys(data);
+
+
+    if (
+        keys.length === 0
+    ) {
+
         return "Record";
+
     }
+
 
     const preferredFields = [
 
@@ -260,139 +386,124 @@ function getDisplayName(record) {
         "description",
 
         "label"
+
     ];
 
 
-    // Preferred fields
+    for (
+        const preferred
+        of preferredFields
+    ) {
 
-    for (const preferred of preferredFields) {
+        const matchingKey =
+            keys.find(
+                key =>
+                    key
+                        .toLowerCase()
+                        .trim() ===
+                    preferred
+                        .toLowerCase()
+                        .trim()
+            );
 
-        const matchingKey = keys.find(
-            key =>
-                key.toLowerCase().trim() ===
-                preferred.toLowerCase().trim()
-        );
 
         if (
             matchingKey &&
-            hasDisplayValue(data[matchingKey])
+            hasDisplayValue(
+                data[matchingKey]
+            )
         ) {
-            return String(data[matchingKey]);
+
+            return String(
+                data[matchingKey]
+            );
+
         }
+
     }
 
 
-    // Any field containing name
+    // Any name field
 
-    const nameKey = keys.find(key => {
+    const nameKey =
+        keys.find(
+            key => {
 
-        const normalized =
-            key
-                .toLowerCase()
-                .replace(/[_-]/g, " ")
-                .trim();
+                const normalized =
+                    key
+                        .toLowerCase()
+                        .replace(
+                            /[_-]/g,
+                            " "
+                        )
+                        .trim();
 
-        return (
-            normalized.includes("name") &&
-            hasDisplayValue(data[key])
+
+                return (
+                    normalized.includes("name") &&
+                    hasDisplayValue(
+                        data[key]
+                    )
+                );
+
+            }
         );
-    });
+
 
     if (nameKey) {
-        return String(data[nameKey]);
-    }
 
-
-    // Title / label
-
-    const titleKey = keys.find(key => {
-
-        const normalized =
-            key
-                .toLowerCase()
-                .replace(/[_-]/g, " ")
-                .trim();
-
-        return (
-            (
-                normalized.includes("title") ||
-                normalized.includes("label")
-            ) &&
-            hasDisplayValue(data[key])
+        return String(
+            data[nameKey]
         );
-    });
 
-    if (titleKey) {
-        return String(data[titleKey]);
     }
 
 
-    // First meaningful text value
+    // First text field
 
-    for (const key of keys) {
+    for (
+        const key of keys
+    ) {
 
-        const value = data[key];
+        const value =
+            data[key];
+
 
         if (
             hasDisplayValue(value) &&
             isNaN(Number(value))
         ) {
+
             return String(value);
+
         }
+
     }
 
 
-    // First meaningful value
+    // First available field
 
-    for (const key of keys) {
-
-        const value = data[key];
-
-        if (hasDisplayValue(value)) {
-            return String(value);
-        }
-    }
-
-    return "Record";
-}
-
-
-// ============================================================
-// GET INFORMATION FIELDS
-// ============================================================
-
-function getInformationFields(record) {
-
-    const data = getRecordData(record);
-
-    const keys = Object.keys(data);
-
-    const displayName = getDisplayName(record);
-
-    const fields = [];
-
-    for (const key of keys) {
-
-        const value = data[key];
-
-        if (!hasDisplayValue(value)) {
-            continue;
-        }
+    for (
+        const key of keys
+    ) {
 
         if (
-            String(value) ===
-            String(displayName)
+            hasDisplayValue(
+                data[key]
+            )
         ) {
-            continue;
+
+            return String(
+                data[key]
+            );
+
         }
 
-        fields.push({
-            key: key,
-            value: value
-        });
     }
 
-    return fields;
+
+    return "Record";
+
 }
 
 
@@ -400,7 +511,9 @@ function getInformationFields(record) {
 // RECORD CONFIDENCE
 // ============================================================
 
-function getRecordConfidence(record) {
+function getRecordConfidence(
+    record
+) {
 
     if (
         record &&
@@ -408,29 +521,59 @@ function getRecordConfidence(record) {
         record.confidence !== null
     ) {
 
-        let value = Number(record.confidence);
+        let value =
+            Number(
+                record.confidence
+            );
 
-        if (value <= 1) {
-            value = value * 100;
+
+        if (
+            value >= 0 &&
+            value <= 1
+        ) {
+
+            value =
+                value * 100;
+
         }
 
-        return Math.round(value);
+
+        return Math.max(
+            0,
+            Math.min(
+                100,
+                Math.round(value)
+            )
+        );
+
     }
 
 
-    const data = getRecordData(record);
+    const data =
+        getRecordData(record);
 
-    const keys = Object.keys(data);
 
-    if (keys.length === 0) {
+    const keys =
+        Object.keys(data);
+
+
+    if (
+        keys.length === 0
+    ) {
+
         return 0;
+
     }
+
 
     const populated =
         keys.filter(
             key =>
-                hasDisplayValue(data[key])
+                hasDisplayValue(
+                    data[key]
+                )
         ).length;
+
 
     return Math.round(
         (
@@ -438,6 +581,7 @@ function getRecordConfidence(record) {
             keys.length
         ) * 100
     );
+
 }
 
 
@@ -445,7 +589,9 @@ function getRecordConfidence(record) {
 // RECORD STATUS
 // ============================================================
 
-function getRecordStatus(record) {
+function getRecordStatus(
+    record
+) {
 
     if (
         record &&
@@ -453,21 +599,38 @@ function getRecordStatus(record) {
         record.status !== null &&
         String(record.status).trim() !== ""
     ) {
-        return String(record.status);
+
+        return String(
+            record.status
+        );
+
     }
+
 
     const confidence =
         getRecordConfidence(record);
 
-    if (confidence >= 85) {
+
+    if (
+        confidence >= 85
+    ) {
+
         return "Verified";
+
     }
 
-    if (confidence >= 60) {
+
+    if (
+        confidence >= 60
+    ) {
+
         return "Needs Review";
+
     }
+
 
     return "Incomplete";
+
 }
 
 
@@ -475,97 +638,106 @@ function getRecordStatus(record) {
 // STATUS CLASS
 // ============================================================
 
-function statusClass(status) {
+function statusClass(
+    status
+) {
 
     const value =
         String(status || "")
             .toLowerCase();
 
-    if (
-        value.includes("verified") ||
-        value.includes("pass")
-    ) {
-        return "verified";
-    }
 
     if (
-        value.includes("review") ||
-        value.includes("warning")
+        value.includes("verified") ||
+        value.includes("pass") ||
+        value.includes("complete")
     ) {
-        return "review";
+
+        return "verified";
+
     }
+
 
     if (
         value.includes("critical") ||
         value.includes("incomplete") ||
         value.includes("fail")
     ) {
+
         return "critical";
+
     }
 
+
     return "review";
+
 }
 
 
 // ============================================================
-// GET TOTAL ROWS
+// TOTAL ROWS
 // ============================================================
 
-function getTotalRows(data) {
+function getTotalRows(
+    data
+) {
 
     return Number(
         data.total_rows ??
         data.total_records ??
         data.total_products ??
+        data.rows_count ??
         (
             data.dataset &&
             data.dataset.rows_count
         ) ??
         0
     );
+
 }
 
 
 // ============================================================
-// GET TOTAL COLUMNS
+// TOTAL COLUMNS
 // ============================================================
 
-function getTotalColumns(data) {
+function getTotalColumns(
+    data
+) {
 
     return Number(
         data.total_columns ??
+        data.columns_count ??
         (
             data.dataset &&
             data.dataset.columns_count
         ) ??
         0
     );
+
 }
 
 
 // ============================================================
-// DATASET NAME
+// UPDATE DATASET NAME
 // ============================================================
 
-function updateDatasetName(data) {
+function updateDatasetName(
+    data
+) {
 
-    let datasetName =
+    const dataset =
+        data.dataset || {};
+
+
+    const name =
         data.dataset_name ||
         data.datasetName ||
         data.filename ||
         data.file_name ||
-        (
-            data.dataset &&
-            (
-                data.dataset.filename ||
-                data.dataset.name
-            )
-        );
-
-
-    if (!datasetName) {
-        datasetName = "No dataset uploaded";
-    }
+        dataset.filename ||
+        dataset.name ||
+        "No dataset uploaded";
 
 
     setMultiple(
@@ -576,18 +748,23 @@ function updateDatasetName(data) {
             "dataset-name",
             "datasetPill"
         ],
-        datasetName
+        name
     );
+
 }
 
 
 // ============================================================
-// ROW COUNT
+// UPDATE ROW COUNT
 // ============================================================
 
-function updateRowCount(data) {
+function updateRowCount(
+    data
+) {
 
-    const rows = getTotalRows(data);
+    const rows =
+        getTotalRows(data);
+
 
     setMultiple(
         [
@@ -595,20 +772,26 @@ function updateRowCount(data) {
             "currentRows",
             "datasetRows",
             "rowsCount",
-            "totalRecords"
+            "totalRecords",
+            "recordCount"
         ],
         formatNumber(rows)
     );
+
 }
 
 
 // ============================================================
-// COLUMN COUNT
+// UPDATE COLUMN COUNT
 // ============================================================
 
-function updateColumnCount(data) {
+function updateColumnCount(
+    data
+) {
 
-    const columns = getTotalColumns(data);
+    const columns =
+        getTotalColumns(data);
+
 
     setMultiple(
         [
@@ -619,32 +802,7 @@ function updateColumnCount(data) {
         ],
         formatNumber(columns)
     );
-}
 
-
-// ============================================================
-// RECORD COUNT
-// ============================================================
-
-function updateRecordCount(data) {
-
-    const records =
-        Number(
-            data.total_records ??
-            data.total_products ??
-            data.total_rows ??
-            0
-        );
-
-    setMultiple(
-        [
-            "totalProducts",
-            "productCount",
-            "totalRecords",
-            "recordCount"
-        ],
-        formatNumber(records)
-    );
 }
 
 
@@ -652,15 +810,18 @@ function updateRecordCount(data) {
 // VERIFIED
 // ============================================================
 
-function updateVerified(data) {
+function updateVerified(
+    data
+) {
 
-    const verified =
+    const value =
         Number(
             data.verified ??
             data.verified_products ??
             data.verified_records ??
             0
         );
+
 
     setMultiple(
         [
@@ -669,8 +830,9 @@ function updateVerified(data) {
             "verifiedProducts",
             "verifiedRecords"
         ],
-        formatNumber(verified)
+        formatNumber(value)
     );
+
 }
 
 
@@ -678,7 +840,9 @@ function updateVerified(data) {
 // NEEDS REVIEW
 // ============================================================
 
-function updateNeedsReview(data) {
+function updateNeedsReview(
+    data
+) {
 
     const value =
         Number(
@@ -688,6 +852,7 @@ function updateNeedsReview(data) {
             0
         );
 
+
     setMultiple(
         [
             "needsReview",
@@ -696,6 +861,7 @@ function updateNeedsReview(data) {
         ],
         formatNumber(value)
     );
+
 }
 
 
@@ -703,7 +869,9 @@ function updateNeedsReview(data) {
 // INCOMPLETE
 // ============================================================
 
-function updateIncomplete(data) {
+function updateIncomplete(
+    data
+) {
 
     const value =
         Number(
@@ -712,6 +880,7 @@ function updateIncomplete(data) {
             0
         );
 
+
     setMultiple(
         [
             "incomplete",
@@ -719,6 +888,7 @@ function updateIncomplete(data) {
         ],
         formatNumber(value)
     );
+
 }
 
 
@@ -726,15 +896,17 @@ function updateIncomplete(data) {
 // CRITICAL ISSUES
 // ============================================================
 
-function updateCriticalIssues(data) {
+function updateCriticalIssues(
+    data
+) {
 
     const value =
         Number(
             data.critical_issues ??
             data.criticalIssues ??
-            data.incomplete ??
             0
         );
+
 
     setMultiple(
         [
@@ -745,6 +917,7 @@ function updateCriticalIssues(data) {
         ],
         formatNumber(value)
     );
+
 }
 
 
@@ -752,7 +925,9 @@ function updateCriticalIssues(data) {
 // MISSING VALUES
 // ============================================================
 
-function updateMissingValues(data) {
+function updateMissingValues(
+    data
+) {
 
     const value =
         Number(
@@ -762,6 +937,7 @@ function updateMissingValues(data) {
             0
         );
 
+
     setMultiple(
         [
             "missingValues",
@@ -769,6 +945,7 @@ function updateMissingValues(data) {
         ],
         formatNumber(value)
     );
+
 }
 
 
@@ -776,7 +953,9 @@ function updateMissingValues(data) {
 // DUPLICATES
 // ============================================================
 
-function updateDuplicateRows(data) {
+function updateDuplicateRows(
+    data
+) {
 
     const value =
         Number(
@@ -787,6 +966,7 @@ function updateDuplicateRows(data) {
             0
         );
 
+
     setMultiple(
         [
             "duplicateRows",
@@ -794,6 +974,7 @@ function updateDuplicateRows(data) {
         ],
         formatNumber(value)
     );
+
 }
 
 
@@ -801,7 +982,9 @@ function updateDuplicateRows(data) {
 // CONFIDENCE
 // ============================================================
 
-function updateConfidence(data) {
+function updateConfidence(
+    data
+) {
 
     let value =
         Number(
@@ -811,17 +994,26 @@ function updateConfidence(data) {
             0
         );
 
-    if (value <= 1) {
-        value = value * 100;
+
+    if (
+        value >= 0 &&
+        value <= 1
+    ) {
+
+        value =
+            value * 100;
+
     }
 
-    value = Math.max(
-        0,
-        Math.min(
-            100,
-            Math.round(value)
-        )
-    );
+
+    value =
+        Math.max(
+            0,
+            Math.min(
+                100,
+                Math.round(value)
+            )
+        );
 
 
     setMultiple(
@@ -835,16 +1027,23 @@ function updateConfidence(data) {
         ],
         `${value}%`
     );
+
 }
 
 
 // ============================================================
-// DATA QUALITY CALCULATION
+// DATA QUALITY
 // ============================================================
 
-function calculateDataQuality(data) {
+function calculateDataQuality(
+    data
+) {
 
-    const possibleQualityFields = [
+    // --------------------------------------------------------
+    // Prefer backend score
+    // --------------------------------------------------------
+
+    const qualityFields = [
 
         "data_quality",
         "data_quality_score",
@@ -857,14 +1056,14 @@ function calculateDataQuality(data) {
 
         "dataQuality",
         "dataQualityScore"
+
     ];
 
 
-    // --------------------------------------------------------
-    // Use backend quality if available
-    // --------------------------------------------------------
-
-    for (const field of possibleQualityFields) {
+    for (
+        const field
+        of qualityFields
+    ) {
 
         if (
             data[field] !== undefined &&
@@ -872,11 +1071,22 @@ function calculateDataQuality(data) {
             data[field] !== ""
         ) {
 
-            let value = Number(data[field]);
+            let value =
+                Number(
+                    data[field]
+                );
 
-            if (value >= 0 && value <= 1) {
-                value = value * 100;
+
+            if (
+                value >= 0 &&
+                value <= 1
+            ) {
+
+                value =
+                    value * 100;
+
             }
+
 
             return Math.max(
                 0,
@@ -885,99 +1095,43 @@ function calculateDataQuality(data) {
                     Math.round(value)
                 )
             );
+
         }
+
     }
 
 
     // --------------------------------------------------------
-    // Calculate fallback
+    // Fallback to confidence
     // --------------------------------------------------------
 
-    const totalRows =
-        getTotalRows(data);
-
-    const missingValues =
+    let confidence =
         Number(
-            data.missing_values ??
-            data.missing_count ??
-            data.missingValues ??
-            0
-        );
-
-    const duplicateRows =
-        Number(
-            data.duplicate_rows ??
-            data.duplicates ??
-            data.duplicate_count ??
-            data.duplicateRows ??
-            0
-        );
-
-    const incomplete =
-        Number(
-            data.incomplete ??
-            data.incomplete_records ??
-            0
-        );
-
-    const needsReview =
-        Number(
-            data.needs_review ??
-            data.needsReview ??
-            data.review ??
+            data.average_confidence ??
+            data.averageConfidence ??
             0
         );
 
 
-    // --------------------------------------------------------
-    // If rows unavailable, use confidence
-    // --------------------------------------------------------
+    if (
+        confidence >= 0 &&
+        confidence <= 1
+    ) {
 
-    if (totalRows <= 0) {
+        confidence =
+            confidence * 100;
 
-        let confidence =
-            Number(
-                data.average_confidence ??
-                data.averageConfidence ??
-                0
-            );
-
-        if (confidence <= 1) {
-            confidence *= 100;
-        }
-
-        return Math.round(confidence);
     }
-
-
-    // --------------------------------------------------------
-    // Calculate problematic rows
-    // --------------------------------------------------------
-
-    const problematicRows =
-        Math.min(
-            totalRows,
-            missingValues +
-            duplicateRows +
-            incomplete +
-            needsReview
-        );
-
-
-    const quality =
-        (
-            (totalRows - problematicRows) /
-            totalRows
-        ) * 100;
 
 
     return Math.max(
         0,
         Math.min(
             100,
-            Math.round(quality)
+            Math.round(confidence)
         )
     );
+
 }
 
 
@@ -985,7 +1139,9 @@ function calculateDataQuality(data) {
 // UPDATE DATA QUALITY
 // ============================================================
 
-function updateDataQuality(data) {
+function updateDataQuality(
+    data
+) {
 
     const quality =
         calculateDataQuality(data);
@@ -1007,18 +1163,33 @@ function updateDataQuality(data) {
     );
 
 
-    // Quality title
+    let title =
+        "Excellent Data Quality";
 
-    let title = "Excellent Data Quality";
 
-    if (quality < 60) {
-        title = "Poor Data Quality";
+    if (
+        quality < 60
+    ) {
+
+        title =
+            "Poor Data Quality";
+
     }
-    else if (quality < 80) {
-        title = "Needs Improvement";
+    else if (
+        quality < 80
+    ) {
+
+        title =
+            "Needs Improvement";
+
     }
-    else if (quality < 90) {
-        title = "Good Data Quality";
+    else if (
+        quality < 90
+    ) {
+
+        title =
+            "Good Data Quality";
+
     }
 
 
@@ -1028,24 +1199,29 @@ function updateDataQuality(data) {
     );
 
 
-    // Quality description
-
     let description =
         "The dataset has good overall quality.";
 
-    if (quality < 60) {
+
+    if (
+        quality < 60
+    ) {
 
         description =
             "The dataset contains several data quality issues that require attention.";
 
     }
-    else if (quality < 80) {
+    else if (
+        quality < 80
+    ) {
 
         description =
             "Some records contain missing, incomplete or inconsistent information.";
 
     }
-    else if (quality < 90) {
+    else if (
+        quality < 90
+    ) {
 
         description =
             "Most records are complete, with a few issues requiring review.";
@@ -1057,22 +1233,21 @@ function updateDataQuality(data) {
         "qualityDescription",
         description
     );
+
 }
 
 
 // ============================================================
-// PRODUCT STATUS
+// PRODUCT / DATASET STATUS
 // ============================================================
 
-function calculateProductStatus(data) {
+function updateProductStatus(
+    data
+) {
 
     const total =
-        Number(
-            data.total_products ??
-            data.total_rows ??
-            data.total_records ??
-            0
-        );
+        getTotalRows(data);
+
 
     const verified =
         Number(
@@ -1082,13 +1257,15 @@ function calculateProductStatus(data) {
             0
         );
 
-    const needsReview =
+
+    const review =
         Number(
             data.needs_review ??
             data.needsReview ??
             data.review ??
             0
         );
+
 
     const incomplete =
         Number(
@@ -1098,50 +1275,56 @@ function calculateProductStatus(data) {
         );
 
 
-    if (total === 0) {
-        return "No Data";
-    }
+    let status =
+        "No Data";
 
 
     if (
-        verified === total &&
-        needsReview === 0 &&
-        incomplete === 0
+        total > 0
     ) {
-        return "Verified";
+
+        if (
+            verified === total &&
+            review === 0 &&
+            incomplete === 0
+        ) {
+
+            status =
+                "Verified";
+
+        }
+        else if (
+            review > 0
+        ) {
+
+            status =
+                "Needs Review";
+
+        }
+        else if (
+            incomplete > 0
+        ) {
+
+            status =
+                "Incomplete";
+
+        }
+        else if (
+            verified > 0
+        ) {
+
+            status =
+                "Partially Verified";
+
+        }
+        else {
+
+            status =
+                "Needs Review";
+
+        }
+
     }
-
-
-    if (needsReview > 0) {
-        return "Needs Review";
-    }
-
-
-    if (incomplete > 0) {
-        return "Incomplete";
-    }
-
-
-    if (
-        verified > 0 &&
-        verified < total
-    ) {
-        return "Partially Verified";
-    }
-
-
-    return "Needs Review";
-}
-
-
-// ============================================================
-// UPDATE PRODUCT STATUS
-// ============================================================
-
-function updateProductStatus(data) {
-
-    const status =
-        calculateProductStatus(data);
 
 
     setMultiple(
@@ -1157,124 +1340,98 @@ function updateProductStatus(data) {
     );
 
 
-    // Update verified percentage bar
-
-    const total =
-        Number(
-            data.total_products ??
-            data.total_rows ??
-            data.total_records ??
-            0
-        );
-
-    const verified =
-        Number(
-            data.verified ??
-            data.verified_products ??
-            data.verified_records ??
-            0
-        );
-
-    const review =
-        Number(
-            data.needs_review ??
-            data.needsReview ??
-            data.review ??
-            0
-        );
-
-
-    if (total > 0) {
-
-        const verifiedPercent =
-            Math.round(
-                (verified / total) * 100
-            );
-
-        const reviewPercent =
-            Math.round(
-                (review / total) * 100
-            );
-
-
-        const verifiedBar =
-            document.getElementById(
-                "verifiedBar"
-            );
-
-        if (verifiedBar) {
-            verifiedBar.style.width =
-                `${verifiedPercent}%`;
-        }
-
-
-        const reviewBar =
-            document.getElementById(
-                "reviewBar"
-            );
-
-        if (reviewBar) {
-            reviewBar.style.width =
-                `${reviewPercent}%`;
-        }
-
-
-        setText(
-            "verifiedPercent",
-            `${verifiedPercent}%`
-        );
-
-        setText(
-            "reviewPercent",
-            `${reviewPercent}%`
-        );
-    }
-}
-
-
-// ============================================================
-// COMPLETENESS
-// ============================================================
-
-function updateCompleteness(data) {
-
-    let value =
-        data.completeness ??
-        data.dataset_completeness ??
-        data.completeness_score;
-
+    // --------------------------------------------------------
+    // Progress bars
+    // --------------------------------------------------------
 
     if (
-        value === undefined ||
-        value === null
+        total <= 0
     ) {
+
         return;
+
     }
 
 
-    value = Number(value);
+    const verifiedPercent =
+        Math.max(
+            0,
+            Math.min(
+                100,
+                Math.round(
+                    (
+                        verified /
+                        total
+                    ) * 100
+                )
+            )
+        );
 
-    if (value <= 1) {
-        value *= 100;
+
+    const reviewPercent =
+        Math.max(
+            0,
+            Math.min(
+                100,
+                Math.round(
+                    (
+                        review /
+                        total
+                    ) * 100
+                )
+            )
+        );
+
+
+    const verifiedBar =
+        document.getElementById(
+            "verifiedBar"
+        );
+
+
+    if (verifiedBar) {
+
+        verifiedBar.style.width =
+            `${verifiedPercent}%`;
+
     }
 
 
-    setMultiple(
-        [
-            "completeness",
-            "completenessScore",
-            "datasetCompleteness"
-        ],
-        `${Math.round(value)}%`
+    const reviewBar =
+        document.getElementById(
+            "reviewBar"
+        );
+
+
+    if (reviewBar) {
+
+        reviewBar.style.width =
+            `${reviewPercent}%`;
+
+    }
+
+
+    setText(
+        "verifiedPercent",
+        `${verifiedPercent}%`
     );
+
+
+    setText(
+        "reviewPercent",
+        `${reviewPercent}%`
+    );
+
 }
 
 
 // ============================================================
-// UPDATE ALL DASHBOARD DATA
+// UPDATE DASHBOARD
 // ============================================================
 
-function updateDashboard(data) {
+function updateDashboard(
+    data
+) {
 
     console.log(
         "Dashboard data:",
@@ -1287,8 +1444,6 @@ function updateDashboard(data) {
     updateRowCount(data);
 
     updateColumnCount(data);
-
-    updateRecordCount(data);
 
     updateVerified(data);
 
@@ -1308,7 +1463,6 @@ function updateDashboard(data) {
 
     updateProductStatus(data);
 
-    updateCompleteness(data);
 }
 
 
@@ -1316,7 +1470,9 @@ function updateDashboard(data) {
 // RENDER RECENT RECORDS
 // ============================================================
 
-function renderRecentRecords(records) {
+function renderRecentRecords(
+    records
+) {
 
     const container =
         document.getElementById(
@@ -1335,12 +1491,19 @@ function renderRecentRecords(records) {
     ) {
 
         container.innerHTML = `
+
             <div class="recent-empty">
-                <p>No records found</p>
+
+                <p>
+                    No records found
+                </p>
+
             </div>
+
         `;
 
         return;
+
     }
 
 
@@ -1350,48 +1513,81 @@ function renderRecentRecords(records) {
 
     container.innerHTML =
         recent
+
             .map(
-                (record, index) => {
+                (
+                    record,
+                    index
+                ) => {
 
                     const name =
-                        getDisplayName(record);
+                        getDisplayName(
+                            record
+                        );
 
-                    const fields =
-                        getInformationFields(record);
+
+                    const data =
+                        getRecordData(
+                            record
+                        );
+
 
                     const confidence =
-                        getRecordConfidence(record);
+                        getRecordConfidence(
+                            record
+                        );
+
 
                     const status =
-                        getRecordStatus(record);
+                        getRecordStatus(
+                            record
+                        );
 
 
-                    const visibleFields =
-                        fields.slice(0, 3);
+                    const fields =
+                        Object.entries(
+                            data
+                        )
+
+                        .filter(
+                            ([key, value]) =>
+                                hasDisplayValue(
+                                    value
+                                )
+                        )
+
+                        .slice(0, 3);
 
 
                     const informationHTML =
-                        visibleFields.length > 0
+                        fields.length > 0
 
                         ?
 
-                        visibleFields
+                        fields
                             .map(
-                                field => `
+                                ([key, value]) => `
 
-                                    <div class="recent-field">
+                                    <div
+                                        class="recent-field"
+                                    >
 
-                                        <span class="recent-field-label">
+                                        <span
+                                            class="recent-field-label"
+                                        >
                                             ${escapeHTML(
                                                 formatFieldName(
-                                                    field.key
+                                                    key
                                                 )
                                             )}
                                         </span>
 
-                                        <span class="recent-field-value">
+
+                                        <span
+                                            class="recent-field-value"
+                                        >
                                             ${escapeHTML(
-                                                field.value
+                                                value
                                             )}
                                         </span>
 
@@ -1404,39 +1600,59 @@ function renderRecentRecords(records) {
                         :
 
                         `
-                            <span class="recent-no-data">
+
+                            <span
+                                class="recent-no-data"
+                            >
                                 No additional information
                             </span>
+
                         `;
 
 
                     return `
 
-                        <div class="recent-record-card">
+                        <div
+                            class="recent-record-card"
+                        >
 
-                            <div class="recent-record-number">
+                            <div
+                                class="recent-record-number"
+                            >
                                 ${index + 1}
                             </div>
 
 
-                            <div class="recent-record-main">
+                            <div
+                                class="recent-record-main"
+                            >
 
-                                <div class="recent-record-title">
-                                    ${escapeHTML(name)}
+                                <div
+                                    class="recent-record-title"
+                                >
+                                    ${escapeHTML(
+                                        name
+                                    )}
                                 </div>
 
-                                <div class="recent-record-fields">
+
+                                <div
+                                    class="recent-record-fields"
+                                >
                                     ${informationHTML}
                                 </div>
 
                             </div>
 
 
-                            <div class="recent-record-confidence">
+                            <div
+                                class="recent-record-confidence"
+                            >
 
                                 <span>
                                     Confidence
                                 </span>
+
 
                                 <strong>
                                     ${confidence}%
@@ -1445,12 +1661,16 @@ function renderRecentRecords(records) {
                             </div>
 
 
-                            <div class="recent-record-status">
+                            <div
+                                class="recent-record-status"
+                            >
 
                                 <span
                                     class="status-badge ${statusClass(status)}"
                                 >
-                                    ${escapeHTML(status)}
+                                    ${escapeHTML(
+                                        status
+                                    )}
                                 </span>
 
                             </div>
@@ -1458,9 +1678,12 @@ function renderRecentRecords(records) {
                         </div>
 
                     `;
+
                 }
             )
+
             .join("");
+
 }
 
 
@@ -1475,15 +1698,24 @@ function showLoadingState() {
             "recentProducts"
         );
 
+
     if (!container) {
         return;
     }
 
+
     container.innerHTML = `
+
         <div class="recent-empty">
-            <p>Loading records...</p>
+
+            <p>
+                Loading records...
+            </p>
+
         </div>
+
     `;
+
 }
 
 
@@ -1491,34 +1723,46 @@ function showLoadingState() {
 // ERROR STATE
 // ============================================================
 
-function showErrorState(error) {
+function showErrorState(
+    error
+) {
 
     const container =
         document.getElementById(
             "recentProducts"
         );
 
+
     if (!container) {
         return;
     }
 
+
     container.innerHTML = `
+
         <div class="recent-empty">
-            <p>Unable to load records</p>
+
+            <p>
+                Unable to load records
+            </p>
+
 
             <small>
                 ${escapeHTML(
-                    error.message ||
+                    error?.message ||
                     "Unknown error"
                 )}
             </small>
+
         </div>
+
     `;
+
 }
 
 
 // ============================================================
-// DASHBOARD SUMMARY
+// LOAD DASHBOARD SUMMARY
 // ============================================================
 
 async function loadDashboardSummary() {
@@ -1543,20 +1787,22 @@ async function loadDashboardSummary() {
         updateDashboard(
             dashboard
         );
+
     }
 
 
     return dashboard;
+
 }
 
 
 // ============================================================
-// RECENT RECORDS
+// LOAD RECENT RECORDS
 // ============================================================
 
 async function loadRecentRecords() {
 
-    const records =
+    const response =
         await fetchAPI(
             "/products"
         );
@@ -1564,67 +1810,68 @@ async function loadRecentRecords() {
 
     console.log(
         "Products response:",
+        response
+    );
+
+
+    let records = [];
+
+
+    if (
+        Array.isArray(response)
+    ) {
+
+        records =
+            response;
+
+    }
+    else if (
+        response &&
+        Array.isArray(
+            response.records
+        )
+    ) {
+
+        records =
+            response.records;
+
+    }
+    else if (
+        response &&
+        Array.isArray(
+            response.products
+        )
+    ) {
+
+        records =
+            response.products;
+
+    }
+    else if (
+        response &&
+        Array.isArray(
+            response.rows
+        )
+    ) {
+
+        records =
+            response.rows;
+
+    }
+
+
+    renderRecentRecords(
         records
     );
 
 
-    if (Array.isArray(records)) {
+    return records;
 
-        renderRecentRecords(
-            records
-        );
-
-        return records;
-    }
-
-
-    if (
-        records &&
-        Array.isArray(records.records)
-    ) {
-
-        renderRecentRecords(
-            records.records
-        );
-
-        return records.records;
-    }
-
-
-    if (
-        records &&
-        Array.isArray(records.products)
-    ) {
-
-        renderRecentRecords(
-            records.products
-        );
-
-        return records.products;
-    }
-
-
-    if (
-        records &&
-        Array.isArray(records.rows)
-    ) {
-
-        renderRecentRecords(
-            records.rows
-        );
-
-        return records.rows;
-    }
-
-
-    renderRecentRecords([]);
-
-    return [];
 }
 
 
 // ============================================================
-// DATASET INFORMATION
+// LOAD DATASET INFORMATION
 // ============================================================
 
 async function loadDatasetInformation() {
@@ -1647,7 +1894,9 @@ async function loadDatasetInformation() {
             !dataset ||
             dataset.success === false
         ) {
+
             return;
+
         }
 
 
@@ -1655,8 +1904,6 @@ async function loadDatasetInformation() {
             dataset.dataset ||
             dataset;
 
-
-        // Dataset filename
 
         const filename =
             info.filename ||
@@ -1676,10 +1923,9 @@ async function loadDatasetInformation() {
                 ],
                 filename
             );
+
         }
 
-
-        // Rows
 
         if (
             info.rows_count !== undefined
@@ -1690,16 +1936,17 @@ async function loadDatasetInformation() {
                     "totalRows",
                     "currentRows",
                     "datasetRows",
-                    "rowsCount"
+                    "rowsCount",
+                    "totalRecords",
+                    "recordCount"
                 ],
                 formatNumber(
                     info.rows_count
                 )
             );
+
         }
 
-
-        // Columns
 
         if (
             info.columns_count !== undefined
@@ -1716,15 +1963,19 @@ async function loadDatasetInformation() {
                     info.columns_count
                 )
             );
+
         }
 
-    } catch (error) {
+    }
+    catch (error) {
 
         console.warn(
             "Dataset information could not be loaded:",
             error
         );
+
     }
+
 }
 
 
@@ -1737,91 +1988,68 @@ async function loadDashboard() {
     showLoadingState();
 
 
-    try {
+    const results =
+        await Promise.allSettled(
+            [
 
-        const results =
-            await Promise.allSettled(
-                [
+                loadDashboardSummary(),
 
-                    loadDashboardSummary(),
+                loadRecentRecords(),
 
-                    loadRecentRecords(),
+                loadDatasetInformation()
 
-                    loadDatasetInformation()
-
-                ]
-            );
-
-
-        if (
-            results[0].status === "rejected"
-        ) {
-
-            console.error(
-                "Dashboard summary failed:",
-                results[0].reason
-            );
-        }
-
-
-        if (
-            results[1].status === "rejected"
-        ) {
-
-            console.error(
-                "Records failed:",
-                results[1].reason
-            );
-
-            showErrorState(
-                results[1].reason
-            );
-        }
-
-
-        if (
-            results[2].status === "rejected"
-        ) {
-
-            console.warn(
-                "Dataset information failed:",
-                results[2].reason
-            );
-        }
-
-
-        console.log(
-            "Dashboard loading completed."
+            ]
         );
 
-    } catch (error) {
+
+    if (
+        results[0].status ===
+        "rejected"
+    ) {
 
         console.error(
-            "Dashboard error:",
-            error
+            "Dashboard summary failed:",
+            results[0].reason
         );
+
+    }
+
+
+    if (
+        results[1].status ===
+        "rejected"
+    ) {
+
+        console.error(
+            "Records failed:",
+            results[1].reason
+        );
+
 
         showErrorState(
-            error
+            results[1].reason
         );
+
     }
-}
 
 
-// ============================================================
-// AUTO REFRESH
-// ============================================================
+    if (
+        results[2].status ===
+        "rejected"
+    ) {
 
-function setupDashboardRefresh() {
+        console.warn(
+            "Dataset information failed:",
+            results[2].reason
+        );
 
-    window.addEventListener(
-        "focus",
-        function () {
+    }
 
-            loadDashboard();
 
-        }
+    console.log(
+        "Dashboard loading completed."
     );
+
 }
 
 
@@ -1831,11 +2059,9 @@ function setupDashboardRefresh() {
 
 document.addEventListener(
     "DOMContentLoaded",
-    function () {
+    function() {
 
         loadDashboard();
-
-        setupDashboardRefresh();
 
     }
 );

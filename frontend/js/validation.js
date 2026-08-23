@@ -1,5 +1,5 @@
- const API =
-    "https://productintelligence-lzcn.onrender.com";
+  const API =
+    ((window.location.protocol === "file:" || window.location.hostname === "localhost" || window.location.hostname === "127.0.0.1") ? "http://127.0.0.1:8000" : "https://productintelligence-lzcn.onrender.com");
 
 
 // ============================================================
@@ -423,26 +423,31 @@ function getProductDisplayValue(
     possibleFields
 ) {
 
-    for (
-        const field of possibleFields
-    ) {
+    const sources = [
+        product,
+        product && product.data,
+        product && product.raw_data
+    ];
 
-        if (
-            product[field] !==
-                undefined &&
-            product[field] !==
-                null &&
-            String(
-                product[field]
-            ).trim() !== ""
-        ) {
+    for (const source of sources) {
 
-            return String(
-                product[field]
-            );
+        if (!source || typeof source !== "object") {
+            continue;
+        }
+
+        for (const field of possibleFields) {
+
+            const value = source[field];
+
+            if (
+                value !== undefined &&
+                value !== null &&
+                String(value).trim() !== ""
+            ) {
+                return String(value);
+            }
         }
     }
-
 
     return "Not Available";
 }
@@ -732,6 +737,13 @@ function displayValidationResult(
         data.product_name ||
         backendProduct.name ||
         backendProduct.product_name ||
+        (backendProduct.raw_data &&
+            (
+                backendProduct.raw_data.product_name ||
+                backendProduct.raw_data.product ||
+                backendProduct.raw_data.name ||
+                backendProduct.raw_data.title
+            )) ||
         selectedProduct.name ||
         selectedProduct.product_name ||
         selectedProduct.product ||
