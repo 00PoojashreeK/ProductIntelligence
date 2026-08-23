@@ -24,15 +24,13 @@
     <script src="js/global-theme.js"></script>
 
 
-    <!-- =========================================
-         CLEAN PASSWORD EYE
-    ========================================== -->
+    <!-- PASSWORD EYE -->
 
     <style>
 
-        /* Password container */
+        /* Password field container */
 
-        .login-password-wrapper {
+        .password-field {
             position: relative !important;
             width: 100% !important;
         }
@@ -40,73 +38,76 @@
 
         /* Password input */
 
-        .login-password-wrapper input {
+        .password-field input {
             width: 100% !important;
+
             padding-right: 48px !important;
         }
 
 
-        /* Eye button */
+        /* 
+           IMPORTANT:
+           This is NOT a button.
+           Therefore global button CSS
+           cannot make it blue.
+        */
 
-        #loginPasswordToggle {
+        .password-eye {
             position: absolute !important;
 
-            right: 8px !important;
+            right: 12px !important;
             top: 50% !important;
 
             transform: translateY(-50%) !important;
 
-            width: 32px !important;
-            height: 32px !important;
-
-            padding: 0 !important;
-            margin: 0 !important;
+            width: 22px !important;
+            height: 22px !important;
 
             display: flex !important;
 
             align-items: center !important;
             justify-content: center !important;
 
-            background: transparent !important;
-
-            border: 0 !important;
-
-            box-shadow: none !important;
-
             cursor: pointer !important;
 
-            z-index: 100 !important;
-        }
+            z-index: 999 !important;
 
+            user-select: none !important;
 
-        /* Remove button effects */
+            color: #94a3b8 !important;
 
-        #loginPasswordToggle:hover,
-        #loginPasswordToggle:focus,
-        #loginPasswordToggle:active {
+            font-size: 18px !important;
+
             background: transparent !important;
 
-            border: 0 !important;
+            border: none !important;
 
             box-shadow: none !important;
-
-            transform: translateY(-50%) !important;
         }
 
 
-        /* =========================================
-           DRAW THE EYE
-        ========================================== */
+        /* Eye hover */
 
-        .eye-icon {
+        .password-eye:hover {
+            color: #ffffff !important;
+
+            background: transparent !important;
+
+            box-shadow: none !important;
+        }
+
+
+        /* Simple eye */
+
+        .eye-shape {
             position: relative;
 
-            width: 19px;
-            height: 12px;
+            width: 18px;
+            height: 11px;
 
-            border: 2px solid #94a3b8;
+            border: 1.8px solid #94a3b8;
 
-            border-radius: 80% 20%;
+            border-radius: 70% 30%;
 
             transform: rotate(45deg);
 
@@ -116,7 +117,8 @@
 
         /* Eye pupil */
 
-        .eye-icon::after {
+        .eye-shape::after {
+
             content: "";
 
             position: absolute;
@@ -124,76 +126,71 @@
             width: 5px;
             height: 5px;
 
-            background: #94a3b8;
-
             border-radius: 50%;
 
-            top: 50%;
+            background: #94a3b8;
+
             left: 50%;
+            top: 50%;
 
             transform: translate(-50%, -50%);
+
         }
 
 
-        /* Hover */
+        /* Hover eye */
 
-        #loginPasswordToggle:hover .eye-icon {
-            border-color: #e2e8f0;
-        }
-
-        #loginPasswordToggle:hover .eye-icon::after {
-            background: #e2e8f0;
+        .password-eye:hover .eye-shape {
+            border-color: #ffffff;
         }
 
 
-        /* =========================================
-           HIDDEN EYE
-        ========================================== */
+        .password-eye:hover .eye-shape::after {
+            background: #ffffff;
+        }
 
-        .eye-hidden {
-            width: 19px;
+
+        /* Hidden-password line */
+
+        .eye-off {
+
+            position: relative;
+
+            width: 20px;
             height: 2px;
 
             background: #94a3b8;
-
-            display: block;
 
             transform: rotate(-45deg);
 
-            position: relative;
-        }
+            display: block;
 
-
-        .eye-hidden::before {
-            content: "";
-
-            position: absolute;
-
-            width: 19px;
-            height: 2px;
-
-            background: #94a3b8;
-
-            top: 0;
-            left: 0;
         }
 
 
         /* Light theme */
 
-        body.pi-light #loginPasswordToggle .eye-icon {
+        body.pi-light .password-eye {
+            color: #667085 !important;
+        }
+
+
+        body.pi-light .eye-shape {
             border-color: #667085;
         }
 
-        body.pi-light #loginPasswordToggle .eye-icon::after {
+
+        body.pi-light .eye-shape::after {
             background: #667085;
         }
 
-        body.pi-light #loginPasswordToggle:hover .eye-icon {
+
+        body.pi-light .password-eye:hover .eye-shape {
             border-color: #344054;
         }
 
-        body.pi-light #loginPasswordToggle:hover .eye-icon::after {
+
+        body.pi-light .password-eye:hover .eye-shape::after {
             background: #344054;
         }
 
@@ -251,7 +248,7 @@
             </label>
 
 
-            <div class="login-password-wrapper">
+            <div class="password-field">
 
                 <input
                     type="password"
@@ -261,22 +258,24 @@
                 >
 
 
-                <!-- CLEAN EYE BUTTON -->
+                <!-- EYE ICON -->
 
-                <button
-                    type="button"
-                    id="loginPasswordToggle"
+                <span
+                    class="password-eye"
+                    id="passwordEye"
+                    role="button"
+                    tabindex="0"
                     aria-label="Show password"
                 >
 
-                    <span class="eye-icon"></span>
+                    <span class="eye-shape"></span>
 
-                </button>
+                </span>
 
             </div>
 
 
-            <!-- LOGIN -->
+            <!-- LOGIN BUTTON -->
 
             <button type="submit">
                 Login
@@ -289,7 +288,7 @@
         </form>
 
 
-        <!-- SIGN UP -->
+        <!-- CREATE ACCOUNT -->
 
         <p style="text-align:center; margin-top:20px;">
 
@@ -308,53 +307,69 @@
 </div>
 
 
-<!-- =========================================
-     PASSWORD SHOW / HIDE
-========================================= -->
+<!-- PASSWORD SHOW / HIDE -->
 
 <script>
 
-const loginPassword =
+const password =
     document.getElementById("password");
 
 
-const loginPasswordToggle =
-    document.getElementById("loginPasswordToggle");
+const passwordEye =
+    document.getElementById("passwordEye");
 
 
-loginPasswordToggle.addEventListener(
+function togglePassword() {
+
+    if (password.type === "password") {
+
+        password.type = "text";
+
+        passwordEye.innerHTML =
+            '<span class="eye-off"></span>';
+
+        passwordEye.setAttribute(
+            "aria-label",
+            "Hide password"
+        );
+
+    }
+
+    else {
+
+        password.type = "password";
+
+        passwordEye.innerHTML =
+            '<span class="eye-shape"></span>';
+
+        passwordEye.setAttribute(
+            "aria-label",
+            "Show password"
+        );
+
+    }
+
+}
+
+
+passwordEye.addEventListener(
     "click",
-    function () {
+    togglePassword
+);
 
-        if (loginPassword.type === "password") {
 
-            /* SHOW PASSWORD */
+passwordEye.addEventListener(
+    "keydown",
+    function(event) {
 
-            loginPassword.type = "text";
+        if (
+            event.key === "Enter" ||
+            event.key === " "
+        ) {
 
-            loginPasswordToggle.innerHTML =
-                '<span class="eye-hidden"></span>';
+            event.preventDefault();
 
-            loginPasswordToggle.setAttribute(
-                "aria-label",
-                "Hide password"
-            );
-
-        }
-
-        else {
-
-            /* HIDE PASSWORD */
-
-            loginPassword.type = "password";
-
-            loginPasswordToggle.innerHTML =
-                '<span class="eye-icon"></span>';
-
-            loginPasswordToggle.setAttribute(
-                "aria-label",
-                "Show password"
-            );
+            togglePassword();
 
         }
 
@@ -363,6 +378,8 @@ loginPasswordToggle.addEventListener(
 
 </script>
 
+
+<!-- YOUR EXISTING LOGIN JAVASCRIPT -->
 
 <script src="js/auth.js"></script>
 
