@@ -1,20 +1,23 @@
-from fastapi import FastAPI, UploadFile, File, HTTPException
+from fastapi import (
+    FastAPI,
+    UploadFile,
+    File,
+    Form,
+    HTTPException,
+    Query
+)
+
 from fastapi.middleware.cors import CORSMiddleware
 
-import pandas as pd
-import psycopg2
-
-from psycopg2.extras import RealDictCursor, execute_values
-
-import json
 import os
+import json
 import uuid
 import math
-import csv
-import io
 import re
-
+import sqlite3
 from datetime import datetime
+
+import pandas as pd
 
 
 # ============================================================
@@ -22,9 +25,9 @@ from datetime import datetime
 # ============================================================
 
 app = FastAPI(
-    title="Dynamic Data Intelligence AI",
-    description="Schema-aware dynamic dataset intelligence platform",
-    version="6.0"
+    title="Product Intelligence AI",
+    description="Dynamic AI-powered Product Intelligence Platform",
+    version="3.0"
 )
 
 
@@ -54,10 +57,6 @@ UPLOAD_FOLDER = os.path.join(
     "uploads"
 )
 
-DATABASE_URL = os.getenv(
-    "DATABASE_URL"
-)
-
 os.makedirs(
     UPLOAD_FOLDER,
     exist_ok=True
@@ -66,31 +65,90 @@ os.makedirs(
 
 # ============================================================
 # DATABASE
+#
+# Render:
+#   DATABASE_URL = PostgreSQL URL
+#
+# Local:
+#   SQLite is used automatically.
+# ============================================================
+
+DATABASE_URL = os.getenv("DATABASE_URL", "").strip()
+
+USE_POSTGRES = (
+    DATABASE_URL.startswith("postgres://")
+    or
+    DATABASE_URL.startswith("postgresql://")
+)
+
+
+if USE_POSTGRES:
+
+    import psycopg2
+    from psycopg2.extras import RealDictCursor
+
+else:
+
+    DATABASE_PATH = os.path.join(
+        BASE_DIR,
+        "product_intelligence.db"
+    )
+
+
+# ============================================================
+# DATABASE CONNECTION
 # ============================================================
 
 def get_connection():
 
-    if not DATABASE_URL:
-        raise RuntimeError(
-            "DATABASE_URL environment variable is not configured."
+    if USE_POSTGRES:
+
+        url = DATABASE_URL
+
+        # Render sometimes supplies postgres://
+        # psycopg2 accepts postgresql://
+        if url.startswith("postgres://"):
+            url = url.replace(
+                "postgres://",
+                "postgresql://",
+                1
+            )
+
+        return psycopg2.connect(
+            url,
+            cursor_factory=RealDictCursor
         )
 
-    return psycopg2.connect(
-        DATABASE_URL,
-        cursor_factory=RealDictCursor
+    connection = sqlite3.connect(
+        DATABASE_PATH
     )
 
+    connection.row_factory = sqlite3.Row
+
+    return connection
+
+
+def placeholder():
+
+    if USE_POSTGRES:
+        return "%s"
+
+    return "?"
+
+
+# ============================================================
+# DATABASE INITIALIZATION
+# ============================================================
 
 def create_database():
 
     connection = get_connection()
 
-    try:
+    cursor = connection.cursor()
 
-        cursor = connection.cursor()
+    if USE_POSTGRES:
 
-        cursor.execute(
-            """
+        cursor.execute("""
             CREATE TABLE IF NOT EXISTS datasets (
 
                 id SERIAL PRIMARY KEY,
@@ -107,168 +165,156 @@ def create_database():
 
                 columns_json TEXT,
 
-                schema_json TEXT,
-
                 uploaded_at TEXT
 
             )
-            """
-        )
+        """)
 
-        cursor.execute(
-            """
+        cursor.execute("""
             CREATE TABLE IF NOT EXISTS dataset_rows (
 
                 id SERIAL PRIMARY KEY,
 
                 dataset_id TEXT NOT NULL,
 
-                row_number INTEGER NOT NULL,
+                row_number INTEGER,
 
-                data_json TEXT NOT NULL
+                data_json TEXT,
+
+                FOREIGN KEY(dataset_id)
+                REFERENCES datasets(dataset_id)
+                ON DELETE CASCADE
 
             )
-            """
-        )
+        """)
 
-        cursor.execute(
-            """
-            CREATE INDEX IF NOT EXISTS
-            idx_dataset_rows_dataset_id
+    else:
 
-            ON dataset_rows(dataset_id)
-            """
-        )
+        cursor.execute("""
+            CREATE TABLE IF NOT EXISTS datasets (
 
-        cursor.execute(
-            """
-            ALTER TABLE datasets
-            ADD COLUMN IF NOT EXISTS schema_json TEXT
-            """
-        )
+                id INTEGER PRIMARY KEY AUTOINCREMENT,
 
-        connection.commit()
+                dataset_id TEXT UNIQUE NOT NULL,
 
-        cursor.close()
+                filename TEXT NOT NULL,
 
-    finally:
+                file_type TEXT,
 
-        connection.close()
+                rows_count INTEGER DEFAULT 0,
+
+                columns_count INTEGER DEFAULT 0,
+
+                columns_json TEXT,
+
+                uploaded_at TEXT
+
+            )
+        """)
+
+        cursor.execute("""
+            CREATE TABLE IF NOT EXISTS dataset_rows (
+
+                id INTEGER PRIMARY KEY AUTOINCREMENT,
+
+                dataset_id TEXT NOT NULL,
+
+                row_number INTEGER,
+
+                data_json TEXT,
+
+                FOREIGN KEY(dataset_id)
+                REFERENCES datasets(dataset_id)
+
+            )
+        """)
+
+    connection.commit()
+    cursor.close()
+    connection.close()
 
 
-@app.on_event("startup")
-def startup_event():
-
-    create_database()
+create_database()
 
 
 # ============================================================
-# HOME
+# HELPERS
 # ============================================================
 
-@app.get("/")
-def home():
+def clean_value(value):
 
-    return {
-        "success": True,
-        "message": "Dynamic Data Intelligence AI API is running",
-        "version": "6.0"
-    }
-
-
-# ============================================================
-# HEALTH
-# ============================================================
-
-@app.get("/health")
-def health():
-
-    connection = None
+    if value is None:
+        return None
 
     try:
 
-        connection = get_connection()
-
-        cursor = connection.cursor()
-
-        cursor.execute(
-            "SELECT 1"
-        )
-
-        cursor.fetchone()
-
-        cursor.close()
-
-        database_ok = True
+        if pd.isna(value):
+            return None
 
     except Exception:
+        pass
 
-        database_ok = False
+    if isinstance(
+        value,
+        pd.Timestamp
+    ):
 
-    finally:
+        return value.isoformat()
 
-        if connection:
-            connection.close()
+    if isinstance(
+        value,
+        float
+    ):
 
-    return {
-        "success": True,
-        "database": database_ok,
-        "message": "Backend is healthy"
-    }
+        if math.isnan(value):
+            return None
 
+        return value
 
-# ============================================================
-# LOGIN
-# ============================================================
+    if isinstance(
+        value,
+        (int, bool)
+    ):
 
-@app.post("/login")
-async def login(
-    username: str = None,
-    email: str = None,
-    password: str = None
-):
+        return value
 
-    user = (
-        username
-        or email
-        or ""
-    ).strip()
-
-    password = (
-        password
-        or ""
-    ).strip()
-
-    if user == "" or password == "":
-
-        return {
-            "success": False,
-            "message": "Please enter username and password"
-        }
-
-    return {
-        "success": True,
-        "message": "Login successful",
-        "user": {
-            "name": user.split("@")[0],
-            "username": user,
-            "email": user if "@" in user else ""
-        }
-    }
+    return str(value).strip()
 
 
-# ============================================================
-# TEXT NORMALIZATION
-# ============================================================
+def safe_json(value):
 
-def normalize_column_name(value):
+    try:
+        return json.loads(value)
+    except Exception:
+        return {}
 
-    text = str(value).strip().lower()
 
-    text = text.replace("_", " ")
-    text = text.replace("-", " ")
-    text = text.replace("/", " ")
-    text = text.replace("\\", " ")
+def is_empty(value):
+
+    if value is None:
+        return True
+
+    text = str(value).strip()
+
+    return (
+        text == ""
+        or
+        text.lower()
+        in [
+            "nan",
+            "none",
+            "null",
+            "n/a",
+            "na",
+            "not available",
+            "-"
+        ]
+    )
+
+
+def normalize_column(column):
+
+    text = str(column).strip()
 
     text = re.sub(
         r"\s+",
@@ -276,7 +322,149 @@ def normalize_column_name(value):
         text
     )
 
-    return text.strip()
+    return text
+
+
+# ============================================================
+# DYNAMIC COLUMN DETECTION
+# ============================================================
+
+def find_column(columns, keywords):
+
+    normalized = []
+
+    for column in columns:
+
+        clean = re.sub(
+            r"[^a-z0-9]",
+            "",
+            str(column).lower()
+        )
+
+        normalized.append(
+            (column, clean)
+        )
+
+    # Exact / strong match
+    for keyword in keywords:
+
+        key = re.sub(
+            r"[^a-z0-9]",
+            "",
+            keyword.lower()
+        )
+
+        for original, clean in normalized:
+
+            if clean == key:
+                return original
+
+    # Partial match
+    for keyword in keywords:
+
+        key = re.sub(
+            r"[^a-z0-9]",
+            "",
+            keyword.lower()
+        )
+
+        for original, clean in normalized:
+
+            if key in clean:
+                return original
+
+    return None
+
+
+def detect_product_name(columns):
+
+    return find_column(
+        columns,
+        [
+            "product name",
+            "product_name",
+            "product",
+            "name",
+            "item name",
+            "item",
+            "title",
+            "model name",
+            "device name"
+        ]
+    )
+
+
+def detect_brand(columns):
+
+    return find_column(
+        columns,
+        [
+            "brand",
+            "manufacturer",
+            "company",
+            "maker",
+            "vendor"
+        ]
+    )
+
+
+def detect_model(columns):
+
+    return find_column(
+        columns,
+        [
+            "model number",
+            "model_number",
+            "model",
+            "sku",
+            "product id",
+            "product_id",
+            "item id",
+            "item_id"
+        ]
+    )
+
+
+# ============================================================
+# DATASET QUALITY
+# ============================================================
+
+def calculate_row_quality(data):
+
+    if not data:
+        return 0
+
+    total = len(data)
+
+    filled = 0
+
+    for value in data.values():
+
+        if not is_empty(value):
+            filled += 1
+
+    score = (
+        filled / total
+    ) * 100
+
+    return round(
+        score,
+        1
+    )
+
+
+def row_status(score):
+
+    if score >= 90:
+        return "Verified"
+
+    if score >= 70:
+        return "Good"
+
+    if score >= 50:
+        return "Needs Review"
+
+    return "Incomplete"
 
 
 # ============================================================
@@ -308,23 +496,26 @@ def read_dataset(
                 encoding="latin1"
             )
 
-    elif extension in [
-        ".xlsx",
-        ".xls"
-    ]:
+    if extension == ".xlsx":
 
         return pd.read_excel(
             file_path
         )
 
-    elif extension == ".tsv":
+    if extension == ".xls":
+
+        return pd.read_excel(
+            file_path
+        )
+
+    if extension == ".tsv":
 
         return pd.read_csv(
             file_path,
             sep="\t"
         )
 
-    elif extension == ".json":
+    if extension == ".json":
 
         with open(
             file_path,
@@ -340,7 +531,7 @@ def read_dataset(
 
         if isinstance(data, dict):
 
-            if data and all(
+            if all(
                 isinstance(value, list)
                 for value in data.values()
             ):
@@ -351,678 +542,112 @@ def read_dataset(
 
     raise ValueError(
         "Unsupported file type. "
-        "Please upload CSV, Excel, JSON or TSV."
+        "Use CSV, XLSX, XLS, JSON or TSV."
     )
 
 
 # ============================================================
-# CLEAN VALUE
+# HOME
 # ============================================================
 
-def clean_value(value):
+@app.get("/")
+def home():
 
-    if value is None:
-        return None
+    return {
+        "success": True,
+        "message": "Product Intelligence AI API is running",
+        "version": "3.0",
+        "database": (
+            "PostgreSQL"
+            if USE_POSTGRES
+            else "SQLite"
+        )
+    }
+
+
+# ============================================================
+# HEALTH
+# ============================================================
+
+@app.get("/health")
+def health():
 
     try:
 
-        if pd.isna(value):
-            return None
-
-    except Exception:
-
-        pass
-
-    if isinstance(
-        value,
-        pd.Timestamp
-    ):
-
-        return value.isoformat()
-
-    if isinstance(
-        value,
-        datetime
-    ):
-
-        return value.isoformat()
-
-    if isinstance(
-        value,
-        bool
-    ):
-
-        return value
-
-    if isinstance(
-        value,
-        int
-    ):
-
-        return value
-
-    if isinstance(
-        value,
-        float
-    ):
-
-        if math.isnan(value):
-            return None
-
-        if math.isinf(value):
-            return None
-
-        return value
-
-    return str(value)
-
-
-# ============================================================
-# DISPLAY VALUE
-# ============================================================
-
-def display_value(
-    value,
-    default="Not Available"
-):
-
-    if value is None:
-        return default
-
-    text = str(value).strip()
-
-    if text == "":
-        return default
-
-    return text
-
-
-# ============================================================
-# VALUE PRESENT CHECK
-# ============================================================
-
-def has_value(value):
-
-    if value is None:
-        return False
-
-    try:
-
-        if pd.isna(value):
-            return False
-
-    except Exception:
-
-        pass
-
-    return str(value).strip() != ""
-
-
-# ============================================================
-# DATA TYPE DETECTION
-# ============================================================
-
-def detect_series_type(series):
-
-    non_null = series.dropna()
-
-    if len(non_null) == 0:
-
-        return "empty"
-
-    if pd.api.types.is_bool_dtype(series):
-
-        return "boolean"
-
-    if pd.api.types.is_numeric_dtype(series):
-
-        return "numeric"
-
-    if pd.api.types.is_datetime64_any_dtype(series):
-
-        return "date"
-
-    converted = pd.to_datetime(
-        non_null,
-        errors="coerce"
-    )
-
-    if len(non_null) > 0:
-
-        date_ratio = (
-            converted.notna().sum()
-            / len(non_null)
-        )
-
-        if date_ratio >= 0.9:
-
-            return "date"
-
-    return "text"
-
-
-# ============================================================
-# COLUMN STATISTICS
-# ============================================================
-
-def analyze_column(
-    series,
-    column_name
-):
-
-    data_type = detect_series_type(
-        series
-    )
-
-    missing_values = int(
-        series.isna().sum()
-    )
-
-    non_null_values = int(
-        series.notna().sum()
-    )
-
-    unique_values = int(
-        series.nunique(
-            dropna=True
-        )
-    )
-
-    total_values = int(
-        len(series)
-    )
-
-    missing_percentage = (
-        round(
-            missing_values
-            / total_values
-            * 100,
-            2
-        )
-        if total_values > 0
-        else 0
-    )
-
-    unique_percentage = (
-        round(
-            unique_values
-            / non_null_values
-            * 100,
-            2
-        )
-        if non_null_values > 0
-        else 0
-    )
-
-    result = {
-        "column": str(column_name),
-
-        "normalized_name":
-            normalize_column_name(
-                column_name
-            ),
-
-        "data_type":
-            data_type,
-
-        "missing_values":
-            missing_values,
-
-        "non_null_values":
-            non_null_values,
-
-        "unique_values":
-            unique_values,
-
-        "total_values":
-            total_values,
-
-        "missing_percentage":
-            missing_percentage,
-
-        "unique_percentage":
-            unique_percentage
-    }
-
-    # --------------------------------------------------------
-    # NUMERIC STATISTICS
-    # --------------------------------------------------------
-
-    if data_type == "numeric":
-
-        numeric_series = pd.to_numeric(
-            series,
-            errors="coerce"
-        )
-
-        valid = numeric_series.dropna()
-
-        if len(valid) > 0:
-
-            result["statistics"] = {
-                "minimum":
-                    clean_value(valid.min()),
-
-                "maximum":
-                    clean_value(valid.max()),
-
-                "mean":
-                    clean_value(valid.mean()),
-
-                "median":
-                    clean_value(valid.median()),
-
-                "standard_deviation":
-                    clean_value(valid.std())
-            }
-
-    # --------------------------------------------------------
-    # TEXT STATISTICS
-    # --------------------------------------------------------
-
-    elif data_type == "text":
-
-        text_series = (
-            series
-            .dropna()
-            .astype(str)
-        )
-
-        if len(text_series) > 0:
-
-            lengths = text_series.str.len()
-
-            result["statistics"] = {
-                "minimum_length":
-                    int(lengths.min()),
-
-                "maximum_length":
-                    int(lengths.max()),
-
-                "average_length":
-                    round(
-                        float(lengths.mean()),
-                        2
-                    )
-            }
-
-    # --------------------------------------------------------
-    # DATE STATISTICS
-    # --------------------------------------------------------
-
-    elif data_type == "date":
-
-        dates = pd.to_datetime(
-            series,
-            errors="coerce"
-        ).dropna()
-
-        if len(dates) > 0:
-
-            result["statistics"] = {
-                "minimum":
-                    dates.min().isoformat(),
-
-                "maximum":
-                    dates.max().isoformat()
-            }
-
-    return result
-
-
-# ============================================================
-# SCHEMA ANALYSIS
-# ============================================================
-
-def analyze_schema(df):
-
-    schema = []
-
-    for column in df.columns:
-
-        schema.append(
-            analyze_column(
-                df[column],
-                column
-            )
-        )
-
-    return {
-        "columns": schema,
-
-        "column_count":
-            len(schema),
-
-        "data_type_summary": {
-            "numeric": sum(
-                1
-                for item in schema
-                if item["data_type"] == "numeric"
-            ),
-
-            "text": sum(
-                1
-                for item in schema
-                if item["data_type"] == "text"
-            ),
-
-            "date": sum(
-                1
-                for item in schema
-                if item["data_type"] == "date"
-            ),
-
-            "boolean": sum(
-                1
-                for item in schema
-                if item["data_type"] == "boolean"
-            ),
-
-            "empty": sum(
-                1
-                for item in schema
-                if item["data_type"] == "empty"
-            )
-        }
-    }
-
-
-# ============================================================
-# COLUMN NAME CLEANING
-# ============================================================
-
-def clean_column_names(df):
-
-    cleaned_columns = []
-
-    used_names = set()
-
-    for index, column in enumerate(
-        df.columns
-    ):
-
-        name = str(
-            column
-        ).strip()
-
-        if name == "":
-
-            name = (
-                f"Column_{index + 1}"
-            )
-
-        original_name = name
-
-        counter = 2
-
-        while name.lower() in used_names:
-
-            name = (
-                original_name
-                + "_"
-                + str(counter)
-            )
-
-            counter += 1
-
-        used_names.add(
-            name.lower()
-        )
-
-        cleaned_columns.append(
-            name
-        )
-
-    df.columns = cleaned_columns
-
-    return df
-
-
-# ============================================================
-# ROW COMPLETENESS
-# ============================================================
-
-def calculate_row_completeness(data):
-
-    if not data:
-
-        return 0
-
-    total_fields = len(data)
-
-    populated_fields = sum(
-        1
-        for value in data.values()
-        if has_value(value)
-    )
-
-    return round(
-        populated_fields
-        / total_fields
-        * 100
-    )
-
-
-# ============================================================
-# GENERIC CONFIDENCE
-# ============================================================
-
-def calculate_dynamic_confidence(data):
-
-    return calculate_row_completeness(
-        data
-    )
-
-
-# ============================================================
-# CONFIDENCE STATUS
-# ============================================================
-
-def confidence_status(
-    confidence
-):
-
-    if confidence >= 85:
-
-        return "Verified"
-
-    if confidence >= 60:
-
-        return "Needs Review"
-
-    return "Incomplete"
-
-
-# ============================================================
-# GENERIC RECORD RESPONSE
-# ============================================================
-
-def build_record_response(
-    row_id,
-    row_number,
-    data
-):
-
-    confidence = (
-        calculate_dynamic_confidence(
-            data
-        )
-    )
-
-    return {
-        "id": row_id,
-
-        "row_number":
-            row_number,
-
-        "confidence":
-            confidence,
-
-        "status":
-            confidence_status(
-                confidence
-            ),
-
-        "field_count":
-            len(data),
-
-        "populated_fields":
-            sum(
-                1
-                for value in data.values()
-                if has_value(value)
-            ),
-
-        "missing_fields":
-            sum(
-                1
-                for value in data.values()
-                if not has_value(value)
-            ),
-
-        "data":
-            data
-    }
-
-
-# ============================================================
-# BACKWARD-COMPATIBLE PRODUCT RESPONSE
-#
-# The endpoint name /products is retained so your existing
-# frontend does not immediately break.
-#
-# But the response is now completely dynamic.
-# ============================================================
-
-def build_product_response(
-    row_id,
-    row_number,
-    data
-):
-
-    record = build_record_response(
-        row_id,
-        row_number,
-        data
-    )
-
-    return {
-        "id":
-            record["id"],
-
-        "row_number":
-            record["row_number"],
-
-        "confidence":
-            record["confidence"],
-
-        "status":
-            record["status"],
-
-        "field_count":
-            record["field_count"],
-
-        "populated_fields":
-            record["populated_fields"],
-
-        "missing_fields":
-            record["missing_fields"],
-
-        "data":
-            record["data"],
-
-        "raw_data":
-            record["data"]
-    }
-
-
-# ============================================================
-# GET CURRENT DATASET
-# ============================================================
-
-def get_current_rows():
-
-    connection = get_connection()
-
-    try:
-
-        cursor = connection.cursor()
-
-        cursor.execute(
-            """
-            SELECT *
-            FROM datasets
-            ORDER BY id DESC
-            LIMIT 1
-            """
-        )
-
-        dataset = cursor.fetchone()
-
-        if not dataset:
-
-            cursor.close()
-
-            return None, []
-
-        dataset_id = dataset[
-            "dataset_id"
-        ]
-
-        cursor.execute(
-            """
-            SELECT
-                id,
-                row_number,
-                data_json
-
-            FROM dataset_rows
-
-            WHERE dataset_id = %s
-
-            ORDER BY row_number
-            """,
-            (
-                dataset_id,
-            )
-        )
-
-        rows = cursor.fetchall()
-
-        result = []
-
-        for row in rows:
-
-            try:
-
-                data = json.loads(
-                    row["data_json"]
-                )
-
-            except Exception:
-
-                data = {}
-
-            result.append(
-                {
-                    "id":
-                        row["id"],
-
-                    "row_number":
-                        row["row_number"],
-
-                    "data":
-                        data
-                }
-            )
-
-        cursor.close()
-
-        return dataset, result
-
-    finally:
+        connection = get_connection()
 
         connection.close()
+
+        return {
+            "success": True,
+            "database": True,
+            "database_type": (
+                "PostgreSQL"
+                if USE_POSTGRES
+                else "SQLite"
+            ),
+            "message": "Backend is healthy"
+        }
+
+    except Exception as e:
+
+        return {
+            "success": False,
+            "database": False,
+            "message": str(e)
+        }
+
+
+# ============================================================
+# LOGIN
+# ============================================================
+
+@app.post("/login")
+async def login(
+
+    username: str = Form(None),
+
+    email: str = Form(None),
+
+    password: str = Form(...)
+
+):
+
+    user = (
+        username
+        or email
+        or ""
+    ).strip()
+
+    password = password.strip()
+
+    if not user or not password:
+
+        return {
+            "success": False,
+            "message": "Please enter username and password"
+        }
+
+    return {
+
+        "success": True,
+
+        "message": "Login successful",
+
+        "user": {
+
+            "name":
+                user.split("@")[0],
+
+            "username":
+                user,
+
+            "email":
+                user if "@" in user else ""
+
+        }
+
+    }
 
 
 # ============================================================
@@ -1031,7 +656,9 @@ def get_current_rows():
 
 @app.post("/upload-dataset")
 async def upload_dataset(
+
     file: UploadFile = File(...)
+
 ):
 
     if not file.filename:
@@ -1049,7 +676,7 @@ async def upload_dataset(
         filename
     )[1].lower()
 
-    supported_extensions = [
+    supported = [
         ".csv",
         ".xlsx",
         ".xls",
@@ -1057,14 +684,13 @@ async def upload_dataset(
         ".tsv"
     ]
 
-    if extension not in supported_extensions:
+    if extension not in supported:
 
         raise HTTPException(
             status_code=400,
             detail=(
                 "Unsupported file type. "
-                "Supported formats: "
-                "CSV, XLSX, XLS, JSON and TSV."
+                "Use CSV, XLSX, XLS, JSON or TSV."
             )
         )
 
@@ -1072,7 +698,7 @@ async def upload_dataset(
         uuid.uuid4()
     )
 
-    safe_filename = (
+    saved_name = (
         dataset_id
         + "_"
         + filename
@@ -1080,29 +706,19 @@ async def upload_dataset(
 
     file_path = os.path.join(
         UPLOAD_FOLDER,
-        safe_filename
+        saved_name
     )
 
     try:
-
-        # ----------------------------------------------------
-        # SAVE FILE
-        # ----------------------------------------------------
 
         contents = await file.read()
 
         with open(
             file_path,
             "wb"
-        ) as output_file:
+        ) as output:
 
-            output_file.write(
-                contents
-            )
-
-        # ----------------------------------------------------
-        # READ DATASET
-        # ----------------------------------------------------
+            output.write(contents)
 
         df = read_dataset(
             file_path,
@@ -1115,55 +731,29 @@ async def upload_dataset(
                 "The uploaded dataset is empty."
             )
 
-        # ----------------------------------------------------
-        # CLEAN COLUMN NAMES
-        # ----------------------------------------------------
+        # Clean column names
+        df.columns = [
+            normalize_column(column)
+            for column in df.columns
+        ]
 
-        df = clean_column_names(
-            df
-        )
+        # Remove unnamed columns
+        df = df.loc[
+            :,
+            [
+                column
+                for column in df.columns
+                if not str(column)
+                .lower()
+                .startswith("unnamed:")
+            ]
+        ]
 
-        # ----------------------------------------------------
-        # REMOVE COMPLETELY EMPTY COLUMNS
-        # ----------------------------------------------------
-
+        # Remove completely empty columns
         df = df.dropna(
             axis=1,
             how="all"
         )
-
-        if len(df.columns) == 0:
-
-            raise ValueError(
-                "Dataset contains no usable columns."
-            )
-
-        # ----------------------------------------------------
-        # REMOVE COMPLETELY EMPTY ROWS
-        # ----------------------------------------------------
-
-        df = df.dropna(
-            axis=0,
-            how="all"
-        )
-
-        if df.empty:
-
-            raise ValueError(
-                "Dataset contains no usable rows."
-            )
-
-        # ----------------------------------------------------
-        # RESET INDEX
-        # ----------------------------------------------------
-
-        df = df.reset_index(
-            drop=True
-        )
-
-        # ----------------------------------------------------
-        # DATASET INFORMATION
-        # ----------------------------------------------------
 
         columns = [
             str(column)
@@ -1172,20 +762,116 @@ async def upload_dataset(
 
         rows_count = len(df)
 
-        columns_count = len(
-            columns
+        columns_count = len(columns)
+
+        # ----------------------------------------------------
+        # DELETE PREVIOUS CURRENT DATASET
+        # ----------------------------------------------------
+
+        connection = get_connection()
+
+        cursor = connection.cursor()
+
+        cursor.execute(
+            """
+            DELETE FROM dataset_rows
+            WHERE dataset_id IN (
+                SELECT dataset_id
+                FROM datasets
+            )
+            """
+        )
+
+        cursor.execute(
+            """
+            DELETE FROM datasets
+            """
         )
 
         # ----------------------------------------------------
-        # SCHEMA ANALYSIS
+        # INSERT NEW DATASET
         # ----------------------------------------------------
 
-        schema_analysis = (
-            analyze_schema(df)
+        p = placeholder()
+
+        cursor.execute(
+            f"""
+            INSERT INTO datasets
+            (
+                dataset_id,
+                filename,
+                file_type,
+                rows_count,
+                columns_count,
+                columns_json,
+                uploaded_at
+            )
+            VALUES (
+                {p},
+                {p},
+                {p},
+                {p},
+                {p},
+                {p},
+                {p}
+            )
+            """,
+            (
+                dataset_id,
+                filename,
+                extension,
+                rows_count,
+                columns_count,
+                json.dumps(columns),
+                datetime.now().isoformat()
+            )
         )
 
         # ----------------------------------------------------
-        # DATASET STATISTICS
+        # SAVE ROWS
+        # ----------------------------------------------------
+
+        for index, row in df.iterrows():
+
+            row_data = {}
+
+            for column in columns:
+
+                row_data[column] = clean_value(
+                    row[column]
+                )
+
+            cursor.execute(
+                f"""
+                INSERT INTO dataset_rows
+                (
+                    dataset_id,
+                    row_number,
+                    data_json
+                )
+                VALUES (
+                    {p},
+                    {p},
+                    {p}
+                )
+                """,
+                (
+                    dataset_id,
+                    index + 1,
+                    json.dumps(
+                        row_data,
+                        default=str
+                    )
+                )
+            )
+
+        connection.commit()
+
+        cursor.close()
+        connection.close()
+
+        # ----------------------------------------------------
+        # QUALITY
         # ----------------------------------------------------
 
         missing_values = int(
@@ -1201,174 +887,22 @@ async def upload_dataset(
 
         numeric_columns = [
             str(column)
-            for column in
-            df.select_dtypes(
+            for column
+            in df.select_dtypes(
                 include="number"
             ).columns
         ]
 
         text_columns = [
             str(column)
-            for column in
-            df.select_dtypes(
+            for column
+            in df.select_dtypes(
                 include="object"
             ).columns
         ]
 
-        datetime_columns = [
-            str(column)
-            for column in
-            df.select_dtypes(
-                include=[
-                    "datetime",
-                    "datetimetz"
-                ]
-            ).columns
-        ]
-
-        boolean_columns = [
-            str(column)
-            for column in
-            df.select_dtypes(
-                include="bool"
-            ).columns
-        ]
-
-        # ----------------------------------------------------
-        # CONVERT ROWS
-        # ----------------------------------------------------
-
-        records = df.to_dict(
-            orient="records"
-        )
-
-        rows_to_insert = []
-
-        for index, record in enumerate(
-            records
-        ):
-
-            cleaned_record = {}
-
-            for column in columns:
-
-                cleaned_record[column] = (
-                    clean_value(
-                        record.get(
-                            column
-                        )
-                    )
-                )
-
-            rows_to_insert.append(
-                (
-                    dataset_id,
-                    index + 1,
-                    json.dumps(
-                        cleaned_record,
-                        default=str
-                    )
-                )
-            )
-
-        # ----------------------------------------------------
-        # DATABASE
-        # ----------------------------------------------------
-
-        connection = get_connection()
-
-        try:
-
-            cursor = connection.cursor()
-
-            # Keep one active dataset.
-            cursor.execute(
-                "DELETE FROM dataset_rows"
-            )
-
-            cursor.execute(
-                "DELETE FROM datasets"
-            )
-
-            cursor.execute(
-                """
-                INSERT INTO datasets
-                (
-                    dataset_id,
-                    filename,
-                    file_type,
-                    rows_count,
-                    columns_count,
-                    columns_json,
-                    schema_json,
-                    uploaded_at
-                )
-
-                VALUES
-                (
-                    %s,
-                    %s,
-                    %s,
-                    %s,
-                    %s,
-                    %s,
-                    %s,
-                    %s
-                )
-                """,
-                (
-                    dataset_id,
-                    filename,
-                    extension,
-                    rows_count,
-                    columns_count,
-                    json.dumps(
-                        columns
-                    ),
-                    json.dumps(
-                        schema_analysis
-                    ),
-                    datetime.now().isoformat()
-                )
-            )
-
-            if rows_to_insert:
-
-                execute_values(
-                    cursor,
-                    """
-                    INSERT INTO dataset_rows
-                    (
-                        dataset_id,
-                        row_number,
-                        data_json
-                    )
-
-                    VALUES %s
-                    """,
-                    rows_to_insert,
-                    page_size=1000
-                )
-
-            connection.commit()
-
-            cursor.close()
-
-        except Exception:
-
-            connection.rollback()
-
-            raise
-
-        finally:
-
-            connection.close()
-
-        # ----------------------------------------------------
-        # RESPONSE
-        # ----------------------------------------------------
-
         return {
+
             "success": True,
 
             "message":
@@ -1402,36 +936,20 @@ async def upload_dataset(
                 numeric_columns,
 
             "text_columns":
-                text_columns,
+                text_columns
 
-            "datetime_columns":
-                datetime_columns,
-
-            "boolean_columns":
-                boolean_columns,
-
-            "schema":
-                schema_analysis
         }
 
     except HTTPException:
-
         raise
 
     except Exception as e:
 
-        if os.path.exists(
-            file_path
-        ):
+        if os.path.exists(file_path):
 
             try:
-
-                os.remove(
-                    file_path
-                )
-
+                os.remove(file_path)
             except Exception:
-
                 pass
 
         raise HTTPException(
@@ -1441,7 +959,7 @@ async def upload_dataset(
 
 
 # ============================================================
-# OLD UPLOAD URL
+# OLD UPLOAD ENDPOINT
 # ============================================================
 
 @app.post("/upload-csv")
@@ -1449,54 +967,92 @@ async def upload_csv(
     file: UploadFile = File(...)
 ):
 
-    return await upload_dataset(
-        file
-    )
+    return await upload_dataset(file)
 
 
 # ============================================================
-# GET DATASET
+# GET CURRENT DATASET
 # ============================================================
 
 @app.get("/dataset")
 def get_dataset():
 
-    dataset, rows = (
-        get_current_rows()
+    connection = get_connection()
+
+    cursor = connection.cursor()
+
+    cursor.execute(
+        """
+        SELECT *
+        FROM datasets
+        ORDER BY id DESC
+        LIMIT 1
+        """
     )
 
+    dataset = cursor.fetchone()
+
     if not dataset:
+
+        cursor.close()
+        connection.close()
 
         return {
             "success": True,
             "dataset": None,
             "columns": [],
-            "schema": {},
             "rows": []
         }
 
-    columns = json.loads(
-        dataset["columns_json"]
-        or "[]"
+    dataset_id = dataset["dataset_id"]
+
+    p = placeholder()
+
+    cursor.execute(
+        f"""
+        SELECT
+            row_number,
+            data_json
+        FROM dataset_rows
+        WHERE dataset_id = {p}
+        ORDER BY row_number
+        """,
+        (dataset_id,)
     )
 
-    try:
+    rows = cursor.fetchall()
 
-        schema = json.loads(
-            dataset.get(
-                "schema_json"
-            )
-            or "{}"
+    result_rows = []
+
+    for row in rows:
+
+        data = safe_json(
+            row["data_json"]
         )
 
-    except Exception:
+        result_rows.append({
+            "id": row["row_number"],
+            "row_number": row["row_number"],
+            "data": data,
+            "quality": calculate_row_quality(data),
+            "status": row_status(
+                calculate_row_quality(data)
+            )
+        })
 
-        schema = {}
+    columns = safe_json(
+        dataset["columns_json"]
+    )
+
+    cursor.close()
+    connection.close()
 
     return {
+
         "success": True,
 
         "dataset": {
+
             "dataset_id":
                 dataset["dataset_id"],
 
@@ -1514,499 +1070,183 @@ def get_dataset():
 
             "uploaded_at":
                 dataset["uploaded_at"]
+
         },
 
         "columns":
             columns,
 
-        "schema":
-            schema,
+        "rows":
+            result_rows
 
-        "rows": [
-            item["data"]
-            for item in rows
-        ]
     }
 
 
 # ============================================================
-# GENERIC RECORDS
+# PRODUCT RESPONSE HELPERS
 # ============================================================
 
-@app.get("/records")
-def get_records():
+def build_product_from_row(row, columns):
+    data = row["data"]
 
-    dataset, rows = (
-        get_current_rows()
+    name_column = detect_product_name(columns)
+    brand_column = detect_brand(columns)
+    model_column = detect_model(columns)
+    category_column = find_column(
+        columns,
+        [
+            "category",
+            "type",
+            "product type",
+            "department"
+        ]
     )
 
-    if not dataset:
+    display_name = (
+        data.get(name_column)
+        if name_column
+        else None
+    )
 
-        return {
-            "success": True,
-            "records": []
-        }
+    # Never return "Not Available" when the dataset has a
+    # usable value under another column.
+    if is_empty(display_name):
+        for column in columns:
+            value = data.get(column)
+            if not is_empty(value):
+                display_name = value
+                break
 
-    records = [
-        build_record_response(
-            item["id"],
-            item["row_number"],
-            item["data"]
-        )
-        for item in rows
-    ]
+    if is_empty(display_name):
+        display_name = f"Product {row['row_number']}"
 
     return {
-        "success": True,
-        "count": len(records),
-        "records": records
+        "id": row["id"],
+        "row_number": row["row_number"],
+        "name": str(display_name),
+        "product_name": str(display_name),
+        "brand": data.get(brand_column) if brand_column else None,
+        "model": data.get(model_column) if model_column else None,
+        "category": data.get(category_column) if category_column else None,
+        "confidence": row["quality"],
+        "status": row["status"],
+        "data": data,
+        "raw_data": data
     }
 
 
 # ============================================================
 # PRODUCTS
 #
-# Kept for compatibility with existing frontend.
-# Data itself is completely dynamic.
+# IMPORTANT:
+# This endpoint returns an ARRAY.
+# products.js expects an array.
 # ============================================================
 
 @app.get("/products")
 def get_products():
+    dataset_response = get_dataset()
 
-    dataset, rows = (
-        get_current_rows()
-    )
-
-    if not dataset:
-
+    if not dataset_response["dataset"]:
         return []
 
+    columns = dataset_response["columns"]
+
     return [
-        build_product_response(
-            item["id"],
-            item["row_number"],
-            item["data"]
-        )
-        for item in rows
+        build_product_from_row(row, columns)
+        for row in dataset_response["rows"]
     ]
 
 
 # ============================================================
-# SINGLE RECORD
+# PRODUCT DETAILS
 # ============================================================
 
-@app.get("/records/{record_id}")
-def get_record(
-    record_id: int
-):
+@app.get("/products/{product_id}")
+def get_product(product_id: int):
+    dataset_response = get_dataset()
 
-    dataset, rows = (
-        get_current_rows()
+    if not dataset_response["dataset"]:
+        raise HTTPException(
+            status_code=404,
+            detail="No dataset uploaded."
+        )
+
+    for row in dataset_response["rows"]:
+        if int(row["id"]) == int(product_id):
+            return build_product_from_row(
+                row,
+                dataset_response["columns"]
+            )
+
+    raise HTTPException(
+        status_code=404,
+        detail="Product not found."
     )
 
-    if not dataset:
+
+# ============================================================
+# VALIDATE PRODUCT
+# ============================================================
+
+@app.get("/validate/{product_id}")
+def validate_product(product_id: int):
+
+    dataset_response = get_dataset()
+
+    if not dataset_response["dataset"]:
 
         raise HTTPException(
             status_code=404,
             detail="No dataset uploaded."
         )
 
-    for item in rows:
+    target = None
 
-        if int(item["id"]) == int(
-            record_id
-        ):
+    for row in dataset_response["rows"]:
 
-            return build_record_response(
-                item["id"],
-                item["row_number"],
-                item["data"]
-            )
+        if int(row["id"]) == int(product_id):
 
-    for item in rows:
+            target = row
+            break
 
-        if int(
-            item["row_number"]
-        ) == int(record_id):
+    if target is None:
 
-            return build_record_response(
-                item["id"],
-                item["row_number"],
-                item["data"]
-            )
-
-    raise HTTPException(
-        status_code=404,
-        detail=(
-            f"Record {record_id} "
-            "was not found."
-        )
-    )
-
-
-# ============================================================
-# SINGLE PRODUCT
-#
-# Kept for frontend compatibility.
-# ============================================================
-
-@app.get("/products/{product_id}")
-def get_product(
-    product_id: int
-):
-
-    return get_record(
-        product_id
-    )
-
-
-# ============================================================
-# GENERIC VALUE EXTRACTION
-# ============================================================
-
-def extract_number(value):
-
-    if value is None:
-
-        return None
-
-    match = re.search(
-        r"-?\d+(?:\.\d+)?",
-        str(value)
-    )
-
-    if not match:
-
-        return None
-
-    try:
-
-        return float(
-            match.group()
+        raise HTTPException(
+            status_code=404,
+            detail="Product not found."
         )
 
-    except Exception:
+    data = target["data"]
 
-        return None
-
-
-# ============================================================
-# GENERIC NUMERIC VALIDATION
-# ============================================================
-
-def validate_numeric_values(
-    raw_data
-):
+    columns = dataset_response["columns"]
 
     issues = []
 
-    for column, value in raw_data.items():
+    warnings = []
 
-        if not has_value(value):
-
-            continue
-
-        number = extract_number(
-            value
-        )
-
-        if number is None:
-
-            continue
-
-        if number < 0:
-
-            issues.append(
-                f"{column} has a negative value"
-            )
-
-    return issues
-
-
-# ============================================================
-# DUPLICATE CHECK
-# ============================================================
-
-def serialize_row(data):
-
-    return json.dumps(
-        data,
-        sort_keys=True,
-        default=str
-    )
-
-
-def is_duplicate_row(
-    current_data,
-    other_data
-):
-
-    return (
-        serialize_row(
-            current_data
-        )
-        ==
-        serialize_row(
-            other_data
-        )
-    )
-
-
-# ============================================================
-# VALIDATION
-# ============================================================
-
-def generate_validation(
-    record,
-    all_rows
-):
-
-    raw_data = record.get(
-        "data",
-        record.get(
-            "raw_data",
-            {}
-        )
-    )
-
-    checks = []
-
-    # --------------------------------------------------------
-    # COMPLETENESS
-    # --------------------------------------------------------
-
-    total_fields = len(
-        raw_data
-    )
-
-    populated_fields = sum(
-        1
-        for value in raw_data.values()
-        if has_value(value)
-    )
-
-    completeness = (
-        round(
-            populated_fields
-            / total_fields
-            * 100
-        )
-        if total_fields > 0
-        else 0
-    )
-
-    if completeness >= 90:
-
-        checks.append(
-            {
-                "title":
-                    "Dataset Completeness",
-
-                "status":
-                    "PASS",
-
-                "icon":
-                    "✓",
-
-                "message":
-                    (
-                        f"{populated_fields} "
-                        f"of {total_fields} "
-                        "fields contain values."
-                    )
-            }
-        )
-
-    elif completeness >= 60:
-
-        checks.append(
-            {
-                "title":
-                    "Dataset Completeness",
-
-                "status":
-                    "WARNING",
-
-                "icon":
-                    "⚠️",
-
-                "message":
-                    (
-                        f"{populated_fields} "
-                        f"of {total_fields} "
-                        "fields contain values."
-                    )
-            }
-        )
-
-    else:
-
-        checks.append(
-            {
-                "title":
-                    "Dataset Completeness",
-
-                "status":
-                    "FAIL",
-
-                "icon":
-                    "❌",
-
-                "message":
-                    (
-                        "A large portion of "
-                        "the available fields "
-                        "are empty."
-                    )
-            }
-        )
-
-    # --------------------------------------------------------
-    # FIELD AVAILABILITY
-    # --------------------------------------------------------
-
-    if total_fields > 0:
-
-        checks.append(
-            {
-                "title":
-                    "Column Availability",
-
-                "status":
-                    "PASS",
-
-                "icon":
-                    "✓",
-
-                "message":
-                    (
-                        f"{total_fields} "
-                        "columns were detected "
-                        "in this record."
-                    )
-            }
-        )
-
-    else:
-
-        checks.append(
-            {
-                "title":
-                    "Column Availability",
-
-                "status":
-                    "FAIL",
-
-                "icon":
-                    "❌",
-
-                "message":
-                    "No columns were detected."
-            }
-        )
-
-    # --------------------------------------------------------
-    # NUMERIC VALIDATION
-    # --------------------------------------------------------
-
-    numeric_issues = (
-        validate_numeric_values(
-            raw_data
-        )
-    )
-
-    if numeric_issues:
-
-        checks.append(
-            {
-                "title":
-                    "Numeric Value Validation",
-
-                "status":
-                    "WARNING",
-
-                "icon":
-                    "⚠️",
-
-                "message":
-                    "; ".join(
-                        numeric_issues
-                    )
-            }
-        )
-
-    else:
-
-        checks.append(
-            {
-                "title":
-                    "Numeric Value Validation",
-
-                "status":
-                    "PASS",
-
-                "icon":
-                    "✓",
-
-                "message":
-                    (
-                        "No obvious negative "
-                        "numeric values were detected."
-                    )
-            }
-        )
+    recommendations = []
 
     # --------------------------------------------------------
     # EMPTY FIELD CHECK
     # --------------------------------------------------------
 
-    empty_columns = [
-        column
-        for column, value
-        in raw_data.items()
-        if not has_value(value)
-    ]
+    missing_fields = []
 
-    if not empty_columns:
+    for column in columns:
 
-        checks.append(
-            {
-                "title":
-                    "Empty Field Check",
+        value = data.get(column)
 
-                "status":
-                    "PASS",
+        if is_empty(value):
 
-                "icon":
-                    "✓",
+            missing_fields.append(
+                column
+            )
 
-                "message":
-                    "All fields contain values."
-            }
-        )
+    for field in missing_fields:
 
-    else:
-
-        checks.append(
-            {
-                "title":
-                    "Empty Field Check",
-
-                "status":
-                    "WARNING",
-
-                "icon":
-                    "⚠️",
-
-                "message":
-                    (
-                        f"{len(empty_columns)} "
-                        "field(s) are empty."
-                    ),
-
-                "empty_columns":
-                    empty_columns
-            }
+        issues.append(
+            f"{field} is missing."
         )
 
     # --------------------------------------------------------
@@ -2015,1119 +1255,353 @@ def generate_validation(
 
     duplicate_count = 0
 
-    for item in all_rows:
+    for row in dataset_response["rows"]:
 
-        other_data = item.get(
-            "data",
-            {}
-        )
+        if row["id"] == target["id"]:
+            continue
 
-        if is_duplicate_row(
-            raw_data,
-            other_data
-        ):
+        if row["data"] == data:
 
             duplicate_count += 1
 
-    if duplicate_count > 1:
+    if duplicate_count > 0:
 
-        checks.append(
-            {
-                "title":
-                    "Duplicate Check",
-
-                "status":
-                    "WARNING",
-
-                "icon":
-                    "⚠️",
-
-                "message":
-                    (
-                        "Another record "
-                        "contains the same "
-                        "complete set of values."
-                    )
-            }
-        )
-
-    else:
-
-        checks.append(
-            {
-                "title":
-                    "Duplicate Check",
-
-                "status":
-                    "PASS",
-
-                "icon":
-                    "✓",
-
-                "message":
-                    "No duplicate record was detected."
-            }
+        warnings.append(
+            "This product appears to have a duplicate record."
         )
 
     # --------------------------------------------------------
-    # SCORE
+    # NUMERIC CHECKS
     # --------------------------------------------------------
 
-    total_checks = len(
-        checks
-    )
+    numeric_columns = []
 
-    passed = sum(
-        1
-        for check in checks
-        if check["status"] == "PASS"
-    )
+    for column in columns:
 
-    warnings = sum(
-        1
-        for check in checks
-        if check["status"] == "WARNING"
-    )
+        value = data.get(column)
 
-    failed = sum(
-        1
-        for check in checks
-        if check["status"] == "FAIL"
-    )
+        if is_empty(value):
+            continue
 
-    if total_checks:
+        # Detect numeric-looking values
+        text = str(value).replace(
+            ",",
+            ""
+        ).strip()
 
-        quality_score = round(
-            (
-                passed
-                + warnings * 0.5
+        try:
+
+            float(text)
+
+            numeric_columns.append(
+                column
             )
-            / total_checks
-            * 100
+
+        except Exception:
+
+            # If column contains numeric
+            # keywords but value is not numeric
+            lower = column.lower()
+
+            numeric_keywords = [
+                "price",
+                "cost",
+                "weight",
+                "height",
+                "width",
+                "length",
+                "power",
+                "voltage",
+                "current",
+                "rating",
+                "quantity",
+                "stock",
+                "speed",
+                "rpm",
+                "capacity",
+                "temperature"
+            ]
+
+            if any(
+                key in lower
+                for key in numeric_keywords
+            ):
+
+                warnings.append(
+                    f"{column} contains a non-numeric value."
+                )
+
+    # --------------------------------------------------------
+    # TEXT QUALITY
+    # --------------------------------------------------------
+
+    for column in columns:
+
+        value = data.get(column)
+
+        if is_empty(value):
+            continue
+
+        if isinstance(value, str):
+
+            if len(value.strip()) < 2:
+
+                warnings.append(
+                    f"{column} contains very little information."
+                )
+
+    # --------------------------------------------------------
+    # RECOMMENDATIONS
+    # --------------------------------------------------------
+
+    if missing_fields:
+
+        recommendations.append(
+            "Complete all missing product information."
         )
 
-    else:
+    if duplicate_count > 0:
 
-        quality_score = 0
+        recommendations.append(
+            "Review duplicate records and keep only the correct product entry."
+        )
 
-    if failed > 0:
+    if warnings:
 
-        status = "Critical Issues"
+        recommendations.append(
+            "Review fields marked with warnings before publishing the product."
+        )
 
-    elif quality_score >= 85:
+    if not issues and not warnings:
+
+        recommendations.append(
+            "Product information looks complete and consistent."
+        )
+
+    # --------------------------------------------------------
+    # QUALITY SCORE
+    # --------------------------------------------------------
+
+    total_fields = len(columns)
+
+    filled_fields = (
+        total_fields
+        - len(missing_fields)
+    )
+
+    completeness = (
+        filled_fields / total_fields * 100
+        if total_fields
+        else 0
+    )
+
+    quality_score = max(
+        0,
+        round(
+            completeness
+            - min(
+                len(warnings) * 3,
+                20
+            )
+            - min(
+                duplicate_count * 10,
+                20
+            )
+        )
+    )
+
+    if quality_score >= 90:
 
         status = "Verified"
 
-    elif quality_score >= 60:
+    elif quality_score >= 70:
 
         status = "Needs Review"
 
     else:
 
-        status = "Critical Issues"
+        status = "Incomplete"
+
+    # --------------------------------------------------------
+    # BUILD FRONTEND-FRIENDLY PRODUCT DETAILS + CHECKS
+    # --------------------------------------------------------
+
+    product = build_product_from_row(
+        target,
+        columns
+    )
+
+    checks = []
+
+    # Missing-field check
+    checks.append({
+        "title": "Required fields",
+        "status": "FAIL" if missing_fields else "PASS",
+        "icon": "✕" if missing_fields else "✓",
+        "message": (
+            f"{len(missing_fields)} field(s) are missing: "
+            + ", ".join(missing_fields)
+            if missing_fields
+            else "All dataset fields contain values."
+        )
+    })
+
+    # Duplicate check
+    checks.append({
+        "title": "Duplicate record check",
+        "status": "WARNING" if duplicate_count else "PASS",
+        "icon": "!" if duplicate_count else "✓",
+        "message": (
+            f"{duplicate_count} duplicate record(s) found."
+            if duplicate_count
+            else "No duplicate record was found."
+        )
+    })
+
+    # Numeric validation check
+    numeric_warning_messages = [
+        warning
+        for warning in warnings
+        if "non-numeric value" in warning
+    ]
+
+    checks.append({
+        "title": "Numeric field validation",
+        "status": "FAIL" if numeric_warning_messages else "PASS",
+        "icon": "✕" if numeric_warning_messages else "✓",
+        "message": (
+            " ".join(numeric_warning_messages)
+            if numeric_warning_messages
+            else "Numeric-looking fields contain valid numeric values."
+        )
+    })
+
+    # Text quality check
+    short_text_warnings = [
+        warning
+        for warning in warnings
+        if "very little information" in warning
+    ]
+
+    checks.append({
+        "title": "Text quality",
+        "status": "WARNING" if short_text_warnings else "PASS",
+        "icon": "!" if short_text_warnings else "✓",
+        "message": (
+            " ".join(short_text_warnings)
+            if short_text_warnings
+            else "Text fields contain sufficient information."
+        )
+    })
 
     return {
-        "quality_score":
-            quality_score,
+
+        "success":
+            True,
+
+        "id":
+            product_id,
+
+        "product_name":
+            product["name"],
+
+        "product":
+            product,
 
         "status":
             status,
 
+        "score":
+            quality_score,
+
+        "quality_score":
+            quality_score,
+
         "checks":
             checks,
 
-        "passed":
-            passed,
+        "issues":
+            issues,
 
         "warnings":
             warnings,
 
-        "failed":
-            failed
-    }
+        "recommendations":
+            recommendations,
 
+        "missing_fields":
+            missing_fields,
 
-# ============================================================
-# VALIDATE RECORD - NEW API
-# ============================================================
+        "duplicate_count":
+            duplicate_count,
 
-@app.post("/validate-record")
-async def validate_record(
-    payload: dict
-):
+        "total_fields":
+            total_fields,
 
-    record_data = payload.get(
-        "record",
-        payload.get(
-            "product",
-            {}
-        )
-    )
-
-    all_rows_data = payload.get(
-        "all_rows",
-        []
-    )
-
-    if not record_data:
-
-        raise HTTPException(
-            status_code=400,
-            detail="Record data is missing."
-        )
-
-    if "data" in record_data:
-
-        raw_data = record_data[
-            "data"
-        ]
-
-    elif "raw_data" in record_data:
-
-        raw_data = record_data[
-            "raw_data"
-        ]
-
-    else:
-
-        raw_data = record_data
-
-    record = build_record_response(
-        record_data.get(
-            "id",
-            0
-        ),
-
-        record_data.get(
-            "row_number",
-            0
-        ),
-
-        raw_data
-    )
-
-    all_rows = []
-
-    for row in all_rows_data:
-
-        if not isinstance(
-            row,
-            dict
-        ):
-
-            continue
-
-        if "data" in row:
-
-            all_rows.append(
-                {
-                    "data":
-                        row["data"]
-                }
-            )
-
-        elif "raw_data" in row:
-
-            all_rows.append(
-                {
-                    "data":
-                        row["raw_data"]
-                }
-            )
-
-        else:
-
-            all_rows.append(
-                {
-                    "data":
-                        row
-                }
-            )
-
-    result = generate_validation(
-        record,
-        all_rows
-    )
-
-    return {
-        "success": True,
-
-        "record_id":
-            record["id"],
-
-        "status":
-            result["status"],
-
-        "quality_score":
-            result["quality_score"],
-
-        "checks":
-            result["checks"],
-
-        "record":
-            record
-    }
-
-
-# ============================================================
-# OLD VALIDATION ENDPOINT
-#
-# Kept for compatibility.
-# ============================================================
-
-@app.post("/validate-product")
-async def validate_product_new(
-    payload: dict
-):
-
-    return await validate_record(
-        payload
-    )
-
-
-# ============================================================
-# VALIDATE RECORD BY ID
-# ============================================================
-
-@app.get("/validate-record/{record_id}")
-def validate_record_by_id(
-    record_id: int
-):
-
-    dataset, rows = (
-        get_current_rows()
-    )
-
-    if not dataset:
-
-        raise HTTPException(
-            status_code=404,
-            detail="No dataset uploaded."
-        )
-
-    selected = None
-
-    for item in rows:
-
-        if int(
-            item["id"]
-        ) == int(record_id):
-
-            selected = item
-
-            break
-
-    if not selected:
-
-        for item in rows:
-
-            if int(
-                item["row_number"]
-            ) == int(record_id):
-
-                selected = item
-
-                break
-
-    if not selected:
-
-        raise HTTPException(
-            status_code=404,
-            detail="Record not found."
-        )
-
-    record = build_record_response(
-        selected["id"],
-        selected["row_number"],
-        selected["data"]
-    )
-
-    result = generate_validation(
-        record,
-        rows
-    )
-
-    return {
-        "success": True,
-
-        "record_id":
-            record["id"],
-
-        "status":
-            result["status"],
-
-        "quality_score":
-            result["quality_score"],
-
-        "checks":
-            result["checks"],
-
-        "record":
-            record
-    }
-
-
-# ============================================================
-# OLD VALIDATION ENDPOINT
-# ============================================================
-
-@app.get("/validate/{product_id}")
-def validate_product_by_id(
-    product_id: int
-):
-
-    return validate_record_by_id(
-        product_id
-    )
-
-
-# ============================================================
-# DATASET DASHBOARD
-# ============================================================
-
-@app.get("/dashboard")
-def dashboard():
-
-    dataset, rows = (
-        get_current_rows()
-    )
-
-    if not dataset:
-
-        return {
-            "success": True,
-
-            "has_data":
-                False,
-
-            "total_records":
-                0,
-
-            "total_products":
-                0,
-
-            "total_rows":
-                0,
-
-            "total_columns":
-                0,
-
-            "dataset_name":
-                "No dataset uploaded",
-
-            "missing_values":
-                0,
-
-            "duplicate_rows":
-                0,
-
-            "verified":
-                0,
-
-            "needs_review":
-                0,
-
-            "incomplete":
-                0,
-
-            "critical_issues":
-                0,
-
-            "average_confidence":
-                0,
-
-            "average_quality":
-                0
-        }
-
-    records = [
-        build_record_response(
-            item["id"],
-            item["row_number"],
-            item["data"]
-        )
-        for item in rows
-    ]
-
-    # --------------------------------------------------------
-    # STATUS
-    # --------------------------------------------------------
-
-    verified = sum(
-        1
-        for record in records
-        if record["status"] == "Verified"
-    )
-
-    needs_review = sum(
-        1
-        for record in records
-        if record["status"] == "Needs Review"
-    )
-
-    incomplete = sum(
-        1
-        for record in records
-        if record["status"] == "Incomplete"
-    )
-
-    # --------------------------------------------------------
-    # CONFIDENCE
-    # --------------------------------------------------------
-
-    average_confidence = (
-        round(
-            sum(
-                record["confidence"]
-                for record in records
-            )
-            / len(records)
-        )
-        if records
-        else 0
-    )
-
-    # --------------------------------------------------------
-    # MISSING VALUES
-    # --------------------------------------------------------
-
-    missing_values = sum(
-        1
-        for item in rows
-        for value in item["data"].values()
-        if not has_value(value)
-    )
-
-    # --------------------------------------------------------
-    # DUPLICATE ROWS
-    # --------------------------------------------------------
-
-    duplicate_rows = int(
-        len(rows)
-        - len(
-            {
-                serialize_row(
-                    item["data"]
-                )
-                for item in rows
-            }
-        )
-    )
-
-    # --------------------------------------------------------
-    # DATASET COMPLETENESS
-    # --------------------------------------------------------
-
-    total_cells = (
-        dataset["rows_count"]
-        *
-        dataset["columns_count"]
-    )
-
-    completeness = (
-        round(
-            (
-                total_cells
-                - missing_values
-            )
-            / total_cells
-            * 100
-        )
-        if total_cells > 0
-        else 0
-    )
-
-    return {
-        "success": True,
-
-        "has_data":
-            True,
-
-        "total_records":
-            len(records),
-
-        # Backward-compatible names
-        "total_products":
-            len(records),
-
-        "total_rows":
-            len(records),
-
-        "total_columns":
-            dataset["columns_count"],
-
-        "dataset_name":
-            dataset["filename"],
-
-        "missing_values":
-            missing_values,
-
-        "duplicate_rows":
-            duplicate_rows,
-
-        "verified":
-            verified,
-
-        "needs_review":
-            needs_review,
-
-        "incomplete":
-            incomplete,
-
-        "critical_issues":
-            incomplete,
-
-        "average_confidence":
-            average_confidence,
-
-        "average_quality":
-            average_confidence,
+        "filled_fields":
+            filled_fields,
 
         "completeness":
-            completeness
+            round(
+                completeness,
+                1
+            ),
+
+        "data":
+            data
+
     }
 
 
 # ============================================================
-# DATASET REPORT
+# DELETE CURRENT DATASET
 # ============================================================
 
-@app.get("/report")
-def get_report():
+@app.delete("/dataset")
+def delete_dataset():
 
-    dataset, rows = (
-        get_current_rows()
-    )
+    connection = get_connection()
 
-    if not dataset:
-
-        return {
-            "success": True,
-
-            "has_data":
-                False,
-
-            "dataset":
-                None,
-
-            "summary":
-                {},
-
-            "columns":
-                [],
-
-            "schema":
-                {},
-
-            "rows":
-                [],
-
-            "records":
-                [],
-
-            "products":
-                []
-        }
-
-    # --------------------------------------------------------
-    # RECORDS
-    # --------------------------------------------------------
-
-    records = [
-        build_record_response(
-            item["id"],
-            item["row_number"],
-            item["data"]
-        )
-        for item in rows
-    ]
-
-    # --------------------------------------------------------
-    # MISSING VALUES
-    # --------------------------------------------------------
-
-    missing_values = sum(
-        1
-        for item in rows
-        for value in item["data"].values()
-        if not has_value(value)
-    )
-
-    # --------------------------------------------------------
-    # DUPLICATE ROWS
-    # --------------------------------------------------------
-
-    unique_rows = len(
-        {
-            serialize_row(
-                item["data"]
-            )
-            for item in rows
-        }
-    )
-
-    duplicate_rows = max(
-        len(rows)
-        - unique_rows,
-        0
-    )
-
-    # --------------------------------------------------------
-    # VALIDATION
-    # --------------------------------------------------------
-
-    validation_results = []
-
-    for record in records:
-
-        result = generate_validation(
-            record,
-            rows
-        )
-
-        validation_results.append(
-            result
-        )
-
-    # --------------------------------------------------------
-    # STATUS COUNTS
-    # --------------------------------------------------------
-
-    verified = sum(
-        1
-        for result in validation_results
-        if result["status"] == "Verified"
-    )
-
-    needs_review = sum(
-        1
-        for result in validation_results
-        if result["status"] == "Needs Review"
-    )
-
-    critical = sum(
-        1
-        for result in validation_results
-        if result["status"] == "Critical Issues"
-    )
-
-    # --------------------------------------------------------
-    # AVERAGE QUALITY
-    # --------------------------------------------------------
-
-    average_quality = (
-        round(
-            sum(
-                result["quality_score"]
-                for result in validation_results
-            )
-            / len(validation_results)
-        )
-        if validation_results
-        else 0
-    )
-
-    # --------------------------------------------------------
-    # COMPLETENESS
-    # --------------------------------------------------------
-
-    total_cells = (
-        dataset["rows_count"]
-        *
-        dataset["columns_count"]
-    )
-
-    completeness = (
-        round(
-            (
-                total_cells
-                - missing_values
-            )
-            / total_cells
-            * 100
-        )
-        if total_cells > 0
-        else 0
-    )
-
-    # --------------------------------------------------------
-    # DUPLICATE SCORE
-    # --------------------------------------------------------
-
-    duplicate_score = round(
-        (
-            1
-            -
-            duplicate_rows
-            /
-            max(
-                dataset["rows_count"],
-                1
-            )
-        )
-        * 100
-    )
-
-    duplicate_score = max(
-        0,
-        min(
-            100,
-            duplicate_score
-        )
-    )
-
-    # --------------------------------------------------------
-    # OVERALL QUALITY
-    # --------------------------------------------------------
-
-    overall_quality = round(
-        (
-            completeness * 0.45
-            +
-            duplicate_score * 0.10
-            +
-            average_quality * 0.45
-        )
-    )
-
-    overall_quality = max(
-        0,
-        min(
-            100,
-            overall_quality
-        )
-    )
-
-    # --------------------------------------------------------
-    # SCHEMA
-    # --------------------------------------------------------
-
-    columns = json.loads(
-        dataset["columns_json"]
-        or "[]"
-    )
+    cursor = connection.cursor()
 
     try:
 
-        schema = json.loads(
-            dataset.get(
-                "schema_json"
-            )
-            or "{}"
+        cursor.execute(
+            """
+            DELETE FROM dataset_rows
+            """
         )
 
-    except Exception:
-
-        schema = {}
-
-    # --------------------------------------------------------
-    # RETURN
-    # --------------------------------------------------------
-
-    return {
-        "success": True,
-
-        "has_data":
-            True,
-
-        "dataset": {
-            "dataset_id":
-                dataset["dataset_id"],
-
-            "filename":
-                dataset["filename"],
-
-            "rows_count":
-                dataset["rows_count"],
-
-            "columns_count":
-                dataset["columns_count"],
-
-            "file_type":
-                dataset["file_type"],
-
-            "uploaded_at":
-                dataset["uploaded_at"]
-        },
-
-        "summary": {
-
-            "total_records":
-                len(records),
-
-            # Backward compatibility
-            "total_products":
-                len(records),
-
-            "total_rows":
-                len(records),
-
-            "total_columns":
-                dataset["columns_count"],
-
-            "missing_values":
-                missing_values,
-
-            "duplicate_rows":
-                duplicate_rows,
-
-            "verified":
-                verified,
-
-            "needs_review":
-                needs_review,
-
-            "critical_issues":
-                critical,
-
-            "average_quality_score":
-                average_quality,
-
-            "average_confidence":
-                round(
-                    sum(
-                        record["confidence"]
-                        for record in records
-                    )
-                    / len(records)
-                )
-                if records
-                else 0,
-
-            "completeness":
-                completeness,
-
-            "duplicate_score":
-                duplicate_score,
-
-            "data_quality_score":
-                overall_quality
-        },
-
-        "columns":
-            columns,
-
-        "schema":
-            schema,
-
-        "rows": [
-            item["data"]
-            for item in rows
-        ],
-
-        "records":
-            records,
-
-        # Backward compatibility
-        "products":
-            [
-                build_product_response(
-                    item["id"],
-                    item["row_number"],
-                    item["data"]
-                )
-                for item in rows
-            ]
-    }
-
-
-# ============================================================
-# REPORT ALIAS
-# ============================================================
-
-@app.get("/reports")
-def get_reports():
-
-    return get_report()
-
-
-# ============================================================
-# INDIVIDUAL RECORD REPORT
-# ============================================================
-
-@app.get("/reports/record/{record_id}")
-def individual_record_report(
-    record_id: int
-):
-
-    dataset, rows = (
-        get_current_rows()
-    )
-
-    if not dataset:
-
-        raise HTTPException(
-            status_code=404,
-            detail="No dataset uploaded."
+        cursor.execute(
+            """
+            DELETE FROM datasets
+            """
         )
 
-    selected = None
+        connection.commit()
 
-    for item in rows:
+        return {
 
-        if int(
-            item["id"]
-        ) == int(record_id):
+            "success": True,
 
-            selected = item
+            "message":
+                "Current dataset deleted successfully."
 
-            break
-
-    if not selected:
-
-        for item in rows:
-
-            if int(
-                item["row_number"]
-            ) == int(record_id):
-
-                selected = item
-
-                break
-
-    if not selected:
-
-        raise HTTPException(
-            status_code=404,
-            detail="Record not found."
-        )
-
-    record = build_record_response(
-        selected["id"],
-        selected["row_number"],
-        selected["data"]
-    )
-
-    validation = generate_validation(
-        record,
-        rows
-    )
-
-    return {
-        "success": True,
-
-        "dataset": {
-            "filename":
-                dataset["filename"]
-        },
-
-        "record":
-            record,
-
-        "report": {
-            "quality_score":
-                validation[
-                    "quality_score"
-                ],
-
-            "status":
-                validation[
-                    "status"
-                ],
-
-            "passed_checks":
-                validation[
-                    "passed"
-                ],
-
-            "warnings":
-                validation[
-                    "warnings"
-                ],
-
-            "failed_checks":
-                validation[
-                    "failed"
-                ],
-
-            "checks":
-                validation[
-                    "checks"
-                ]
         }
-    }
 
+    except Exception as e:
 
-# ============================================================
-# OLD INDIVIDUAL PRODUCT REPORT
-# ============================================================
-
-@app.get("/reports/product/{product_id}")
-def individual_product_report(
-    product_id: int
-):
-
-    return individual_record_report(
-        product_id
-    )
-
-
-# ============================================================
-# CSV REPORT
-# ============================================================
-
-@app.get("/report/csv")
-def report_csv():
-
-    dataset, rows = (
-        get_current_rows()
-    )
-
-    if not dataset:
+        connection.rollback()
 
         raise HTTPException(
-            status_code=404,
-            detail="No dataset available."
+            status_code=500,
+            detail=str(e)
         )
 
-    output = io.StringIO()
+    finally:
 
-    columns = json.loads(
-        dataset["columns_json"]
-        or "[]"
-    )
-
-    writer = csv.writer(
-        output
-    )
-
-    writer.writerow(
-        columns
-    )
-
-    for item in rows:
-
-        data = item["data"]
-
-        writer.writerow(
-            [
-                data.get(
-                    column,
-                    ""
-                )
-                for column in columns
-            ]
-        )
-
-    return {
-        "success": True,
-
-        "filename":
-            "dynamic-dataset-report.csv",
-
-        "csv":
-            output.getvalue()
-    }
-
-
-# ============================================================
-# JSON REPORT
-# ============================================================
-
-@app.get("/report/json")
-def report_json():
-
-    return get_report()
+        cursor.close()
+        connection.close()
 
 
 # ============================================================
@@ -3139,232 +1613,279 @@ def get_datasets():
 
     connection = get_connection()
 
-    try:
+    cursor = connection.cursor()
 
-        cursor = connection.cursor()
+    cursor.execute(
+        """
+        SELECT
+            id,
+            dataset_id,
+            filename,
+            file_type,
+            rows_count,
+            columns_count,
+            uploaded_at
+        FROM datasets
+        ORDER BY id DESC
+        """
+    )
 
-        cursor.execute(
-            """
-            SELECT
-                id,
-                dataset_id,
-                filename,
-                file_type,
-                rows_count,
-                columns_count,
-                uploaded_at
+    datasets = cursor.fetchall()
 
-            FROM datasets
+    result = [
+        dict(dataset)
+        for dataset in datasets
+    ]
 
-            ORDER BY id DESC
-            """
-        )
+    cursor.close()
+    connection.close()
 
-        datasets = cursor.fetchall()
+    return {
 
-        result = [
-            dict(dataset)
-            for dataset in datasets
-        ]
+        "success":
+            True,
 
-        cursor.close()
+        "count":
+            len(result),
+
+        "datasets":
+            result
+
+    }
+
+
+# ============================================================
+# DASHBOARD
+# ============================================================
+
+@app.get("/dashboard")
+def dashboard():
+
+    dataset = get_dataset()
+
+    if not dataset["dataset"]:
 
         return {
+
             "success": True,
 
-            "count":
-                len(result),
+            "total_products": 0,
 
-            "datasets":
-                result
+            "total_rows": 0,
+
+            "total_columns": 0,
+
+            "dataset_name":
+                "No dataset uploaded",
+
+            "missing_values": 0,
+
+            "verified": 0,
+
+            "needs_review": 0,
+
+            "average_confidence": 0
+
         }
 
-    finally:
+    rows = dataset["rows"]
 
-        connection.close()
+    missing = 0
 
+    verified = 0
 
-# ============================================================
-# DELETE CURRENT DATASET
-# ============================================================
+    needs_review = 0
 
-@app.delete("/dataset")
-def delete_current_dataset():
+    scores = []
 
-    connection = get_connection()
+    for row in rows:
 
-    try:
+        data = row["data"]
 
-        cursor = connection.cursor()
+        for value in data.values():
 
-        cursor.execute(
-            """
-            SELECT dataset_id
-            FROM datasets
-            ORDER BY id DESC
-            LIMIT 1
-            """
+            if is_empty(value):
+
+                missing += 1
+
+        score = row["quality"]
+
+        scores.append(score)
+
+        if row["status"] == "Verified":
+
+            verified += 1
+
+        else:
+
+            needs_review += 1
+
+    average_confidence = (
+        round(
+            sum(scores) / len(scores),
+            1
         )
+        if scores
+        else 0
+    )
 
-        dataset = cursor.fetchone()
+    return {
 
-        if not dataset:
+        "success":
+            True,
 
-            cursor.close()
+        "total_products":
+            len(rows),
 
-            return {
-                "success": False,
+        "total_rows":
+            len(rows),
 
-                "message":
-                    "No dataset found."
+        "total_columns":
+            dataset["dataset"]["columns_count"],
+
+        "dataset_name":
+            dataset["dataset"]["filename"],
+
+        "missing_values":
+            missing,
+
+        "verified":
+            verified,
+
+        "needs_review":
+            needs_review,
+
+        "average_confidence":
+            average_confidence
+
+    }
+
+
+# ============================================================
+# REPORT
+# ============================================================
+
+@app.get("/report")
+def report(summary: bool = Query(False)):
+    """Return report summary. Use summary=true to keep the response small; products are loaded separately."""
+    dataset = get_dataset()
+
+    if not dataset["dataset"]:
+        return {
+            "success": True,
+            "dataset": None,
+            "products": [],
+            "report": {
+                "dataset_name": "No dataset uploaded",
+                "total_products": 0,
+                "total_columns": 0,
+                "verified": 0,
+                "needs_review": 0,
+                "average_confidence": 0,
+                "missing_values": 0,
+                "duplicate_rows": 0,
+                "columns": []
             }
-
-        dataset_id = dataset[
-            "dataset_id"
-        ]
-
-        cursor.execute(
-            """
-            DELETE FROM dataset_rows
-            WHERE dataset_id = %s
-            """,
-            (
-                dataset_id,
-            )
-        )
-
-        cursor.execute(
-            """
-            DELETE FROM datasets
-            WHERE dataset_id = %s
-            """,
-            (
-                dataset_id,
-            )
-        )
-
-        connection.commit()
-
-        cursor.close()
-
-        # ----------------------------------------------------
-        # DELETE FILE
-        # ----------------------------------------------------
-
-        if os.path.exists(
-            UPLOAD_FOLDER
-        ):
-
-            for filename in os.listdir(
-                UPLOAD_FOLDER
-            ):
-
-                if filename.startswith(
-                    dataset_id + "_"
-                ):
-
-                    path = os.path.join(
-                        UPLOAD_FOLDER,
-                        filename
-                    )
-
-                    try:
-
-                        os.remove(
-                            path
-                        )
-
-                    except Exception:
-
-                        pass
-
-        return {
-            "success": True,
-
-            "message":
-                "Dataset deleted successfully."
         }
 
-    except Exception:
+    rows = dataset["rows"]
 
-        connection.rollback()
+    scores = [
+        row["quality"]
+        for row in rows
+    ]
 
-        raise
+    verified = sum(
+        1
+        for row in rows
+        if row["status"] == "Verified"
+    )
 
-    finally:
+    missing_values = 0
 
-        connection.close()
+    for row in rows:
+        for value in row["data"].values():
+            if is_empty(value):
+                missing_values += 1
 
+    # Count exact duplicate records.
+    seen = set()
+    duplicate_rows = 0
 
-# ============================================================
-# DELETE ALL DATASETS
-# ============================================================
+    for row in rows:
+        try:
+            signature = json.dumps(
+                row["data"],
+                sort_keys=True,
+                default=str
+            )
+        except Exception:
+            signature = str(row["data"])
 
-@app.delete("/datasets")
-def delete_all_datasets():
+        if signature in seen:
+            duplicate_rows += 1
+        else:
+            seen.add(signature)
 
-    connection = get_connection()
-
-    try:
-
-        cursor = connection.cursor()
-
-        cursor.execute(
-            "DELETE FROM dataset_rows"
+    product_list = [] if summary else [
+        build_product_from_row(
+            row,
+            dataset["columns"]
         )
+        for row in rows
+    ]
 
-        cursor.execute(
-            "DELETE FROM datasets"
-        )
+    dataset_info = {
+        "dataset_id": dataset["dataset"]["dataset_id"],
+        "filename": dataset["dataset"]["filename"],
+        "file_type": dataset["dataset"]["file_type"],
+        "rows": dataset["dataset"]["rows_count"],
+        "columns": dataset["columns"],
+        "columns_count": dataset["dataset"]["columns_count"],
+        "uploaded_at": dataset["dataset"]["uploaded_at"]
+    }
 
-        connection.commit()
+    report_info = {
+        "dataset_name":
+            dataset["dataset"]["filename"],
 
-        cursor.close()
+        "total_products":
+            len(rows),
 
-        # ----------------------------------------------------
-        # DELETE UPLOADED FILES
-        # ----------------------------------------------------
+        "total_columns":
+            dataset["dataset"]["columns_count"],
 
-        if os.path.exists(
-            UPLOAD_FOLDER
-        ):
+        "verified":
+            verified,
 
-            for filename in os.listdir(
-                UPLOAD_FOLDER
-            ):
+        "needs_review":
+            len(rows) - verified,
 
-                path = os.path.join(
-                    UPLOAD_FOLDER,
-                    filename
-                )
+        "average_confidence":
+            round(
+                sum(scores) / len(scores),
+                1
+            )
+            if scores
+            else 0,
 
-                try:
+        "missing_values":
+            missing_values,
 
-                    if os.path.isfile(
-                        path
-                    ):
+        "duplicate_rows":
+            duplicate_rows,
 
-                        os.remove(
-                            path
-                        )
+        "columns":
+            dataset["columns"]
+    }
 
-                except Exception:
+    # Keep report generation fast and reliable. The browser loads
+    # the product records separately from /products, so a large
+    # dataset cannot make the report response unnecessarily huge.
+    return {
+        "success": True,
+        "dataset": dataset_info,
+        "products": [] if summary else product_list,
+        "report": report_info
+    }
 
-                    pass
-
-        return {
-            "success": True,
-
-            "message":
-                "All datasets deleted successfully."
-        }
-
-    except Exception:
-
-        connection.rollback()
-
-        raise
-
-    finally:
-
-        connection.close()
