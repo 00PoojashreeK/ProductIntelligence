@@ -386,34 +386,38 @@
 .detail-row {
     display: flex;
     justify-content: space-between;
-    align-items: center;
-
+    align-items: flex-start;
     gap: 20px;
-    padding: 12px 0;
-
-    border-bottom: 1px solid rgba(148,163,184,.10);
-}
-
-.detail-row:last-child {
-    border-bottom: 0;
+    width: 100%;
+    padding: 14px 0;
+    border-bottom: 1px solid #e5e7eb;
+    box-sizing: border-box;
 }
 
 .detail-row span {
-    color: var(--muted) !important;
-    font-size: 13px;
+    flex: 0 0 40%;
+    min-width: 0;
 }
 
 .detail-row strong {
-    max-width: 60%;
-
-    overflow: hidden;
-    text-overflow: ellipsis;
-    white-space: nowrap;
-
-    color: #edf2ff !important;
-    font-size: 13px;
+    flex: 1;
+    min-width: 0;
+    text-align: right;
+    overflow-wrap: anywhere;
+    word-break: break-word;
+    white-space: normal;
 }
+@media (max-width: 700px) {
+    .detail-row {
+        display: block;
+    }
 
+    .detail-row strong {
+        display: block;
+        margin-top: 5px;
+        text-align: left;
+    }
+}
 /* =========================================================
    INSIGHTS
 ========================================================= */

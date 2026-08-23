@@ -5,6 +5,7 @@ const API = "https://productintelligence-lzcn.onrender.com";
 // SETTINGS
 // ============================================================
 
+// KEEP THIS FIXED AS REQUESTED
 const PRODUCTS_PER_PAGE = 50;
 
 
@@ -22,6 +23,8 @@ let totalPages = 1;
 
 let currentProductIndex = -1;
 
+let datasetColumns = [];
+
 
 // ============================================================
 // LOAD REPORT
@@ -29,21 +32,34 @@ let currentProductIndex = -1;
 
 async function loadReport() {
 
-    const initialReport =
+    const individualReport =
         document.getElementById("individualReport");
 
-    if (initialReport) {
-        initialReport.classList.add("report-hidden");
-        initialReport.style.display = "none";
+    if (individualReport) {
+
+        individualReport.classList.add(
+            "report-hidden"
+        );
+
+        individualReport.style.display =
+            "none";
     }
 
+
     const productGroups =
-        document.getElementById("productGroups");
+        document.getElementById(
+            "productGroups"
+        );
+
 
     try {
 
         if (!productGroups) {
-            console.error("productGroups element not found.");
+
+            console.error(
+                "productGroups element not found."
+            );
+
             return;
         }
 
@@ -56,7 +72,9 @@ async function loadReport() {
 
 
         const response =
-            await fetch(`${API}/report`);
+            await fetch(
+                `${API}/report`
+            );
 
 
         if (!response.ok) {
@@ -64,7 +82,6 @@ async function loadReport() {
             throw new Error(
                 `Backend returned ${response.status}`
             );
-
         }
 
 
@@ -73,12 +90,13 @@ async function loadReport() {
 
 
         console.log(
-            "Report data:",
+            "Dynamic report data:",
             data
         );
 
 
         if (
+            !data ||
             !data.success ||
             !data.dataset
         ) {
@@ -86,7 +104,6 @@ async function loadReport() {
             showNoDataset();
 
             return;
-
         }
 
 
@@ -100,106 +117,37 @@ async function loadReport() {
 
 
         // ====================================================
-        // OVERALL REPORT
+        // DETECT DATASET COLUMNS
         // ====================================================
 
-        const datasetName =
-            document.getElementById("datasetName");
-
-        if (datasetName) {
-
-            datasetName.innerText =
-                `Dataset: ${data.dataset.filename || "Unknown Dataset"}`;
-
-        }
-
-
-        const datasetNameCard =
-            document.getElementById("datasetNameCard");
-
-        if (datasetNameCard) {
-
-            datasetNameCard.innerText =
-                data.dataset.filename || "—";
-
-        }
-
-
-        const datasetStatusText =
-            document.getElementById("datasetStatusText");
-
-        if (datasetStatusText) {
-
-            datasetStatusText.innerText =
-                "Ready";
-
-        }
-
-
-        const totalProducts =
-            document.getElementById("totalProducts");
-
-        if (totalProducts) {
-
-            totalProducts.innerText =
-                products.length;
-
-        }
-
-
-        const totalColumns =
-            document.getElementById("totalColumns");
-
-        if (totalColumns) {
-
-            totalColumns.innerText =
-                data.dataset.columns || 0;
-
-        }
+        datasetColumns =
+            detectDatasetColumns(
+                data,
+                products
+            );
 
 
         // ====================================================
-        // VERIFIED / NEEDS REVIEW
+        // DATASET INFORMATION
         // ====================================================
 
-        const verified =
-            products.filter(
-                product =>
-                    product.status === "Verified"
-            ).length;
-
-
-        const needsReview =
-            products.filter(
-                product =>
-                    product.status !== "Verified"
-            ).length;
-
-
-        const verifiedProducts =
-            document.getElementById("verifiedProducts");
-
-        if (verifiedProducts) {
-
-            verifiedProducts.innerText =
-                verified;
-
-        }
-
-
-        const needsReviewElement =
-            document.getElementById("needsReview");
-
-        if (needsReviewElement) {
-
-            needsReviewElement.innerText =
-                needsReview;
-
-        }
+        renderDatasetInformation(
+            data
+        );
 
 
         // ====================================================
-        // AVERAGE CONFIDENCE
+        // STATISTICS
+        // ====================================================
+
+        renderStatistics(
+            data,
+            products
+        );
+
+
+        // ====================================================
+        // CONFIDENCE
         // ====================================================
 
         const averageConfidence =
@@ -209,19 +157,25 @@ async function loadReport() {
             );
 
 
-        console.log(
-            "Final Average Confidence:",
-            averageConfidence
-        );
-
-
         setAverageConfidence(
             averageConfidence
         );
 
 
         // ====================================================
-        // CALCULATE PAGES
+        // DYNAMIC SUMMARY
+        // ====================================================
+
+        generateDynamicInsights(
+            data,
+            products,
+            datasetColumns,
+            averageConfidence
+        );
+
+
+        // ====================================================
+        // PAGINATION
         // ====================================================
 
         totalPages =
@@ -231,10 +185,11 @@ async function loadReport() {
             );
 
 
-        if (totalPages === 0) {
+        if (
+            totalPages === 0
+        ) {
 
             totalPages = 1;
-
         }
 
 
@@ -242,13 +197,14 @@ async function loadReport() {
 
 
         // ====================================================
-        // SHOW FIRST PAGE
+        // BUILD PRODUCT PAGE
         // ====================================================
 
         buildProductPage();
 
-
     }
+
+
     catch (error) {
 
         console.error(
@@ -283,11 +239,917 @@ async function loadReport() {
                 </div>
 
             `;
+        }
+    }
+}
+
+
+// ============================================================
+// DETECT DATASET COLUMNS
+// ============================================================
+
+function detectDatasetColumns(
+    data,
+    productList
+) {
+
+    const columns = [];
+
+
+    // --------------------------------------------------------
+    // Backend dataset columns
+    // --------------------------------------------------------
+
+    if (
+        data &&
+        data.dataset &&
+        Array.isArray(
+            data.dataset.columns
+        )
+    ) {
+
+        columns.push(
+            ...data.dataset.columns
+        );
+    }
+
+
+    // --------------------------------------------------------
+    // If backend gives numeric column count,
+    // detect columns from actual product records.
+    // --------------------------------------------------------
+
+    if (
+        productList.length > 0
+    ) {
+
+        productList.forEach(
+            product => {
+
+                if (
+                    product &&
+                    typeof product === "object"
+                ) {
+
+                    Object.keys(
+                        product
+                    ).forEach(
+                        key => {
+
+                            if (
+                                !columns.includes(
+                                    key
+                                )
+                            ) {
+
+                                columns.push(
+                                    key
+                                );
+                            }
+
+                        }
+                    );
+                }
+
+            }
+        );
+    }
+
+
+    // --------------------------------------------------------
+    // Remove internal fields if they are not dataset fields
+    // --------------------------------------------------------
+
+    const ignoredFields = [
+        "raw_data"
+    ];
+
+
+    return columns.filter(
+        column =>
+            !ignoredFields.includes(
+                column
+            )
+    );
+}
+
+
+// ============================================================
+// DATASET INFORMATION
+// ============================================================
+
+function renderDatasetInformation(
+    data
+) {
+
+    const dataset =
+        data.dataset || {};
+
+
+    const filename =
+        getFirstAvailableValue(
+            dataset,
+            [
+                "filename",
+                "file_name",
+                "name",
+                "dataset_name"
+            ]
+        );
+
+
+    const datasetName =
+        filename ||
+        "Uploaded Dataset";
+
+
+    // --------------------------------------------------------
+    // Main dataset name
+    // --------------------------------------------------------
+
+    const datasetNameElement =
+        document.getElementById(
+            "datasetName"
+        );
+
+
+    if (datasetNameElement) {
+
+        datasetNameElement.innerText =
+            datasetName;
+    }
+
+
+    const datasetNameCard =
+        document.getElementById(
+            "datasetNameCard"
+        );
+
+
+    if (datasetNameCard) {
+
+        datasetNameCard.innerText =
+            datasetName;
+    }
+
+
+    // --------------------------------------------------------
+    // Overview title
+    // --------------------------------------------------------
+
+    const overviewTitle =
+        document.getElementById(
+            "overviewTitle"
+        );
+
+
+    if (overviewTitle) {
+
+        overviewTitle.innerText =
+            "Dataset Intelligence Overview";
+    }
+
+
+    // --------------------------------------------------------
+    // Header description
+    // --------------------------------------------------------
+
+    const reportDescription =
+        document.getElementById(
+            "reportDescription"
+        );
+
+
+    if (reportDescription) {
+
+        reportDescription.innerText =
+            `Intelligence generated from ${datasetName}.`;
+    }
+
+
+    // --------------------------------------------------------
+    // Hero description
+    // --------------------------------------------------------
+
+    const heroDescription =
+        document.getElementById(
+            "heroDescription"
+        );
+
+
+    if (heroDescription) {
+
+        heroDescription.innerText =
+            buildDatasetDescription(
+                data,
+                products
+            );
+    }
+
+
+    // --------------------------------------------------------
+    // Uploaded date
+    // --------------------------------------------------------
+
+    const uploadedAt =
+        document.getElementById(
+            "uploadedAt"
+        );
+
+
+    if (uploadedAt) {
+
+        const date =
+            getFirstAvailableValue(
+                dataset,
+                [
+                    "uploaded_at",
+                    "upload_date",
+                    "created_at",
+                    "createdAt",
+                    "timestamp"
+                ]
+            );
+
+
+        uploadedAt.innerText =
+            formatDate(
+                date
+            );
+    }
+
+
+    // --------------------------------------------------------
+    // Dataset status
+    // --------------------------------------------------------
+
+    const status =
+        getDatasetStatus(
+            data
+        );
+
+
+    const datasetStatus =
+        document.getElementById(
+            "datasetStatus"
+        );
+
+
+    if (datasetStatus) {
+
+        datasetStatus.innerText =
+            status;
+
+        datasetStatus.className =
+            "status-badge";
+
+        const normalized =
+            String(status)
+                .toLowerCase();
+
+
+        if (
+            normalized.includes(
+                "ready"
+            ) ||
+            normalized.includes(
+                "complete"
+            ) ||
+            normalized.includes(
+                "success"
+            )
+        ) {
+
+            datasetStatus.classList.add(
+                "status-verified"
+            );
 
         }
 
+        else if (
+            normalized.includes(
+                "review"
+            ) ||
+            normalized.includes(
+                "warning"
+            )
+        ) {
+
+            datasetStatus.classList.add(
+                "status-review"
+            );
+
+        }
+
+        else {
+
+            datasetStatus.classList.add(
+                "status-critical"
+            );
+        }
     }
 
+
+    const datasetStatusText =
+        document.getElementById(
+            "datasetStatusText"
+        );
+
+
+    if (datasetStatusText) {
+
+        datasetStatusText.innerText =
+            status;
+    }
+
+
+    // --------------------------------------------------------
+    // Dynamic columns
+    // --------------------------------------------------------
+
+    const columnsElement =
+        document.getElementById(
+            "datasetColumnsList"
+        );
+
+
+    if (columnsElement) {
+
+        if (
+            datasetColumns.length > 0
+        ) {
+
+            columnsElement.innerText =
+                datasetColumns
+                    .map(
+                        column =>
+                            formatFieldName(
+                                column
+                            )
+                    )
+                    .join(
+                        ", "
+                    );
+
+        }
+
+        else {
+
+            columnsElement.innerText =
+                "No column information available";
+        }
+    }
+}
+
+
+// ============================================================
+// DATASET DESCRIPTION
+// ============================================================
+
+function buildDatasetDescription(
+    data,
+    productList
+) {
+
+    const total =
+        productList.length;
+
+
+    const columns =
+        datasetColumns.length;
+
+
+    if (
+        total === 0
+    ) {
+
+        return "The uploaded dataset does not currently contain product records.";
+    }
+
+
+    if (
+        columns === 0
+    ) {
+
+        return `The uploaded dataset contains ${total} product records.`;
+    }
+
+
+    return `The uploaded dataset contains ${total} product records across ${columns} detected fields. The report below is generated directly from the available dataset information.`;
+}
+
+
+// ============================================================
+// STATISTICS
+// ============================================================
+
+function renderStatistics(
+    data,
+    productList
+) {
+
+    const total =
+        productList.length;
+
+
+    const totalProducts =
+        document.getElementById(
+            "totalProducts"
+        );
+
+
+    if (totalProducts) {
+
+        totalProducts.innerText =
+            total;
+    }
+
+
+    const totalColumns =
+        document.getElementById(
+            "totalColumns"
+        );
+
+
+    if (totalColumns) {
+
+        let count =
+            datasetColumns.length;
+
+
+        // If actual backend column count is larger
+        // and column names are not supplied
+
+        if (
+            count === 0 &&
+            data.dataset &&
+            typeof data.dataset.columns === "number"
+        ) {
+
+            count =
+                data.dataset.columns;
+        }
+
+
+        totalColumns.innerText =
+            count;
+    }
+
+
+    const verified =
+        productList.filter(
+            product =>
+                isVerifiedProduct(
+                    product
+                )
+        ).length;
+
+
+    const needsReview =
+        Math.max(
+            0,
+            total - verified
+        );
+
+
+    const verifiedElement =
+        document.getElementById(
+            "verifiedProducts"
+        );
+
+
+    if (verifiedElement) {
+
+        verifiedElement.innerText =
+            verified;
+    }
+
+
+    const reviewElement =
+        document.getElementById(
+            "needsReview"
+        );
+
+
+    if (reviewElement) {
+
+        reviewElement.innerText =
+            needsReview;
+    }
+}
+
+
+// ============================================================
+// VERIFIED PRODUCT DETECTION
+// ============================================================
+
+function isVerifiedProduct(
+    product
+) {
+
+    if (
+        !product ||
+        typeof product !== "object"
+    ) {
+
+        return false;
+    }
+
+
+    const status =
+        getFirstAvailableValue(
+            product,
+            [
+                "status",
+                "validation_status",
+                "validationStatus"
+            ]
+        );
+
+
+    if (
+        status !== null &&
+        status !== undefined
+    ) {
+
+        const normalized =
+            String(status)
+                .trim()
+                .toLowerCase();
+
+
+        if (
+            normalized === "verified" ||
+            normalized === "pass" ||
+            normalized === "passed" ||
+            normalized === "valid" ||
+            normalized === "success"
+        ) {
+
+            return true;
+        }
+
+
+        return false;
+    }
+
+
+    const confidence =
+        getProductConfidence(
+            product
+        );
+
+
+    if (
+        !isNaN(confidence)
+    ) {
+
+        return confidence >= 80;
+    }
+
+
+    return false;
+}
+
+
+// ============================================================
+// DYNAMIC INSIGHTS
+// ============================================================
+
+function generateDynamicInsights(
+    data,
+    productList,
+    columns,
+    averageConfidence
+) {
+
+    const container =
+        document.getElementById(
+            "dynamicInsights"
+        );
+
+
+    if (!container) {
+
+        return;
+    }
+
+
+    container.innerHTML =
+        "";
+
+
+    if (
+        productList.length === 0
+    ) {
+
+        container.innerHTML = `
+
+            <div class="insight-item">
+
+                <span class="insight-dot warning-dot"></span>
+
+                <div>
+
+                    <strong>
+                        No product records
+                    </strong>
+
+                    <p>
+                        The uploaded dataset does not contain
+                        product records available for analysis.
+                    </p>
+
+                </div>
+
+            </div>
+
+        `;
+
+        return;
+    }
+
+
+    const verified =
+        productList.filter(
+            isVerifiedProduct
+        ).length;
+
+
+    const review =
+        productList.length -
+        verified;
+
+
+    const completeness =
+        calculateDatasetCompleteness(
+            productList,
+            columns
+        );
+
+
+    const insights = [];
+
+
+    // --------------------------------------------------------
+    // Dataset size
+    // --------------------------------------------------------
+
+    insights.push({
+
+        type:
+            "success",
+
+        title:
+            "Dataset Coverage",
+
+        message:
+            `${productList.length} product records were detected in the uploaded dataset${columns.length ? ` across ${columns.length} fields` : ""}.`
+
+    });
+
+
+    // --------------------------------------------------------
+    // Validation
+    // --------------------------------------------------------
+
+    if (
+        verified > 0
+    ) {
+
+        insights.push({
+
+            type:
+                "success",
+
+            title:
+                "Validation Coverage",
+
+            message:
+                `${verified} of ${productList.length} product records are currently marked as verified.`
+
+        });
+
+    }
+
+
+    if (
+        review > 0
+    ) {
+
+        insights.push({
+
+            type:
+                "warning",
+
+            title:
+                "Review Queue",
+
+            message:
+                `${review} product record${review === 1 ? "" : "s"} require${review === 1 ? "s" : ""} additional review based on the available validation information.`
+
+        });
+
+    }
+
+
+    // --------------------------------------------------------
+    // Confidence
+    // --------------------------------------------------------
+
+    insights.push({
+
+        type:
+            getConfidenceInsightType(
+                averageConfidence
+            ),
+
+        title:
+            "Average Confidence",
+
+        message:
+            `The average confidence across records with available confidence information is ${formatPercentage(averageConfidence)}.`
+
+    });
+
+
+    // --------------------------------------------------------
+    // Completeness
+    // --------------------------------------------------------
+
+    if (
+        columns.length > 0
+    ) {
+
+        insights.push({
+
+            type:
+                getCompletenessType(
+                    completeness
+                ),
+
+            title:
+                "Dataset Completeness",
+
+            message:
+                `${formatPercentage(completeness)} of the detected dataset fields contain values across the available product records.`
+
+        });
+    }
+
+
+    // --------------------------------------------------------
+    // Render
+    // --------------------------------------------------------
+
+    insights.forEach(
+        insight => {
+
+            const item =
+                document.createElement(
+                    "div"
+                );
+
+
+            item.className =
+                "insight-item";
+
+
+            const dot =
+                document.createElement(
+                    "span"
+                );
+
+
+            dot.className =
+                "insight-dot " +
+                getInsightDotClass(
+                    insight.type
+                );
+
+
+            const content =
+                document.createElement(
+                    "div"
+                );
+
+
+            const title =
+                document.createElement(
+                    "strong"
+                );
+
+
+            title.innerText =
+                insight.title;
+
+
+            const message =
+                document.createElement(
+                    "p"
+                );
+
+
+            message.innerText =
+                insight.message;
+
+
+            content.appendChild(
+                title
+            );
+
+            content.appendChild(
+                message
+            );
+
+
+            item.appendChild(
+                dot
+            );
+
+            item.appendChild(
+                content
+            );
+
+
+            container.appendChild(
+                item
+            );
+
+        }
+    );
+}
+
+
+// ============================================================
+// DATASET COMPLETENESS
+// ============================================================
+
+function calculateDatasetCompleteness(
+    productList,
+    columns
+) {
+
+    if (
+        !productList.length ||
+        !columns.length
+    ) {
+
+        return 0;
+    }
+
+
+    let available =
+        0;
+
+
+    let possible =
+        productList.length *
+        columns.length;
+
+
+    productList.forEach(
+        product => {
+
+            columns.forEach(
+                column => {
+
+                    const value =
+                        getNestedProductValue(
+                            product,
+                            column
+                        );
+
+
+                    if (
+                        hasUsableValue(
+                            value
+                        )
+                    ) {
+
+                        available++;
+                    }
+
+                }
+            );
+
+        }
+    );
+
+
+    if (
+        possible === 0
+    ) {
+
+        return 0;
+    }
+
+
+    return (
+        available /
+        possible
+    ) *
+    100;
 }
 
 
@@ -300,15 +1162,13 @@ function calculateAverageConfidence(
     productList
 ) {
 
-    // --------------------------------------------------------
-    // First try backend summary
-    // --------------------------------------------------------
-
     if (
         data &&
         data.summary &&
-        data.summary.average_confidence !== undefined &&
-        data.summary.average_confidence !== null
+        data.summary.average_confidence !==
+            undefined &&
+        data.summary.average_confidence !==
+            null
     ) {
 
         const backendValue =
@@ -321,69 +1181,167 @@ function calculateAverageConfidence(
             !isNaN(backendValue)
         ) {
 
-            return backendValue;
-
+            return normalizePercentage(
+                backendValue
+            );
         }
-
     }
 
 
-    // --------------------------------------------------------
-    // Otherwise calculate from products
-    // --------------------------------------------------------
-
-    if (
-        !Array.isArray(productList) ||
-        productList.length === 0
-    ) {
-
-        return 0;
-
-    }
-
-
-    let total = 0;
-
-    let count = 0;
+    const confidenceValues = [];
 
 
     productList.forEach(
         product => {
 
-            if (!product) {
-                return;
-            }
-
-
             const confidence =
-                parseConfidence(
-                    product.confidence ??
-                    product.score ??
-                    product.quality_score
+                getProductConfidence(
+                    product
                 );
 
 
-            if (!isNaN(confidence)) {
+            if (
+                !isNaN(confidence)
+            ) {
 
-                total += confidence;
-
-                count++;
-
+                confidenceValues.push(
+                    normalizePercentage(
+                        confidence
+                    )
+                );
             }
 
         }
     );
 
 
-    if (count === 0) {
+    if (
+        confidenceValues.length === 0
+    ) {
 
         return 0;
-
     }
 
 
-    return total / count;
+    const total =
+        confidenceValues.reduce(
+            (
+                sum,
+                value
+            ) =>
+                sum + value,
+            0
+        );
 
+
+    return (
+        total /
+        confidenceValues.length
+    );
+}
+
+
+// ============================================================
+// GET PRODUCT CONFIDENCE
+// ============================================================
+
+function getProductConfidence(
+    product
+) {
+
+    if (
+        !product ||
+        typeof product !== "object"
+    ) {
+
+        return NaN;
+    }
+
+
+    const possibleKeys = [
+
+        "confidence",
+
+        "confidence_score",
+
+        "confidenceScore",
+
+        "score",
+
+        "quality_score",
+
+        "qualityScore",
+
+        "validation_score",
+
+        "validationScore"
+
+    ];
+
+
+    for (
+        const key of possibleKeys
+    ) {
+
+        if (
+            product[key] !== undefined &&
+            product[key] !== null
+        ) {
+
+            const value =
+                parseConfidence(
+                    product[key]
+                );
+
+
+            if (
+                !isNaN(value)
+            ) {
+
+                return value;
+            }
+        }
+    }
+
+
+    // --------------------------------------------------------
+    // Check raw_data too
+    // --------------------------------------------------------
+
+    if (
+        product.raw_data &&
+        typeof product.raw_data === "object"
+    ) {
+
+        for (
+            const key of possibleKeys
+        ) {
+
+            if (
+                product.raw_data[key] !==
+                    undefined &&
+                product.raw_data[key] !==
+                    null
+            ) {
+
+                const value =
+                    parseConfidence(
+                        product.raw_data[key]
+                    );
+
+
+                if (
+                    !isNaN(value)
+                ) {
+
+                    return value;
+                }
+            }
+        }
+    }
+
+
+    return NaN;
 }
 
 
@@ -391,7 +1349,9 @@ function calculateAverageConfidence(
 // PARSE CONFIDENCE
 // ============================================================
 
-function parseConfidence(value) {
+function parseConfidence(
+    value
+) {
 
     if (
         value === null ||
@@ -399,7 +1359,6 @@ function parseConfidence(value) {
     ) {
 
         return NaN;
-
     }
 
 
@@ -408,22 +1367,68 @@ function parseConfidence(value) {
     ) {
 
         return value;
-
     }
 
 
     const cleaned =
         String(value)
-            .replace("%", "")
+            .replace(
+                "%",
+                ""
+            )
             .trim();
 
 
     const number =
-        parseFloat(cleaned);
+        parseFloat(
+            cleaned
+        );
 
 
     return number;
+}
 
+
+// ============================================================
+// NORMALIZE PERCENTAGE
+// ============================================================
+
+function normalizePercentage(
+    value
+) {
+
+    let number =
+        parseFloat(
+            value
+        );
+
+
+    if (
+        isNaN(number)
+    ) {
+
+        return 0;
+    }
+
+
+    // If backend sends 0-1 instead of 0-100
+
+    if (
+        number >= 0 &&
+        number <= 1
+    ) {
+
+        number *= 100;
+    }
+
+
+    return Math.max(
+        0,
+        Math.min(
+            100,
+            number
+        )
+    );
 }
 
 
@@ -443,59 +1448,29 @@ function setAverageConfidence(
 
     if (!element) {
 
-        console.error(
-            "averageConfidence element was not found in HTML."
-        );
-
         return;
-
     }
 
 
-    let confidence =
-        parseFloat(value);
-
-
-    if (
-        isNaN(confidence)
-    ) {
-
-        confidence = 0;
-
-    }
-
-
-    // Keep value between 0 and 100
-
-    confidence =
-        Math.max(
-            0,
-            Math.min(
-                100,
-                confidence
-            )
+    const confidence =
+        normalizePercentage(
+            value
         );
 
-
-    // Round to 1 decimal only when needed
 
     const displayConfidence =
-        Number.isInteger(confidence)
+        Number.isInteger(
+            confidence
+        )
             ? confidence
             : confidence.toFixed(1);
 
-
-    // ========================================================
-    // SET TEXT
-    // ========================================================
 
     element.textContent =
         `${displayConfidence}%`;
 
 
-    // ========================================================
-    // FORCE VISIBILITY
-    // ========================================================
+    // Keep your visibility fix
 
     element.style.display =
         "block";
@@ -528,10 +1503,6 @@ function setAverageConfidence(
         "center";
 
 
-    // ========================================================
-    // ALSO MAKE PARENT VISIBLE
-    // ========================================================
-
     const reportScore =
         element.closest(
             ".report-score"
@@ -546,28 +1517,17 @@ function setAverageConfidence(
         reportScore.style.opacity =
             "1";
 
-        reportScore.style.color =
-            "#111827";
-
         reportScore.style.position =
             "relative";
 
         reportScore.style.zIndex =
             "5";
-
     }
-
-
-    console.log(
-        "Average confidence displayed:",
-        `${displayConfidence}%`
-    );
-
 }
 
 
 // ============================================================
-// BUILD 50-PRODUCT PAGE
+// BUILD PRODUCT PAGE
 // ============================================================
 
 function buildProductPage() {
@@ -581,7 +1541,6 @@ function buildProductPage() {
     if (!container) {
 
         return;
-
     }
 
 
@@ -602,7 +1561,8 @@ function buildProductPage() {
                 </h2>
 
                 <p>
-                    Upload a dataset to generate reports.
+                    No product records were found
+                    in the uploaded dataset.
                 </p>
 
             </div>
@@ -610,13 +1570,8 @@ function buildProductPage() {
         `;
 
         return;
-
     }
 
-
-    // ========================================================
-    // CALCULATE RANGE
-    // ========================================================
 
     const startIndex =
         (
@@ -639,10 +1594,6 @@ function buildProductPage() {
             endIndex
         );
 
-
-    // ========================================================
-    // CREATE GROUP
-    // ========================================================
 
     const group =
         document.createElement(
@@ -669,8 +1620,11 @@ function buildProductPage() {
                 </h2>
 
                 <p>
-                    Showing ${startIndex + 1}–${endIndex}
-                    of ${products.length} products
+                    Showing
+                    ${startIndex + 1}–${endIndex}
+                    of
+                    ${products.length}
+                    products
                 </p>
 
             </div>
@@ -678,8 +1632,10 @@ function buildProductPage() {
 
             <div class="report-page-indicator">
 
-                Page ${currentPage}
-                of ${totalPages}
+                Page
+                ${currentPage}
+                of
+                ${totalPages}
 
             </div>
 
@@ -705,8 +1661,10 @@ function buildProductPage() {
 
             <span id="pageNumber">
 
-                Page ${currentPage}
-                of ${totalPages}
+                Page
+                ${currentPage}
+                of
+                ${totalPages}
 
             </span>
 
@@ -717,6 +1675,7 @@ function buildProductPage() {
                 onclick="nextPage()"
             >
                 Next →
+
             </button>
 
         </div>
@@ -729,10 +1688,6 @@ function buildProductPage() {
     );
 
 
-    // ========================================================
-    // ADD PRODUCTS
-    // ========================================================
-
     const list =
         document.getElementById(
             "productList"
@@ -740,7 +1695,10 @@ function buildProductPage() {
 
 
     pageProducts.forEach(
-        (product, localIndex) => {
+        (
+            product,
+            localIndex
+        ) => {
 
             const actualIndex =
                 startIndex +
@@ -778,6 +1736,18 @@ function buildProductPage() {
                 );
 
 
+            const confidence =
+                getProductConfidence(
+                    product
+                );
+
+
+            const status =
+                getProductStatus(
+                    product
+                );
+
+
             button.innerHTML = `
 
                 <div class="product-number">
@@ -796,6 +1766,25 @@ function buildProductPage() {
 
                 </div>
 
+
+                <div class="product-report-meta">
+
+                    <span>
+                        ${escapeHTML(
+                            status
+                        )}
+                    </span>
+
+                    <span>
+                        ${
+                            isNaN(confidence)
+                                ? "—"
+                                : `${formatPercentage(confidence)}`
+                        }
+                    </span>
+
+                </div>
+
             `;
 
 
@@ -806,10 +1795,6 @@ function buildProductPage() {
         }
     );
 
-
-    // ========================================================
-    // DISABLE PAGINATION
-    // ========================================================
 
     const previousButton =
         document.getElementById(
@@ -827,7 +1812,6 @@ function buildProductPage() {
 
         previousButton.disabled =
             currentPage === 1;
-
     }
 
 
@@ -835,24 +1819,22 @@ function buildProductPage() {
 
         nextButton.disabled =
             currentPage === totalPages;
-
     }
-
 }
 
 
 // ============================================================
-// NEXT 50 PRODUCTS
+// NEXT PAGE
 // ============================================================
 
 function nextPage() {
 
     if (
-        currentPage >= totalPages
+        currentPage >=
+        totalPages
     ) {
 
         return;
-
     }
 
 
@@ -872,19 +1854,19 @@ function nextPage() {
 
         productGroups.scrollIntoView({
 
-            behavior: "smooth",
+            behavior:
+                "smooth",
 
-            block: "start"
+            block:
+                "start"
 
         });
-
     }
-
 }
 
 
 // ============================================================
-// PREVIOUS 50 PRODUCTS
+// PREVIOUS PAGE
 // ============================================================
 
 function previousPage() {
@@ -894,7 +1876,6 @@ function previousPage() {
     ) {
 
         return;
-
     }
 
 
@@ -914,19 +1895,19 @@ function previousPage() {
 
         productGroups.scrollIntoView({
 
-            behavior: "smooth",
+            behavior:
+                "smooth",
 
-            block: "start"
+            block:
+                "start"
 
         });
-
     }
-
 }
 
 
 // ============================================================
-// GET PRODUCT NAME
+// GET PRODUCT NAME DYNAMICALLY
 // ============================================================
 
 function getProductName(
@@ -935,40 +1916,88 @@ function getProductName(
 ) {
 
     if (
-        product &&
-        product.name &&
-        product.name !== "Not Available"
+        !product ||
+        typeof product !== "object"
     ) {
 
-        return product.name;
-
+        return `Product ${index + 1}`;
     }
 
 
-    if (
-        product &&
-        product.product_name &&
-        product.product_name !== "Not Available"
+    const preferredKeys = [
+
+        "name",
+
+        "product_name",
+
+        "productName",
+
+        "title",
+
+        "product",
+
+        "item_name",
+
+        "itemName",
+
+        "description"
+
+    ];
+
+
+    for (
+        const key of preferredKeys
     ) {
 
-        return product.product_name;
+        const value =
+            product[key];
 
+
+        if (
+            hasUsableValue(
+                value
+            )
+        ) {
+
+            return String(
+                value
+            );
+        }
     }
 
 
+    // --------------------------------------------------------
+    // Search raw_data
+    // --------------------------------------------------------
+
     if (
-        product &&
-        product.title &&
-        product.title !== "Not Available"
+        product.raw_data &&
+        typeof product.raw_data === "object"
     ) {
 
-        return product.title;
+        for (
+            const key of preferredKeys
+        ) {
 
+            const value =
+                product.raw_data[key];
+
+
+            if (
+                hasUsableValue(
+                    value
+                )
+            ) {
+
+                return String(
+                    value
+                );
+            }
+        }
     }
 
 
     return `Product ${index + 1}`;
-
 }
 
 
@@ -986,7 +2015,6 @@ function showProductReport(
     ) {
 
         return;
-
     }
 
 
@@ -1006,12 +2034,7 @@ function showProductReport(
 
     if (!report) {
 
-        console.error(
-            "individualReport element not found."
-        );
-
         return;
-
     }
 
 
@@ -1030,9 +2053,12 @@ function showProductReport(
         "1";
 
 
-    // ========================================================
-    // NAME
-    // ========================================================
+    const name =
+        getProductName(
+            product,
+            index
+        );
+
 
     const nameElement =
         document.getElementById(
@@ -1043,30 +2069,35 @@ function showProductReport(
     if (nameElement) {
 
         nameElement.innerText =
-            getProductName(
-                product,
-                index
-            );
-
+            name;
     }
 
 
-    // ========================================================
-    // CONFIDENCE
-    // ========================================================
+    const description =
+        document.getElementById(
+            "individualDescription"
+        );
+
+
+    if (description) {
+
+        description.innerText =
+            `Detailed analysis generated from the available fields for ${name}.`;
+    }
+
 
     const confidence =
-        parseConfidence(
-            product.confidence ??
-            product.score ??
-            product.quality_score
+        getProductConfidence(
+            product
         );
 
 
     const finalConfidence =
         isNaN(confidence)
             ? 0
-            : confidence;
+            : normalizePercentage(
+                confidence
+            );
 
 
     const score =
@@ -1078,21 +2109,18 @@ function showProductReport(
     if (score) {
 
         score.innerText =
-            `${finalConfidence}%`;
+            formatPercentage(
+                finalConfidence
+            );
 
 
         score.className =
-            "score-box";
+            "";
 
 
-        score.style.display =
-            "flex";
-
-        score.style.visibility =
-            "visible";
-
-        score.style.opacity =
-            "1";
+        score.classList.add(
+            "score-box"
+        );
 
 
         if (
@@ -1120,40 +2148,22 @@ function showProductReport(
             score.classList.add(
                 "score-low"
             );
-
         }
-
     }
 
-
-    // ========================================================
-    // PRODUCT INFORMATION
-    // ========================================================
 
     buildProductInformation(
         product
     );
 
 
-    // ========================================================
-    // SUMMARY
-    // ========================================================
-
     buildProductSummary(
         product
     );
 
 
-    // ========================================================
-    // NAVIGATION
-    // ========================================================
-
     updateProductNavigation();
 
-
-    // ========================================================
-    // SHOW REPORT
-    // ========================================================
 
     const top =
         report.getBoundingClientRect().top +
@@ -1163,17 +2173,18 @@ function showProductReport(
 
     window.scrollTo({
 
-        top: top,
+        top:
+            top,
 
-        behavior: "smooth"
+        behavior:
+            "smooth"
 
     });
-
 }
 
 
 // ============================================================
-// PRODUCT INFORMATION
+// BUILD PRODUCT INFORMATION DYNAMICALLY
 // ============================================================
 
 function buildProductInformation(
@@ -1189,7 +2200,6 @@ function buildProductInformation(
     if (!table) {
 
         return;
-
     }
 
 
@@ -1197,172 +2207,61 @@ function buildProductInformation(
         "";
 
 
-    const get =
-        (...keys) => {
+    if (
+        !product ||
+        typeof product !== "object"
+    ) {
 
-            for (
-                const key of keys
-            ) {
+        table.innerHTML =
+            "<p>No product information available.</p>";
 
-                const value =
-                    product?.[key];
-
-
-                if (
-                    value !== undefined &&
-                    value !== null &&
-                    String(value).trim() !== "" &&
-                    String(value) !== "Not Available"
-                ) {
-
-                    return value;
-
-                }
-
-            }
+        return;
+    }
 
 
-            return "Not Available";
+    // --------------------------------------------------------
+    // Use raw_data if available
+    // because it represents the original uploaded dataset.
+    // --------------------------------------------------------
 
-        };
+    let source =
+        product;
 
 
-    const confidence =
-        parseConfidence(
-            product?.confidence ??
-            product?.score ??
-            product?.quality_score
+    if (
+        product.raw_data &&
+        typeof product.raw_data === "object" &&
+        Object.keys(
+            product.raw_data
+        ).length > 0
+    ) {
+
+        source =
+            product.raw_data;
+    }
+
+
+    const entries =
+        Object.entries(
+            source
         );
 
 
-    const confidenceDisplay =
-        isNaN(confidence)
-            ? "Not Available"
-            : `${confidence}%`;
+    if (
+        entries.length === 0
+    ) {
+
+        table.innerHTML =
+            "<p>No product information available.</p>";
+
+        return;
+    }
 
 
-    const fields = [
-
-        [
-            "Product Name",
-            get(
-                "name",
-                "product_name",
-                "title"
-            )
-        ],
-
-        [
-            "Brand",
-            get("brand")
-        ],
-
-        [
-            "Model",
-            get(
-                "model",
-                "model_number"
-            )
-        ],
-
-        [
-            "Category",
-            get("category")
-        ],
-
-        [
-            "Power",
-            get(
-                "power",
-                "power_rating"
-            )
-        ],
-
-        [
-            "Voltage",
-            get("voltage")
-        ],
-
-        [
-            "Weight",
-            get("weight")
-        ],
-
-        [
-            "Material",
-            get("material")
-        ],
-
-        [
-            "Applications",
-            get(
-                "applications",
-                "application"
-            )
-        ],
-
-        [
-            "Flow Rate",
-            get(
-                "flow_rate",
-                "flowrate"
-            )
-        ],
-
-        [
-            "RPM / Speed",
-            get(
-                "rpm",
-                "speed"
-            )
-        ],
-
-        [
-            "Country of Origin",
-            get(
-                "country",
-                "country_of_origin"
-            )
-        ],
-
-        [
-            "Warranty",
-            get("warranty")
-        ],
-
-        [
-            "Price",
-            get("price")
-        ],
-
-        [
-            "Rating",
-            get("rating")
-        ],
-
-        [
-            "Stock",
-            get(
-                "stock",
-                "availability"
-            )
-        ],
-
-        [
-            "Status",
-            get("status")
-        ],
-
-        [
-            "Confidence",
-            confidenceDisplay
-        ]
-
-    ];
-
-
-    fields.forEach(
-        ([label, value]) => {
+    entries.forEach(
+        (
+            [key, value]
+        ) => {
 
             const row =
                 document.createElement(
@@ -1374,24 +2273,46 @@ function buildProductInformation(
                 "product-info-row";
 
 
-            row.innerHTML = `
-
-                <span
-                    class="product-info-label"
-                >
-                    ${escapeHTML(label)}
-                </span>
+            const label =
+                document.createElement(
+                    "span"
+                );
 
 
-                <strong
-                    class="product-info-value"
-                >
-                    ${escapeHTML(
-                        displayValue(value)
-                    )}
-                </strong>
+            label.className =
+                "product-info-label";
 
-            `;
+
+            label.innerText =
+                formatFieldName(
+                    key
+                );
+
+
+            const valueElement =
+                document.createElement(
+                    "strong"
+                );
+
+
+            valueElement.className =
+                "product-info-value";
+
+
+            valueElement.innerText =
+                displayValue(
+                    value
+                );
+
+
+            row.appendChild(
+                label
+            );
+
+
+            row.appendChild(
+                valueElement
+            );
 
 
             table.appendChild(
@@ -1400,12 +2321,11 @@ function buildProductInformation(
 
         }
     );
-
 }
 
 
 // ============================================================
-// PRODUCT SUMMARY
+// DYNAMIC PRODUCT SUMMARY
 // ============================================================
 
 function buildProductSummary(
@@ -1421,126 +2341,296 @@ function buildProductSummary(
     if (!summary) {
 
         return;
-
     }
 
 
-    const name =
+    if (
+        !product ||
+        typeof product !== "object"
+    ) {
+
+        summary.innerHTML =
+            "<p>No product information is available.</p>";
+
+        return;
+    }
+
+
+    let source =
+        product;
+
+
+    if (
+        product.raw_data &&
+        typeof product.raw_data === "object" &&
+        Object.keys(
+            product.raw_data
+        ).length > 0
+    ) {
+
+        source =
+            product.raw_data;
+    }
+
+
+    const fields =
+        Object.keys(
+            source
+        );
+
+
+    const totalFields =
+        fields.length;
+
+
+    const availableFields =
+        fields.filter(
+            field =>
+                hasUsableValue(
+                    source[field]
+                )
+        ).length;
+
+
+    const missingFields =
+        totalFields -
+        availableFields;
+
+
+    const completeness =
+        totalFields > 0
+            ? (
+                availableFields /
+                totalFields
+            ) * 100
+            : 0;
+
+
+    const confidence =
+        getProductConfidence(
+            product
+        );
+
+
+    const status =
+        getProductStatus(
+            product
+        );
+
+
+    const productName =
         getProductName(
             product,
             currentProductIndex
         );
 
 
-    const parsedConfidence =
-        parseConfidence(
-            product.confidence ??
-            product.score ??
-            product.quality_score
+    const summaryItems = [];
+
+
+    summaryItems.push({
+
+        title:
+            "Record Status",
+
+        text:
+            `${productName} is currently marked as ${status}.`
+
+    });
+
+
+    if (
+        !isNaN(confidence)
+    ) {
+
+        summaryItems.push({
+
+            title:
+                "Confidence",
+
+            text:
+                `The available confidence score for this record is ${formatPercentage(confidence)}.`
+
+        });
+
+    }
+
+
+    summaryItems.push({
+
+        title:
+            "Field Completeness",
+
+        text:
+            `${formatPercentage(completeness)} of the detected fields contain usable values.`
+
+    });
+
+
+    if (
+        missingFields > 0
+    ) {
+
+        summaryItems.push({
+
+            title:
+                "Missing Information",
+
+            text:
+                `${missingFields} of ${totalFields} detected fields do not currently contain usable values.`
+
+        });
+
+    }
+
+    else {
+
+        summaryItems.push({
+
+            title:
+                "Data Availability",
+
+            text:
+                `All ${totalFields} detected fields contain usable values for this record.`
+
+        });
+
+    }
+
+
+    summaryItems.push({
+
+        title:
+            "Detected Fields",
+
+        text:
+            `${totalFields} dataset fields are available for this product record.`
+
+    });
+
+
+    summary.innerHTML =
+        "";
+
+
+    summaryItems.forEach(
+        item => {
+
+            const paragraph =
+                document.createElement(
+                    "p"
+                );
+
+
+            const strong =
+                document.createElement(
+                    "strong"
+                );
+
+
+            strong.innerText =
+                `${item.title}: `;
+
+
+            paragraph.appendChild(
+                strong
+            );
+
+
+            paragraph.appendChild(
+                document.createTextNode(
+                    item.text
+                )
+            );
+
+
+            summary.appendChild(
+                paragraph
+            );
+
+        }
+    );
+}
+
+
+// ============================================================
+// PRODUCT STATUS
+// ============================================================
+
+function getProductStatus(
+    product
+) {
+
+    if (
+        !product ||
+        typeof product !== "object"
+    ) {
+
+        return "Not Available";
+    }
+
+
+    const value =
+        getFirstAvailableValue(
+            product,
+            [
+                "status",
+                "validation_status",
+                "validationStatus",
+                "result"
+            ]
         );
 
 
+    if (
+        value !== null &&
+        value !== undefined &&
+        String(value).trim() !== ""
+    ) {
+
+        return String(
+            value
+        );
+    }
+
+
     const confidence =
-        isNaN(parsedConfidence)
-            ? 0
-            : parsedConfidence;
-
-
-    let qualityMessage;
+        getProductConfidence(
+            product
+        );
 
 
     if (
-        confidence >= 85
+        !isNaN(confidence)
     ) {
 
-        qualityMessage =
-            "This product record contains a strong set of catalog attributes and appears suitable for use in a product catalog.";
-
-    }
-
-    else if (
-        confidence >= 60
-    ) {
-
-        qualityMessage =
-            "This product record contains several important attributes, but additional enrichment may improve its catalog readiness.";
-
-    }
-
-    else {
-
-        qualityMessage =
-            "This product record has limited product information and should be enriched before being used as a complete catalog record.";
-
-    }
+        const normalized =
+            normalizePercentage(
+                confidence
+            );
 
 
-    let statusMessage;
+        if (
+            normalized >= 80
+        ) {
+
+            return "Verified";
+        }
 
 
-    if (
-        product.status === "Verified"
-    ) {
+        if (
+            normalized >= 50
+        ) {
 
-        statusMessage =
-            "The available product information is sufficiently complete based on the catalog fields currently detected.";
+            return "Needs Review";
+        }
 
-    }
 
-    else if (
-        product.status === "Needs Review"
-    ) {
-
-        statusMessage =
-            "Some important product attributes are incomplete or unavailable and should be reviewed before publishing.";
-
-    }
-
-    else {
-
-        statusMessage =
-            "The product record contains significant missing information and requires enrichment.";
-
+        return "Critical";
     }
 
 
-    summary.innerHTML = `
-
-        <p>
-
-            <strong>
-                ${escapeHTML(name)}
-            </strong>
-
-            has a product information confidence
-            score of
-
-            <strong>
-                ${confidence}%
-            </strong>.
-
-        </p>
-
-
-        <p>
-
-            ${escapeHTML(
-                qualityMessage
-            )}
-
-        </p>
-
-
-        <p>
-
-            ${escapeHTML(
-                statusMessage
-            )}
-
-        </p>
-
-    `;
-
+    return "Not Available";
 }
 
 
@@ -1555,14 +2645,12 @@ function showPreviousProduct() {
     ) {
 
         return;
-
     }
 
 
     showProductReport(
         currentProductIndex - 1
     );
-
 }
 
 
@@ -1578,19 +2666,17 @@ function showNextProduct() {
     ) {
 
         return;
-
     }
 
 
     showProductReport(
         currentProductIndex + 1
     );
-
 }
 
 
 // ============================================================
-// UPDATE INDIVIDUAL NAVIGATION
+// UPDATE PRODUCT NAVIGATION
 // ============================================================
 
 function updateProductNavigation() {
@@ -1607,43 +2693,36 @@ function updateProductNavigation() {
         );
 
 
-    if (
-        !previous ||
-        !next
-    ) {
+    const position =
+        document.getElementById(
+            "individualProductPosition"
+        );
 
-        return;
 
+    if (previous) {
+
+        previous.disabled =
+            currentProductIndex <= 0;
     }
 
 
-    previous.disabled =
-        currentProductIndex <= 0;
+    if (next) {
+
+        next.disabled =
+            currentProductIndex >=
+            products.length - 1;
+    }
 
 
-    next.disabled =
-        currentProductIndex >=
-        products.length - 1;
+    if (position) {
 
-
-    previous.innerText =
-
-        currentProductIndex > 0
-
-            ? `← Product ${currentProductIndex}`
-
-            : "← Previous";
-
-
-    next.innerText =
-
-        currentProductIndex <
-        products.length - 1
-
-            ? `Product ${currentProductIndex + 2} →`
-
-            : "Next →";
-
+        position.innerText =
+            `Product ${
+                currentProductIndex + 1
+            } of ${
+                products.length
+            }`;
+    }
 }
 
 
@@ -1657,18 +2736,429 @@ function displayValue(
 
     if (
         value === null ||
-        value === undefined ||
-        String(value).trim() === "" ||
-        String(value).trim() === "Not Available"
+        value === undefined
     ) {
 
         return "Not Available";
-
     }
 
 
-    return String(value);
+    if (
+        typeof value === "object"
+    ) {
 
+        try {
+
+            return JSON.stringify(
+                value
+            );
+
+        }
+        catch {
+
+            return "Not Available";
+        }
+    }
+
+
+    const text =
+        String(value)
+            .trim();
+
+
+    if (
+        text === "" ||
+        text.toLowerCase() ===
+            "not available" ||
+        text.toLowerCase() ===
+            "nan" ||
+        text.toLowerCase() ===
+            "null"
+    ) {
+
+        return "Not Available";
+    }
+
+
+    return text;
+}
+
+
+// ============================================================
+// GET NESTED VALUE
+// ============================================================
+
+function getNestedProductValue(
+    product,
+    key
+) {
+
+    if (
+        product &&
+        Object.prototype.hasOwnProperty.call(
+            product,
+            key
+        )
+    ) {
+
+        return product[key];
+    }
+
+
+    if (
+        product &&
+        product.raw_data &&
+        typeof product.raw_data === "object" &&
+        Object.prototype.hasOwnProperty.call(
+            product.raw_data,
+            key
+        )
+    ) {
+
+        return product.raw_data[key];
+    }
+
+
+    return undefined;
+}
+
+
+// ============================================================
+// GET FIRST AVAILABLE VALUE
+// ============================================================
+
+function getFirstAvailableValue(
+    object,
+    keys
+) {
+
+    if (
+        !object ||
+        typeof object !== "object"
+    ) {
+
+        return null;
+    }
+
+
+    for (
+        const key of keys
+    ) {
+
+        if (
+            object[key] !== undefined &&
+            object[key] !== null &&
+            String(
+                object[key]
+            ).trim() !== ""
+        ) {
+
+            return object[key];
+        }
+    }
+
+
+    return null;
+}
+
+
+// ============================================================
+// GET DATASET STATUS
+// ============================================================
+
+function getDatasetStatus(
+    data
+) {
+
+    if (
+        data &&
+        data.dataset
+    ) {
+
+        const explicitStatus =
+            getFirstAvailableValue(
+                data.dataset,
+                [
+                    "status",
+                    "dataset_status",
+                    "state"
+                ]
+            );
+
+
+        if (
+            explicitStatus
+        ) {
+
+            return String(
+                explicitStatus
+            );
+        }
+    }
+
+
+    if (
+        data &&
+        data.status
+    ) {
+
+        return String(
+            data.status
+        );
+    }
+
+
+    if (
+        products.length > 0
+    ) {
+
+        return "Ready";
+    }
+
+
+    return "No Data";
+}
+
+
+// ============================================================
+// FORMAT FIELD NAME
+// ============================================================
+
+function formatFieldName(
+    field
+) {
+
+    if (
+        field === null ||
+        field === undefined
+    ) {
+
+        return "";
+    }
+
+
+    return String(field)
+
+        .replace(
+            /[_-]+/g,
+            " "
+        )
+
+        .replace(
+            /([a-z])([A-Z])/g,
+            "$1 $2"
+        )
+
+        .replace(
+            /\s+/g,
+            " "
+        )
+
+        .trim()
+
+        .replace(
+            /^./,
+            character =>
+                character.toUpperCase()
+        );
+}
+
+
+// ============================================================
+// FORMAT DATE
+// ============================================================
+
+function formatDate(
+    value
+) {
+
+    if (
+        !value
+    ) {
+
+        return "Not Available";
+    }
+
+
+    const date =
+        new Date(
+            value
+        );
+
+
+    if (
+        isNaN(
+            date.getTime()
+        )
+    ) {
+
+        return String(
+            value
+        );
+    }
+
+
+    return date.toLocaleString();
+}
+
+
+// ============================================================
+// FORMAT PERCENTAGE
+// ============================================================
+
+function formatPercentage(
+    value
+) {
+
+    if (
+        value === null ||
+        value === undefined ||
+        isNaN(
+            parseFloat(value)
+        )
+    ) {
+
+        return "Not Available";
+    }
+
+
+    const number =
+        normalizePercentage(
+            value
+        );
+
+
+    return Number.isInteger(
+        number
+    )
+        ? `${number}%`
+        : `${number.toFixed(1)}%`;
+}
+
+
+// ============================================================
+// CONFIDENCE INSIGHT TYPE
+// ============================================================
+
+function getConfidenceInsightType(
+    confidence
+) {
+
+    if (
+        confidence >= 80
+    ) {
+
+        return "success";
+    }
+
+
+    if (
+        confidence >= 50
+    ) {
+
+        return "warning";
+    }
+
+
+    return "critical";
+}
+
+
+// ============================================================
+// COMPLETENESS INSIGHT TYPE
+// ============================================================
+
+function getCompletenessType(
+    completeness
+) {
+
+    if (
+        completeness >= 80
+    ) {
+
+        return "success";
+    }
+
+
+    if (
+        completeness >= 50
+    ) {
+
+        return "warning";
+    }
+
+
+    return "critical";
+}
+
+
+// ============================================================
+// INSIGHT DOT CLASS
+// ============================================================
+
+function getInsightDotClass(
+    type
+) {
+
+    if (
+        type === "success"
+    ) {
+
+        return "success-dot";
+    }
+
+
+    if (
+        type === "warning"
+    ) {
+
+        return "warning-dot";
+    }
+
+
+    return "info-dot";
+}
+
+
+// ============================================================
+// HAS USABLE VALUE
+// ============================================================
+
+function hasUsableValue(
+    value
+) {
+
+    if (
+        value === null ||
+        value === undefined
+    ) {
+
+        return false;
+    }
+
+
+    if (
+        typeof value === "number" &&
+        isNaN(value)
+    ) {
+
+        return false;
+    }
+
+
+    const text =
+        String(value)
+            .trim()
+            .toLowerCase();
+
+
+    return (
+        text !== "" &&
+        text !== "nan" &&
+        text !== "null" &&
+        text !== "none" &&
+        text !== "not available"
+    );
 }
 
 
@@ -1678,16 +3168,34 @@ function displayValue(
 
 function showNoDataset() {
 
+    products = [];
+
+    datasetColumns = [];
+
+
     const datasetName =
         document.getElementById(
             "datasetName"
         );
 
+
     if (datasetName) {
 
         datasetName.innerText =
             "No dataset uploaded";
+    }
 
+
+    const datasetNameCard =
+        document.getElementById(
+            "datasetNameCard"
+        );
+
+
+    if (datasetNameCard) {
+
+        datasetNameCard.innerText =
+            "No dataset uploaded";
     }
 
 
@@ -1696,11 +3204,11 @@ function showNoDataset() {
             "totalProducts"
         );
 
+
     if (totalProducts) {
 
         totalProducts.innerText =
             "0";
-
     }
 
 
@@ -1709,11 +3217,11 @@ function showNoDataset() {
             "totalColumns"
         );
 
+
     if (totalColumns) {
 
         totalColumns.innerText =
             "0";
-
     }
 
 
@@ -1722,11 +3230,11 @@ function showNoDataset() {
             "verifiedProducts"
         );
 
+
     if (verifiedProducts) {
 
         verifiedProducts.innerText =
             "0";
-
     }
 
 
@@ -1735,20 +3243,50 @@ function showNoDataset() {
             "needsReview"
         );
 
+
     if (needsReview) {
 
         needsReview.innerText =
             "0";
-
     }
 
-
-    // IMPORTANT:
-    // Use the same function that forces visibility.
 
     setAverageConfidence(
         0
     );
+
+
+    const dynamicInsights =
+        document.getElementById(
+            "dynamicInsights"
+        );
+
+
+    if (dynamicInsights) {
+
+        dynamicInsights.innerHTML = `
+
+            <div class="insight-item">
+
+                <span class="insight-dot warning-dot"></span>
+
+                <div>
+
+                    <strong>
+                        Dataset unavailable
+                    </strong>
+
+                    <p>
+                        Upload a dataset to generate
+                        product intelligence.
+                    </p>
+
+                </div>
+
+            </div>
+
+        `;
+    }
 
 
     const productGroups =
@@ -1768,7 +3306,7 @@ function showNoDataset() {
                 </h2>
 
                 <p>
-                    Please upload a dataset first.
+                    Upload a dataset to generate reports.
                 </p>
 
                 <a
@@ -1781,9 +3319,39 @@ function showNoDataset() {
             </div>
 
         `;
+    }
+}
 
+
+// ============================================================
+// CLOSE INDIVIDUAL REPORT
+// ============================================================
+
+function closeIndividualReport() {
+
+    const report =
+        document.getElementById(
+            "individualReport"
+        );
+
+
+    if (!report) {
+
+        return;
     }
 
+
+    report.classList.add(
+        "report-hidden"
+    );
+
+
+    report.style.display =
+        "none";
+
+
+    currentProductIndex =
+        -1;
 }
 
 
@@ -1801,7 +3369,6 @@ function escapeHTML(
     ) {
 
         return "";
-
     }
 
 
@@ -1831,41 +3398,6 @@ function escapeHTML(
             "'",
             "&#039;"
         );
-
-}
-
-
-// ============================================================
-// CLOSE INDIVIDUAL REPORT
-// ============================================================
-
-function closeIndividualReport() {
-
-    const report =
-        document.getElementById(
-            "individualReport"
-        );
-
-
-    if (!report) {
-
-        return;
-
-    }
-
-
-    report.classList.add(
-        "report-hidden"
-    );
-
-
-    report.style.display =
-        "none";
-
-
-    currentProductIndex =
-        -1;
-
 }
 
 

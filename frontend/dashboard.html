@@ -90,7 +90,6 @@
             box-shadow:
                 0 12px 30px
                 rgba(15, 23, 42, 0.18);
-
         }
 
         .hero-text {
@@ -128,7 +127,6 @@
 
             background:
                 rgba(255,255,255,0.08);
-
         }
 
         .hero-score strong {
@@ -155,7 +153,6 @@
             gap: 18px;
 
             margin-bottom: 25px;
-
         }
 
         .stat-card {
@@ -181,7 +178,6 @@
             transition:
                 transform 0.2s,
                 box-shadow 0.2s;
-
         }
 
         .stat-card:hover {
@@ -192,7 +188,6 @@
             box-shadow:
                 0 12px 25px
                 rgba(15,23,42,0.10);
-
         }
 
         .stat-icon {
@@ -213,7 +208,6 @@
             background: #f1f5f9;
 
             margin-bottom: 14px;
-
         }
 
         .stat-label {
@@ -223,7 +217,6 @@
             font-size: 14px;
 
             margin-bottom: 6px;
-
         }
 
         .stat-value {
@@ -233,7 +226,6 @@
             font-weight: 700;
 
             color: #0f172a;
-
         }
 
         .stat-sub {
@@ -243,7 +235,6 @@
             color: #94a3b8;
 
             margin-top: 5px;
-
         }
 
 
@@ -262,7 +253,6 @@
             gap: 20px;
 
             margin-bottom: 25px;
-
         }
 
         .dashboard-card {
@@ -280,7 +270,6 @@
             box-shadow:
                 0 5px 18px
                 rgba(15,23,42,0.05);
-
         }
 
         .card-title {
@@ -293,7 +282,6 @@
             align-items: center;
 
             margin-bottom: 20px;
-
         }
 
         .card-title h3 {
@@ -301,7 +289,6 @@
             margin: 0;
 
             font-size: 18px;
-
         }
 
         .card-title span {
@@ -309,7 +296,6 @@
             font-size: 13px;
 
             color: #64748b;
-
         }
 
 
@@ -326,7 +312,6 @@
             gap: 12px;
 
             margin-bottom: 17px;
-
         }
 
         .status-name {
@@ -336,7 +321,6 @@
             font-size: 14px;
 
             font-weight: 600;
-
         }
 
         .status-bar {
@@ -350,7 +334,6 @@
             border-radius: 20px;
 
             overflow: hidden;
-
         }
 
         .status-fill {
@@ -358,7 +341,6 @@
             height: 100%;
 
             border-radius: 20px;
-
         }
 
         .verified-fill {
@@ -378,7 +360,6 @@
             font-size: 13px;
 
             font-weight: 600;
-
         }
 
 
@@ -393,7 +374,6 @@
             align-items: center;
 
             gap: 25px;
-
         }
 
         .quality-circle {
@@ -418,6 +398,7 @@
                 8px solid
                 #6366f1;
 
+            flex-shrink: 0;
         }
 
         .quality-circle strong {
@@ -425,7 +406,6 @@
             font-size: 28px;
 
             color: #312e81;
-
         }
 
         .quality-circle span {
@@ -433,14 +413,12 @@
             font-size: 12px;
 
             color: #64748b;
-
         }
 
         .quality-text h4 {
 
             margin:
                 0 0 8px;
-
         }
 
         .quality-text p {
@@ -452,7 +430,6 @@
             line-height: 1.5;
 
             font-size: 14px;
-
         }
 
 
@@ -468,7 +445,6 @@
                 repeat(3, 1fr);
 
             gap: 12px;
-
         }
 
         .action-card {
@@ -488,8 +464,7 @@
             transition:
                 0.2s;
 
-            background: #f8fafc;
-
+            background: #ffffff;
         }
 
         .action-card:hover {
@@ -498,11 +473,10 @@
                 translateY(-3px);
 
             background:
-                #eef2ff;
+                #ffffff;
 
             border-color:
                 #c7d2fe;
-
         }
 
         .action-card strong {
@@ -510,7 +484,6 @@
             display: block;
 
             margin-bottom: 5px;
-
         }
 
         .action-card span {
@@ -518,7 +491,6 @@
             font-size: 12px;
 
             color: #64748b;
-
         }
 
 
@@ -534,7 +506,6 @@
                 repeat(3, 1fr);
 
             gap: 12px;
-
         }
 
         .dataset-item {
@@ -546,6 +517,7 @@
 
             border-radius: 12px;
 
+            min-width: 0;
         }
 
         .dataset-item span {
@@ -557,7 +529,6 @@
             font-size: 12px;
 
             margin-bottom: 5px;
-
         }
 
         .dataset-item strong {
@@ -566,12 +537,22 @@
 
             word-break: break-word;
 
+            color: #172033;
         }
 
 
         /* =====================================================
            RECENT PRODUCTS
         ===================================================== */
+
+        .recent-products-card {
+            margin-top: 0;
+        }
+
+        .recent-products-wrapper {
+            width: 100%;
+            overflow-x: auto;
+        }
 
         .recent-table {
 
@@ -580,15 +561,18 @@
             border-collapse:
                 collapse;
 
+            background: #ffffff;
         }
 
         .recent-table th {
 
             text-align: left;
 
-            padding: 12px;
+            padding: 12px 14px;
 
             font-size: 12px;
+
+            font-weight: 600;
 
             color: #64748b;
 
@@ -596,21 +580,42 @@
                 1px solid
                 #e2e8f0;
 
+            white-space: nowrap;
         }
 
         .recent-table td {
 
-            padding: 13px 12px;
+            padding: 14px;
 
             font-size: 13px;
+
+            color: #172033;
 
             border-bottom:
                 1px solid
                 #f1f5f9;
 
+            vertical-align: middle;
+        }
+
+        .recent-table tbody tr:hover {
+
+            background:
+                #f8fafc;
+        }
+
+        .recent-table tbody tr:last-child td {
+
+            border-bottom: none;
         }
 
         .status-badge {
+
+            display: inline-flex;
+
+            align-items: center;
+
+            justify-content: center;
 
             padding:
                 5px 10px;
@@ -621,6 +626,7 @@
 
             font-weight: 600;
 
+            white-space: nowrap;
         }
 
         .verified {
@@ -630,7 +636,6 @@
 
             color:
                 #166534;
-
         }
 
         .review {
@@ -640,7 +645,188 @@
 
             color:
                 #92400e;
+        }
 
+
+        /* =====================================================
+           REMOVE CLEAN RECENT RECORDS
+           
+           This hides the unwanted "Clean Recent Records"
+           button/section if dashboard.js creates it.
+        ===================================================== */
+
+        #cleanRecentRecords,
+        #cleanRecentRecordsBtn,
+        .cleanRecentRecords,
+        .clean-recent-records,
+        .clean-recent-records-btn,
+        .clean-recent,
+        .clean-records,
+        [id*="cleanRecent"],
+        [class*="cleanRecent"],
+        [id*="clean-recent"],
+        [class*="clean-recent"] {
+
+            display: none !important;
+        }
+
+
+        /* =====================================================
+           LIGHT THEME
+        ===================================================== */
+
+        body.pi-light {
+
+            background:
+                #ffffff !important;
+
+            color:
+                #172033 !important;
+        }
+
+        body.pi-light
+        .dashboard-container {
+
+            background:
+                #ffffff !important;
+        }
+
+        body.pi-light
+        .stat-card {
+
+            background:
+                #ffffff !important;
+
+            color:
+                #172033 !important;
+
+            border:
+                1px solid
+                #e4e7ec !important;
+        }
+
+        body.pi-light
+        .stat-icon {
+
+            background:
+                #ffffff !important;
+
+            color:
+                #4f46e5 !important;
+
+            border:
+                1px solid
+                #e4e7ec !important;
+        }
+
+        body.pi-light
+        .dashboard-header h1,
+        body.pi-light
+        .dashboard-header h2,
+        body.pi-light
+        .dashboard-header h3 {
+
+            color:
+                #172033 !important;
+        }
+
+        body.pi-light
+        .dashboard-header p {
+
+            color:
+                #475467 !important;
+        }
+
+        body.pi-light
+        .stat-label {
+
+            color:
+                #667085 !important;
+        }
+
+        body.pi-light
+        .stat-value {
+
+            color:
+                #172033 !important;
+        }
+
+
+        /* =====================================================
+           QUICK ACTIONS - WHITE CLEAN UI
+        ===================================================== */
+
+        body.pi-light
+        .quick-actions {
+
+            background:
+                #ffffff !important;
+        }
+
+        body.pi-light
+        .quick-action,
+        body.pi-light
+        .quick-action-card,
+        body.pi-light
+        .action-card,
+        body.pi-light
+        .quick-action-box {
+
+            background:
+                #ffffff !important;
+
+            color:
+                #172033 !important;
+
+            border:
+                1px solid
+                #e4e7ec !important;
+
+            box-shadow:
+                0 4px 14px
+                rgba(16, 24, 40, 0.05) !important;
+        }
+
+        body.pi-light
+        .quick-action *,
+        body.pi-light
+        .quick-action-card *,
+        body.pi-light
+        .action-card *,
+        body.pi-light
+        .quick-action-box * {
+
+            color:
+                #172033 !important;
+        }
+
+        body.pi-light
+        .quick-action p,
+        body.pi-light
+        .quick-action-card p,
+        body.pi-light
+        .action-card p,
+        body.pi-light
+        .quick-action-box p {
+
+            color:
+                #667085 !important;
+        }
+
+        body.pi-light
+        .quick-action:hover,
+        body.pi-light
+        .quick-action-card:hover,
+        body.pi-light
+        .action-card:hover,
+        body.pi-light
+        .quick-action-box:hover {
+
+            background:
+                #ffffff !important;
+
+            border-color:
+                #c7d2fe !important;
         }
 
 
@@ -654,16 +840,13 @@
 
                 grid-template-columns:
                     repeat(2, 1fr);
-
             }
 
             .dashboard-grid {
 
                 grid-template-columns:
                     1fr;
-
             }
-
         }
 
 
@@ -676,7 +859,6 @@
 
                 align-items:
                     flex-start;
-
             }
 
             .dashboard-hero {
@@ -686,28 +868,24 @@
 
                 text-align:
                     center;
-
             }
 
             .stats-grid {
 
                 grid-template-columns:
                     1fr;
-
             }
 
             .actions-grid {
 
                 grid-template-columns:
                     1fr;
-
             }
 
             .dataset-info {
 
                 grid-template-columns:
                     1fr;
-
             }
 
             .quality-box {
@@ -717,151 +895,259 @@
 
                 text-align:
                     center;
-
             }
 
+            .recent-table {
+
+                min-width:
+                    650px;
+            }
         }
-        /* ==========================================
-   DASHBOARD LIGHT THEME
-   CLEAN WHITE UI
-========================================== */
-
-body.pi-light {
-    background: #ffffff !important;
-    color: #172033 !important;
-}
-
-body.pi-light .dashboard-container {
-    background: #ffffff !important;
-}
-
-body.pi-light .stat-card {
-    background: #ffffff !important;
-    color: #172033 !important;
-    border: 1px solid #e4e7ec !important;
-}
-
-body.pi-light .stat-icon {
-    background: #ffffff !important;
-    color: #4f46e5 !important;
-    border: 1px solid #e4e7ec !important;
-}
-
-body.pi-light .dashboard-header h1,
-body.pi-light .dashboard-header h2,
-body.pi-light .dashboard-header h3 {
-    color: #172033 !important;
-}
-
-body.pi-light .dashboard-header p {
-    color: #475467 !important;
-}
-
-body.pi-light .stat-label {
-    color: #667085 !important;
-}
-
-body.pi-light .stat-value {
-    color: #172033 !important;
-}
-/* =====================================================
-   DASHBOARD - QUICK ACTIONS
-   REMOVE GREY BACKGROUND
-===================================================== */
-
-body.pi-light .quick-actions {
-    background: #ffffff !important;
-}
-
-body.pi-light .quick-action,
-body.pi-light .quick-action-card,
-body.pi-light .action-card,
-body.pi-light .quick-action-box {
-    background: #ffffff !important;
-    color: #172033 !important;
-    border: 1px solid #e4e7ec !important;
-    box-shadow: 0 4px 14px rgba(16, 24, 40, 0.05) !important;
-}
-
-/* Text inside quick actions */
-body.pi-light .quick-action *,
-body.pi-light .quick-action-card *,
-body.pi-light .action-card *,
-body.pi-light .quick-action-box * {
-    color: #172033 !important;
-}
-
-/* Description text */
-body.pi-light .quick-action p,
-body.pi-light .quick-action-card p,
-body.pi-light .action-card p,
-body.pi-light .quick-action-box p {
-    color: #667085 !important;
-}
-
-/* Icon */
-body.pi-light .quick-action .icon,
-body.pi-light .quick-action-card .icon,
-body.pi-light .action-card .icon,
-body.pi-light .quick-action-box .icon {
-    background: #ffffff !important;
-    color: #4f46e5 !important;
-}
-
-/* Hover */
-body.pi-light .quick-action:hover,
-body.pi-light .quick-action-card:hover,
-body.pi-light .action-card:hover,
-body.pi-light .quick-action-box:hover {
-    background: #ffffff !important;
-    border-color: #c7d2fe !important;
-}
 
     </style>
 
-    <link rel="stylesheet" href="css/innovative.css">
-    <link rel="stylesheet" href="css/premium.css">
-    <link rel="stylesheet" href="css/theme-contrast-fix.css">
 
-    <link rel="stylesheet" href="css/global-polish.css">
-    <link rel="stylesheet" href="css/final-theme-fix.css">
+    <link
+        rel="stylesheet"
+        href="css/innovative.css"
+    >
+
+    <link
+        rel="stylesheet"
+        href="css/premium.css"
+    >
+
+    <link
+        rel="stylesheet"
+        href="css/theme-contrast-fix.css"
+    >
+
+    <link
+        rel="stylesheet"
+        href="css/global-polish.css"
+    >
+
+    <link
+        rel="stylesheet"
+        href="css/final-theme-fix.css"
+    >
+
     <script src="js/global-theme.js"></script>
-    <link rel="stylesheet" href="css/theme-repair-v2.css">
+
+    <link
+        rel="stylesheet"
+        href="css/theme-repair-v2.css"
+    >
+
 </head>
 
 
 <body>
-
 
 <div class="layout">
 
 
     <!-- =====================================================
          SIDEBAR
-    ====================================================== -->
+    ===================================================== -->
 
     <aside class="sidebar">
-        <h2 class="sidebar-brand"><svg class="brand-icon" viewBox="0 0 24 24" aria-hidden="true"><rect x="4" y="4" width="6" height="16" rx="1.5"/><rect x="14" y="8" width="6" height="12" rx="1.5"/><path d="M7 8h0M17 12h0"/></svg><span>ProductIQ</span></h2>
-        <a href="dashboard.html" class="active"><svg class="nav-icon" viewBox="0 0 24 24" aria-hidden="true"><path d="M3 10.5 12 3l9 7.5"/><path d="M5 9.5V21h14V9.5"/><path d="M9 21v-7h6v7"/></svg><span class="nav-label">Dashboard</span></a>
-        <a href="upload.html"><svg class="nav-icon" viewBox="0 0 24 24" aria-hidden="true"><path d="M12 16V4"/><path d="m7 9 5-5 5 5"/><path d="M5 14v6h14v-6"/></svg><span class="nav-label">Upload Product</span></a>
-        <a href="products.html"><svg class="nav-icon" viewBox="0 0 24 24" aria-hidden="true"><path d="m12 3 9 5-9 5-9-5 9-5Z"/><path d="m3 12 9 5 9-5"/><path d="m3 16 9 5 9-5"/></svg><span class="nav-label">Products</span></a>
-        <a href="validation.html"><svg class="nav-icon" viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="9"/><path d="m8 12 2.5 2.5L16.5 9"/></svg><span class="nav-label">Validation</span></a>
-        <a href="reports.html"><svg class="nav-icon" viewBox="0 0 24 24" aria-hidden="true"><path d="M4 19V5"/><path d="M4 19h16"/><path d="m7 15 4-4 3 2 5-6"/></svg><span class="nav-label">Reports</span></a>
-        <a href="settings.html"><svg class="nav-icon" viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="3.5"/><path d="M19 12a7 7 0 0 0-.1-1.2l2-1.5-2-3.4-2.3 1a7 7 0 0 0-2-1.2L14.3 3h-4.6l-.3 2.7a7 7 0 0 0-2 1.2l-2.3-1-2 3.4 2 1.5A7 7 0 0 0 5 12c0 .4 0 .8.1 1.2l-2 1.5 2 3.4 2.3-1a7 7 0 0 0 2 1.2l.3 2.7h4.6l.3-2.7a7 7 0 0 0 2-1.2l2.3 1 2-3.4-2-1.5c.1-.4.1-.8.1-1.2Z"/></svg><span class="nav-label">Settings</span></a>
-        <a href="index.html"><svg class="nav-icon" viewBox="0 0 24 24" aria-hidden="true"><path d="M10 5H5v14h5"/><path d="m14 8 4 4-4 4"/><path d="M18 12H9"/></svg><span class="nav-label">Logout</span></a>
+
+        <h2 class="sidebar-brand">
+
+            <svg
+                class="brand-icon"
+                viewBox="0 0 24 24"
+                aria-hidden="true"
+            >
+                <rect
+                    x="4"
+                    y="4"
+                    width="6"
+                    height="16"
+                    rx="1.5"
+                />
+
+                <rect
+                    x="14"
+                    y="8"
+                    width="6"
+                    height="12"
+                    rx="1.5"
+                />
+
+                <path d="M7 8h0M17 12h0"/>
+
+            </svg>
+
+            <span>
+                ProductIQ
+            </span>
+
+        </h2>
+
+
+        <a
+            href="dashboard.html"
+            class="active"
+        >
+            <svg
+                class="nav-icon"
+                viewBox="0 0 24 24"
+                aria-hidden="true"
+            >
+                <path d="M3 10.5 12 3l9 7.5"/>
+                <path d="M5 9.5V21h14V9.5"/>
+                <path d="M9 21v-7h6v7"/>
+            </svg>
+
+            <span class="nav-label">
+                Dashboard
+            </span>
+        </a>
+
+
+        <a href="upload.html">
+
+            <svg
+                class="nav-icon"
+                viewBox="0 0 24 24"
+                aria-hidden="true"
+            >
+                <path d="M12 16V4"/>
+                <path d="m7 9 5-5 5 5"/>
+                <path d="M5 14v6h14v-6"/>
+            </svg>
+
+            <span class="nav-label">
+                Upload Product
+            </span>
+
+        </a>
+
+
+        <a href="products.html">
+
+            <svg
+                class="nav-icon"
+                viewBox="0 0 24 24"
+                aria-hidden="true"
+            >
+                <path d="m12 3 9 5-9 5-9-5 9-5Z"/>
+                <path d="m3 12 9 5 9-5"/>
+                <path d="m3 16 9 5 9-5"/>
+            </svg>
+
+            <span class="nav-label">
+                Products
+            </span>
+
+        </a>
+
+
+        <a href="validation.html">
+
+            <svg
+                class="nav-icon"
+                viewBox="0 0 24 24"
+                aria-hidden="true"
+            >
+                <circle
+                    cx="12"
+                    cy="12"
+                    r="9"
+                />
+
+                <path
+                    d="m8 12 2.5 2.5L16.5 9"
+                />
+
+            </svg>
+
+            <span class="nav-label">
+                Validation
+            </span>
+
+        </a>
+
+
+        <a href="reports.html">
+
+            <svg
+                class="nav-icon"
+                viewBox="0 0 24 24"
+                aria-hidden="true"
+            >
+                <path d="M4 19V5"/>
+                <path d="M4 19h16"/>
+                <path d="m7 15 4-4 3 2 5-6"/>
+            </svg>
+
+            <span class="nav-label">
+                Reports
+            </span>
+
+        </a>
+
+
+        <a href="settings.html">
+
+            <svg
+                class="nav-icon"
+                viewBox="0 0 24 24"
+                aria-hidden="true"
+            >
+                <circle
+                    cx="12"
+                    cy="12"
+                    r="3.5"
+                />
+
+                <path
+                    d="M19 12a7 7 0 0 0-.1-1.2l2-1.5-2-3.4-2.3 1a7 7 0 0 0-2-1.2L14.3 3h-4.6l-.3 2.7a7 7 0 0 0-2 1.2l-2.3-1-2 3.4 2 1.5A7 7 0 0 0 5 12c0 .4 0 .8.1 1.2l-2 1.5 2 3.4 2.3-1a7 7 0 0 0 2 1.2l.3 2.7h4.6l.3-2.7a7 7 0 0 0 2-1.2l2.3 1 2.3-3.4-2-1.5c.1-.4.1-.8.1-1.2Z"
+                />
+            </svg>
+
+            <span class="nav-label">
+                Settings
+            </span>
+
+        </a>
+
+
+        <a href="index.html">
+
+            <svg
+                class="nav-icon"
+                viewBox="0 0 24 24"
+                aria-hidden="true"
+            >
+                <path d="M10 5H5v14h5"/>
+                <path d="m14 8 4 4-4 4"/>
+                <path d="M18 12H9"/>
+            </svg>
+
+            <span class="nav-label">
+                Logout
+            </span>
+
+        </a>
+
     </aside>
 
 
     <!-- =====================================================
          MAIN
-    ====================================================== -->
+    ===================================================== -->
 
     <main class="main">
 
         <div class="dashboard-container">
 
 
-            <!-- HEADER -->
+            <!-- =================================================
+                 HEADER
+            ================================================= -->
 
             <div class="dashboard-header">
 
@@ -878,6 +1164,7 @@ body.pi-light .quick-action-box:hover {
 
                 </div>
 
+
                 <div
                     class="dataset-pill"
                     id="datasetPill"
@@ -888,7 +1175,9 @@ body.pi-light .quick-action-box:hover {
             </div>
 
 
-            <!-- HERO -->
+            <!-- =================================================
+                 HERO
+            ================================================= -->
 
             <div class="dashboard-hero">
 
@@ -925,7 +1214,9 @@ body.pi-light .quick-action-box:hover {
             </div>
 
 
-            <!-- KPI -->
+            <!-- =================================================
+                 KPI
+            ================================================= -->
 
             <div class="stats-grid">
 
@@ -957,7 +1248,7 @@ body.pi-light .quick-action-box:hover {
                 <div class="stat-card">
 
                     <div class="stat-icon">
-                        
+                        ✓
                     </div>
 
                     <div class="stat-label">
@@ -981,7 +1272,7 @@ body.pi-light .quick-action-box:hover {
                 <div class="stat-card">
 
                     <div class="stat-icon">
-                        
+                        !
                     </div>
 
                     <div class="stat-label">
@@ -1005,7 +1296,7 @@ body.pi-light .quick-action-box:hover {
                 <div class="stat-card">
 
                     <div class="stat-icon">
-                        
+                        %
                     </div>
 
                     <div class="stat-label">
@@ -1028,7 +1319,9 @@ body.pi-light .quick-action-box:hover {
             </div>
 
 
-            <!-- MAIN ANALYTICS -->
+            <!-- =================================================
+                 MAIN ANALYTICS
+            ================================================= -->
 
             <div class="dashboard-grid">
 
@@ -1111,7 +1404,7 @@ body.pi-light .quick-action-box:hover {
                     <div class="card-title">
 
                         <h3>
-                             Data Quality
+                            Data Quality
                         </h3>
 
                         <span>
@@ -1161,10 +1454,14 @@ body.pi-light .quick-action-box:hover {
             </div>
 
 
-            <!-- DATASET + QUICK ACTIONS -->
+            <!-- =================================================
+                 DATASET + QUICK ACTIONS
+            ================================================= -->
 
             <div class="dashboard-grid">
 
+
+                <!-- CURRENT DATASET -->
 
                 <div class="dashboard-card">
 
@@ -1266,12 +1563,14 @@ body.pi-light .quick-action-box:hover {
                 </div>
 
 
+                <!-- QUICK ACTIONS -->
+
                 <div class="dashboard-card">
 
                     <div class="card-title">
 
                         <h3>
-                             Quick Actions
+                            Quick Actions
                         </h3>
 
                         <span>
@@ -1290,7 +1589,7 @@ body.pi-light .quick-action-box:hover {
                         >
 
                             <strong>
-                                 Upload
+                                Upload
                             </strong>
 
                             <span>
@@ -1338,7 +1637,7 @@ body.pi-light .quick-action-box:hover {
                         >
 
                             <strong>
-                                 Reports
+                                Reports
                             </strong>
 
                             <span>
@@ -1386,9 +1685,14 @@ body.pi-light .quick-action-box:hover {
             </div>
 
 
-            <!-- RECENT PRODUCTS -->
+            <!-- =================================================
+                 RECENT PRODUCTS
+            ================================================= -->
 
-            <div class="dashboard-card">
+            <div
+                class="dashboard-card recent-products-card"
+                id="recentProductsCard"
+            >
 
                 <div class="card-title">
 
@@ -1407,6 +1711,7 @@ body.pi-light .quick-action-box:hover {
 
 
                 <div
+                    class="recent-products-wrapper"
                     id="recentProducts"
                 >
 
@@ -1426,8 +1731,8 @@ body.pi-light .quick-action-box:hover {
 
 <script src="js/dashboard.js"></script>
 
-
 <script src="js/intelligence.js"></script>
+
 </body>
 
 </html>

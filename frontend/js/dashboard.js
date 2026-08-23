@@ -1,188 +1,1222 @@
-const API = "https://productintelligence-lzcn.onrender.com";
+// ============================================================
+// DASHBOARD.JS
+// Dynamic Data Intelligence Dashboard
+// ============================================================
+
+const API_BASE_URL = "https://productintelligence-lzcn.onrender.com";
 
 
 // ============================================================
-// LOAD DASHBOARD
+// API REQUEST
 // ============================================================
 
-async function loadDashboard() {
+async function fetchAPI(endpoint) {
 
-    try {
+    const response = await fetch(
+        `${API_BASE_URL}${endpoint}`,
+        {
+            method: "GET",
+            headers: {
+                "Accept": "application/json"
+            }
+        }
+    );
 
-        const response =
-            await fetch(`${API}/dashboard`);
+    if (!response.ok) {
 
-        if (!response.ok) {
+        let message = `HTTP ${response.status}`;
 
-            throw new Error(
-                "Dashboard API failed"
-            );
+        try {
+            const errorData = await response.json();
 
+            if (errorData.detail) {
+                message = errorData.detail;
+            }
+
+        } catch (error) {
+            // Ignore JSON parsing error
         }
 
-        const data =
-            await response.json();
+        throw new Error(message);
+    }
 
-        console.log(
-            "Dashboard:",
-            data
+    return await response.json();
+}
+
+
+// ============================================================
+// SAFE VALUE
+// ============================================================
+
+function safeValue(value, fallback = 0) {
+
+    if (
+        value === null ||
+        value === undefined ||
+        value === ""
+    ) {
+        return fallback;
+    }
+
+    return value;
+}
+
+
+// ============================================================
+// SET TEXT
+// ============================================================
+
+function setText(id, value) {
+
+    const element = document.getElementById(id);
+
+    if (!element) {
+        return;
+    }
+
+    element.textContent = value;
+}
+
+
+// ============================================================
+// SET MULTIPLE IDS
+// ============================================================
+
+function setMultiple(ids, value) {
+
+    ids.forEach(id => {
+
+        const element = document.getElementById(id);
+
+        if (element) {
+            element.textContent = value;
+        }
+
+    });
+}
+
+
+// ============================================================
+// FORMAT NUMBER
+// ============================================================
+
+function formatNumber(value) {
+
+    if (
+        value === null ||
+        value === undefined ||
+        value === ""
+    ) {
+        return "0";
+    }
+
+    const number = Number(value);
+
+    if (Number.isNaN(number)) {
+        return String(value);
+    }
+
+    return number.toLocaleString();
+}
+
+
+// ============================================================
+// ESCAPE HTML
+// ============================================================
+
+function escapeHTML(value) {
+
+    if (
+        value === null ||
+        value === undefined
+    ) {
+        return "";
+    }
+
+    return String(value)
+        .replace(/&/g, "&amp;")
+        .replace(/</g, "&lt;")
+        .replace(/>/g, "&gt;")
+        .replace(/"/g, "&quot;")
+        .replace(/'/g, "&#039;");
+}
+
+
+// ============================================================
+// FORMAT FIELD NAME
+// ============================================================
+
+function formatFieldName(field) {
+
+    return String(field)
+        .replace(/_/g, " ")
+        .replace(/-/g, " ")
+        .replace(/\s+/g, " ")
+        .trim()
+        .replace(/\b\w/g, letter =>
+            letter.toUpperCase()
+        );
+}
+
+
+// ============================================================
+// GET RECORD DATA
+// ============================================================
+
+function getRecordData(record) {
+
+    if (
+        record &&
+        record.raw_data &&
+        typeof record.raw_data === "object" &&
+        !Array.isArray(record.raw_data)
+    ) {
+        return record.raw_data;
+    }
+
+    if (
+        record &&
+        record.data &&
+        typeof record.data === "object" &&
+        !Array.isArray(record.data)
+    ) {
+        return record.data;
+    }
+
+    return record || {};
+}
+
+
+// ============================================================
+// CHECK DISPLAY VALUE
+// ============================================================
+
+function hasDisplayValue(value) {
+
+    if (
+        value === null ||
+        value === undefined
+    ) {
+        return false;
+    }
+
+    const text = String(value).trim();
+
+    if (
+        text === "" ||
+        text.toLowerCase() === "not available" ||
+        text.toLowerCase() === "n/a" ||
+        text.toLowerCase() === "null" ||
+        text.toLowerCase() === "undefined"
+    ) {
+        return false;
+    }
+
+    return true;
+}
+
+
+// ============================================================
+// GET DISPLAY NAME
+// ============================================================
+
+function getDisplayName(record) {
+
+    const data = getRecordData(record);
+
+    const keys = Object.keys(data);
+
+    if (keys.length === 0) {
+        return "Record";
+    }
+
+    const preferredFields = [
+
+        "product_name",
+        "product name",
+
+        "name",
+
+        "title",
+
+        "full_name",
+        "full name",
+
+        "student_name",
+        "student name",
+
+        "employee_name",
+        "employee name",
+
+        "customer_name",
+        "customer name",
+
+        "item_name",
+        "item name",
+
+        "company_name",
+        "company name",
+
+        "description",
+
+        "label"
+    ];
+
+
+    // Preferred fields
+
+    for (const preferred of preferredFields) {
+
+        const matchingKey = keys.find(
+            key =>
+                key.toLowerCase().trim() ===
+                preferred.toLowerCase().trim()
+        );
+
+        if (
+            matchingKey &&
+            hasDisplayValue(data[matchingKey])
+        ) {
+            return String(data[matchingKey]);
+        }
+    }
+
+
+    // Any field containing name
+
+    const nameKey = keys.find(key => {
+
+        const normalized =
+            key
+                .toLowerCase()
+                .replace(/[_-]/g, " ")
+                .trim();
+
+        return (
+            normalized.includes("name") &&
+            hasDisplayValue(data[key])
+        );
+    });
+
+    if (nameKey) {
+        return String(data[nameKey]);
+    }
+
+
+    // Title / label
+
+    const titleKey = keys.find(key => {
+
+        const normalized =
+            key
+                .toLowerCase()
+                .replace(/[_-]/g, " ")
+                .trim();
+
+        return (
+            (
+                normalized.includes("title") ||
+                normalized.includes("label")
+            ) &&
+            hasDisplayValue(data[key])
+        );
+    });
+
+    if (titleKey) {
+        return String(data[titleKey]);
+    }
+
+
+    // First meaningful text value
+
+    for (const key of keys) {
+
+        const value = data[key];
+
+        if (
+            hasDisplayValue(value) &&
+            isNaN(Number(value))
+        ) {
+            return String(value);
+        }
+    }
+
+
+    // First meaningful value
+
+    for (const key of keys) {
+
+        const value = data[key];
+
+        if (hasDisplayValue(value)) {
+            return String(value);
+        }
+    }
+
+    return "Record";
+}
+
+
+// ============================================================
+// GET INFORMATION FIELDS
+// ============================================================
+
+function getInformationFields(record) {
+
+    const data = getRecordData(record);
+
+    const keys = Object.keys(data);
+
+    const displayName = getDisplayName(record);
+
+    const fields = [];
+
+    for (const key of keys) {
+
+        const value = data[key];
+
+        if (!hasDisplayValue(value)) {
+            continue;
+        }
+
+        if (
+            String(value) ===
+            String(displayName)
+        ) {
+            continue;
+        }
+
+        fields.push({
+            key: key,
+            value: value
+        });
+    }
+
+    return fields;
+}
+
+
+// ============================================================
+// RECORD CONFIDENCE
+// ============================================================
+
+function getRecordConfidence(record) {
+
+    if (
+        record &&
+        record.confidence !== undefined &&
+        record.confidence !== null
+    ) {
+
+        let value = Number(record.confidence);
+
+        if (value <= 1) {
+            value = value * 100;
+        }
+
+        return Math.round(value);
+    }
+
+
+    const data = getRecordData(record);
+
+    const keys = Object.keys(data);
+
+    if (keys.length === 0) {
+        return 0;
+    }
+
+    const populated =
+        keys.filter(
+            key =>
+                hasDisplayValue(data[key])
+        ).length;
+
+    return Math.round(
+        (
+            populated /
+            keys.length
+        ) * 100
+    );
+}
+
+
+// ============================================================
+// RECORD STATUS
+// ============================================================
+
+function getRecordStatus(record) {
+
+    if (
+        record &&
+        record.status !== undefined &&
+        record.status !== null &&
+        String(record.status).trim() !== ""
+    ) {
+        return String(record.status);
+    }
+
+    const confidence =
+        getRecordConfidence(record);
+
+    if (confidence >= 85) {
+        return "Verified";
+    }
+
+    if (confidence >= 60) {
+        return "Needs Review";
+    }
+
+    return "Incomplete";
+}
+
+
+// ============================================================
+// STATUS CLASS
+// ============================================================
+
+function statusClass(status) {
+
+    const value =
+        String(status || "")
+            .toLowerCase();
+
+    if (
+        value.includes("verified") ||
+        value.includes("pass")
+    ) {
+        return "verified";
+    }
+
+    if (
+        value.includes("review") ||
+        value.includes("warning")
+    ) {
+        return "review";
+    }
+
+    if (
+        value.includes("critical") ||
+        value.includes("incomplete") ||
+        value.includes("fail")
+    ) {
+        return "critical";
+    }
+
+    return "review";
+}
+
+
+// ============================================================
+// GET TOTAL ROWS
+// ============================================================
+
+function getTotalRows(data) {
+
+    return Number(
+        data.total_rows ??
+        data.total_records ??
+        data.total_products ??
+        (
+            data.dataset &&
+            data.dataset.rows_count
+        ) ??
+        0
+    );
+}
+
+
+// ============================================================
+// GET TOTAL COLUMNS
+// ============================================================
+
+function getTotalColumns(data) {
+
+    return Number(
+        data.total_columns ??
+        (
+            data.dataset &&
+            data.dataset.columns_count
+        ) ??
+        0
+    );
+}
+
+
+// ============================================================
+// DATASET NAME
+// ============================================================
+
+function updateDatasetName(data) {
+
+    let datasetName =
+        data.dataset_name ||
+        data.datasetName ||
+        data.filename ||
+        data.file_name ||
+        (
+            data.dataset &&
+            (
+                data.dataset.filename ||
+                data.dataset.name
+            )
         );
 
 
-        // ====================================================
-        // BASIC STATS
-        // ====================================================
-
-        const total =
-            Number(data.total_products || 0);
-
-        const verified =
-            Number(data.verified || 0);
-
-        const review =
-            Number(data.needs_review || 0);
-
-        const confidence =
-            Number(
-                data.average_confidence || 0
-            );
-
-        const missing =
-            Number(
-                data.missing_values || 0
-            );
+    if (!datasetName) {
+        datasetName = "No dataset uploaded";
+    }
 
 
-        setText(
-            "totalProducts",
-            total
-        );
-
-        setText(
-            "verifiedProducts",
-            verified
-        );
-
-        setText(
-            "reviewProducts",
-            review
-        );
-
-        setText(
-            "confidence",
-            `${confidence}%`
-        );
-
-
-        // ====================================================
-        // DATA QUALITY
-        // ====================================================
-
-        const quality =
-            calculateQuality(
-                total,
-                verified,
-                confidence,
-                missing,
-                data.total_columns
-            );
-
-
-        setText(
-            "heroScore",
-            `${quality}%`
-        );
-
-        setText(
-            "qualityCircle",
-            `${quality}%`
-        );
-
-
-        // ====================================================
-        // DATASET
-        // ====================================================
-
-        setText(
+    setMultiple(
+        [
             "datasetName",
-            data.dataset_name ||
-            "No dataset uploaded"
-        );
+            "currentDataset",
+            "currentDatasetName",
+            "dataset-name",
+            "datasetPill"
+        ],
+        datasetName
+    );
+}
 
-        setText(
+
+// ============================================================
+// ROW COUNT
+// ============================================================
+
+function updateRowCount(data) {
+
+    const rows = getTotalRows(data);
+
+    setMultiple(
+        [
+            "totalRows",
+            "currentRows",
             "datasetRows",
-            data.total_rows || 0
-        );
+            "rowsCount",
+            "totalRecords"
+        ],
+        formatNumber(rows)
+    );
+}
 
-        setText(
+
+// ============================================================
+// COLUMN COUNT
+// ============================================================
+
+function updateColumnCount(data) {
+
+    const columns = getTotalColumns(data);
+
+    setMultiple(
+        [
+            "totalColumns",
+            "currentColumns",
             "datasetColumns",
-            data.total_columns || 0
+            "columnsCount"
+        ],
+        formatNumber(columns)
+    );
+}
+
+
+// ============================================================
+// RECORD COUNT
+// ============================================================
+
+function updateRecordCount(data) {
+
+    const records =
+        Number(
+            data.total_records ??
+            data.total_products ??
+            data.total_rows ??
+            0
         );
 
-        setText(
+    setMultiple(
+        [
+            "totalProducts",
+            "productCount",
+            "totalRecords",
+            "recordCount"
+        ],
+        formatNumber(records)
+    );
+}
+
+
+// ============================================================
+// VERIFIED
+// ============================================================
+
+function updateVerified(data) {
+
+    const verified =
+        Number(
+            data.verified ??
+            data.verified_products ??
+            data.verified_records ??
+            0
+        );
+
+    setMultiple(
+        [
+            "verified",
+            "verifiedCount",
+            "verifiedProducts",
+            "verifiedRecords"
+        ],
+        formatNumber(verified)
+    );
+}
+
+
+// ============================================================
+// NEEDS REVIEW
+// ============================================================
+
+function updateNeedsReview(data) {
+
+    const value =
+        Number(
+            data.needs_review ??
+            data.needsReview ??
+            data.review ??
+            0
+        );
+
+    setMultiple(
+        [
+            "needsReview",
+            "needsReviewCount",
+            "reviewProducts"
+        ],
+        formatNumber(value)
+    );
+}
+
+
+// ============================================================
+// INCOMPLETE
+// ============================================================
+
+function updateIncomplete(data) {
+
+    const value =
+        Number(
+            data.incomplete ??
+            data.incomplete_records ??
+            0
+        );
+
+    setMultiple(
+        [
+            "incomplete",
+            "incompleteCount"
+        ],
+        formatNumber(value)
+    );
+}
+
+
+// ============================================================
+// CRITICAL ISSUES
+// ============================================================
+
+function updateCriticalIssues(data) {
+
+    const value =
+        Number(
+            data.critical_issues ??
+            data.criticalIssues ??
+            data.incomplete ??
+            0
+        );
+
+    setMultiple(
+        [
+            "criticalIssues",
+            "criticalIssuesCount",
+            "critical",
+            "criticalCount"
+        ],
+        formatNumber(value)
+    );
+}
+
+
+// ============================================================
+// MISSING VALUES
+// ============================================================
+
+function updateMissingValues(data) {
+
+    const value =
+        Number(
+            data.missing_values ??
+            data.missingValues ??
+            data.missing_count ??
+            0
+        );
+
+    setMultiple(
+        [
             "missingValues",
-            missing
+            "missingCount"
+        ],
+        formatNumber(value)
+    );
+}
+
+
+// ============================================================
+// DUPLICATES
+// ============================================================
+
+function updateDuplicateRows(data) {
+
+    const value =
+        Number(
+            data.duplicate_rows ??
+            data.duplicateRows ??
+            data.duplicates ??
+            data.duplicate_count ??
+            0
+        );
+
+    setMultiple(
+        [
+            "duplicateRows",
+            "duplicateCount"
+        ],
+        formatNumber(value)
+    );
+}
+
+
+// ============================================================
+// CONFIDENCE
+// ============================================================
+
+function updateConfidence(data) {
+
+    let value =
+        Number(
+            data.average_confidence ??
+            data.averageConfidence ??
+            data.confidence ??
+            0
+        );
+
+    if (value <= 1) {
+        value = value * 100;
+    }
+
+    value = Math.max(
+        0,
+        Math.min(
+            100,
+            Math.round(value)
+        )
+    );
+
+
+    setMultiple(
+        [
+            "averageConfidence",
+            "avgConfidence",
+            "confidenceScore",
+            "confidencePercentage",
+            "confidence",
+            "heroScore"
+        ],
+        `${value}%`
+    );
+}
+
+
+// ============================================================
+// DATA QUALITY CALCULATION
+// ============================================================
+
+function calculateDataQuality(data) {
+
+    const possibleQualityFields = [
+
+        "data_quality",
+        "data_quality_score",
+
+        "average_quality",
+        "average_quality_score",
+
+        "quality_score",
+        "quality_percentage",
+
+        "dataQuality",
+        "dataQualityScore"
+    ];
+
+
+    // --------------------------------------------------------
+    // Use backend quality if available
+    // --------------------------------------------------------
+
+    for (const field of possibleQualityFields) {
+
+        if (
+            data[field] !== undefined &&
+            data[field] !== null &&
+            data[field] !== ""
+        ) {
+
+            let value = Number(data[field]);
+
+            if (value >= 0 && value <= 1) {
+                value = value * 100;
+            }
+
+            return Math.max(
+                0,
+                Math.min(
+                    100,
+                    Math.round(value)
+                )
+            );
+        }
+    }
+
+
+    // --------------------------------------------------------
+    // Calculate fallback
+    // --------------------------------------------------------
+
+    const totalRows =
+        getTotalRows(data);
+
+    const missingValues =
+        Number(
+            data.missing_values ??
+            data.missing_count ??
+            data.missingValues ??
+            0
+        );
+
+    const duplicateRows =
+        Number(
+            data.duplicate_rows ??
+            data.duplicates ??
+            data.duplicate_count ??
+            data.duplicateRows ??
+            0
+        );
+
+    const incomplete =
+        Number(
+            data.incomplete ??
+            data.incomplete_records ??
+            0
+        );
+
+    const needsReview =
+        Number(
+            data.needs_review ??
+            data.needsReview ??
+            data.review ??
+            0
         );
 
 
-        // ====================================================
-        // DATASET PILL
-        // ====================================================
+    // --------------------------------------------------------
+    // If rows unavailable, use confidence
+    // --------------------------------------------------------
 
-        const pill =
-            document.getElementById(
-                "datasetPill"
+    if (totalRows <= 0) {
+
+        let confidence =
+            Number(
+                data.average_confidence ??
+                data.averageConfidence ??
+                0
             );
 
-        if (pill) {
-
-            pill.innerText =
-                data.dataset_name &&
-                data.dataset_name !==
-                "No dataset uploaded"
-
-                    ? `📁 ${data.dataset_name}`
-
-                    : "No dataset uploaded";
-
+        if (confidence <= 1) {
+            confidence *= 100;
         }
 
-
-        // ====================================================
-        // UPLOAD TIME
-        // ====================================================
-
-        await loadDatasetInfo();
+        return Math.round(confidence);
+    }
 
 
-        // ====================================================
-        // STATUS BARS
-        // ====================================================
+    // --------------------------------------------------------
+    // Calculate problematic rows
+    // --------------------------------------------------------
+
+    const problematicRows =
+        Math.min(
+            totalRows,
+            missingValues +
+            duplicateRows +
+            incomplete +
+            needsReview
+        );
+
+
+    const quality =
+        (
+            (totalRows - problematicRows) /
+            totalRows
+        ) * 100;
+
+
+    return Math.max(
+        0,
+        Math.min(
+            100,
+            Math.round(quality)
+        )
+    );
+}
+
+
+// ============================================================
+// UPDATE DATA QUALITY
+// ============================================================
+
+function updateDataQuality(data) {
+
+    const quality =
+        calculateDataQuality(data);
+
+
+    setMultiple(
+        [
+            "dataQuality",
+            "dataQualityScore",
+            "qualityScore",
+            "averageQuality",
+            "averageQualityScore",
+            "data-quality",
+            "data-quality-score",
+            "qualityCircle",
+            "heroScore"
+        ],
+        `${quality}%`
+    );
+
+
+    // Quality title
+
+    let title = "Excellent Data Quality";
+
+    if (quality < 60) {
+        title = "Poor Data Quality";
+    }
+    else if (quality < 80) {
+        title = "Needs Improvement";
+    }
+    else if (quality < 90) {
+        title = "Good Data Quality";
+    }
+
+
+    setText(
+        "qualityTitle",
+        title
+    );
+
+
+    // Quality description
+
+    let description =
+        "The dataset has good overall quality.";
+
+    if (quality < 60) {
+
+        description =
+            "The dataset contains several data quality issues that require attention.";
+
+    }
+    else if (quality < 80) {
+
+        description =
+            "Some records contain missing, incomplete or inconsistent information.";
+
+    }
+    else if (quality < 90) {
+
+        description =
+            "Most records are complete, with a few issues requiring review.";
+
+    }
+
+
+    setText(
+        "qualityDescription",
+        description
+    );
+}
+
+
+// ============================================================
+// PRODUCT STATUS
+// ============================================================
+
+function calculateProductStatus(data) {
+
+    const total =
+        Number(
+            data.total_products ??
+            data.total_rows ??
+            data.total_records ??
+            0
+        );
+
+    const verified =
+        Number(
+            data.verified ??
+            data.verified_products ??
+            data.verified_records ??
+            0
+        );
+
+    const needsReview =
+        Number(
+            data.needs_review ??
+            data.needsReview ??
+            data.review ??
+            0
+        );
+
+    const incomplete =
+        Number(
+            data.incomplete ??
+            data.incomplete_records ??
+            0
+        );
+
+
+    if (total === 0) {
+        return "No Data";
+    }
+
+
+    if (
+        verified === total &&
+        needsReview === 0 &&
+        incomplete === 0
+    ) {
+        return "Verified";
+    }
+
+
+    if (needsReview > 0) {
+        return "Needs Review";
+    }
+
+
+    if (incomplete > 0) {
+        return "Incomplete";
+    }
+
+
+    if (
+        verified > 0 &&
+        verified < total
+    ) {
+        return "Partially Verified";
+    }
+
+
+    return "Needs Review";
+}
+
+
+// ============================================================
+// UPDATE PRODUCT STATUS
+// ============================================================
+
+function updateProductStatus(data) {
+
+    const status =
+        calculateProductStatus(data);
+
+
+    setMultiple(
+        [
+            "productStatus",
+            "status",
+            "datasetStatus",
+            "currentStatus",
+            "product-status",
+            "dataset-status"
+        ],
+        status
+    );
+
+
+    // Update verified percentage bar
+
+    const total =
+        Number(
+            data.total_products ??
+            data.total_rows ??
+            data.total_records ??
+            0
+        );
+
+    const verified =
+        Number(
+            data.verified ??
+            data.verified_products ??
+            data.verified_records ??
+            0
+        );
+
+    const review =
+        Number(
+            data.needs_review ??
+            data.needsReview ??
+            data.review ??
+            0
+        );
+
+
+    if (total > 0) {
 
         const verifiedPercent =
-            total > 0
-                ? Math.round(
-                    (verified / total) * 100
-                )
-                : 0;
+            Math.round(
+                (verified / total) * 100
+            );
 
         const reviewPercent =
-            total > 0
-                ? Math.round(
-                    (review / total) * 100
-                )
-                : 0;
+            Math.round(
+                (review / total) * 100
+            );
 
 
-        setWidth(
-            "verifiedBar",
-            verifiedPercent
-        );
+        const verifiedBar =
+            document.getElementById(
+                "verifiedBar"
+            );
 
-        setWidth(
-            "reviewBar",
-            reviewPercent
-        );
+        if (verifiedBar) {
+            verifiedBar.style.width =
+                `${verifiedPercent}%`;
+        }
+
+
+        const reviewBar =
+            document.getElementById(
+                "reviewBar"
+            );
+
+        if (reviewBar) {
+            reviewBar.style.width =
+                `${reviewPercent}%`;
+        }
 
 
         setText(
@@ -194,329 +1228,95 @@ async function loadDashboard() {
             "reviewPercent",
             `${reviewPercent}%`
         );
-
-
-        // ====================================================
-        // QUALITY MESSAGE
-        // ====================================================
-
-        updateQualityMessage(
-            quality,
-            total
-        );
-
-
-        // ====================================================
-        // HERO MESSAGE
-        // ====================================================
-
-        updateHeroMessage(
-            quality,
-            total,
-            verified,
-            review
-        );
-
-
-        // ====================================================
-        // RECENT PRODUCTS
-        // ====================================================
-
-        loadRecentProducts();
-
     }
-    catch(error) {
-
-        console.error(
-            "Dashboard error:",
-            error
-        );
-
-        showDashboardError();
-
-    }
-
 }
 
 
 // ============================================================
-// QUALITY CALCULATION
+// COMPLETENESS
 // ============================================================
 
-function calculateQuality(
-    total,
-    verified,
-    confidence,
-    missing,
-    columns
-) {
+function updateCompleteness(data) {
 
-    if (total === 0) {
-
-        return 0;
-
-    }
-
-
-    const verificationScore =
-        (verified / total) * 100;
-
-
-    let completenessScore = 100;
+    let value =
+        data.completeness ??
+        data.dataset_completeness ??
+        data.completeness_score;
 
 
     if (
-        columns &&
-        Number(columns) > 0
+        value === undefined ||
+        value === null
     ) {
-
-        const possibleValues =
-            total * Number(columns);
-
-        completenessScore =
-            Math.max(
-                0,
-                100 -
-                (
-                    missing /
-                    possibleValues
-                ) * 100
-            );
-
+        return;
     }
 
 
-    /*
-     * Overall quality combines:
-     *
-     * 40% verification
-     * 40% AI confidence
-     * 20% completeness
-     */
+    value = Number(value);
 
-    const score =
-        (
-            verificationScore * 0.40
-        ) +
-        (
-            confidence * 0.40
-        ) +
-        (
-            completenessScore * 0.20
-        );
+    if (value <= 1) {
+        value *= 100;
+    }
 
 
-    return Math.min(
-        100,
-        Math.round(score)
+    setMultiple(
+        [
+            "completeness",
+            "completenessScore",
+            "datasetCompleteness"
+        ],
+        `${Math.round(value)}%`
+    );
+}
+
+
+// ============================================================
+// UPDATE ALL DASHBOARD DATA
+// ============================================================
+
+function updateDashboard(data) {
+
+    console.log(
+        "Dashboard data:",
+        data
     );
 
+
+    updateDatasetName(data);
+
+    updateRowCount(data);
+
+    updateColumnCount(data);
+
+    updateRecordCount(data);
+
+    updateVerified(data);
+
+    updateNeedsReview(data);
+
+    updateIncomplete(data);
+
+    updateCriticalIssues(data);
+
+    updateMissingValues(data);
+
+    updateDuplicateRows(data);
+
+    updateConfidence(data);
+
+    updateDataQuality(data);
+
+    updateProductStatus(data);
+
+    updateCompleteness(data);
 }
 
 
 // ============================================================
-// QUALITY MESSAGE
+// RENDER RECENT RECORDS
 // ============================================================
 
-function updateQualityMessage(
-    quality,
-    total
-) {
-
-    const title =
-        document.getElementById(
-            "qualityTitle"
-        );
-
-    const description =
-        document.getElementById(
-            "qualityDescription"
-        );
-
-
-    if (!title || !description) {
-
-        return;
-
-    }
-
-
-    if (total === 0) {
-
-        title.innerText =
-            "No dataset available";
-
-        description.innerText =
-            "Upload a product dataset to begin analysis.";
-
-        return;
-
-    }
-
-
-    if (quality >= 90) {
-
-        title.innerText =
-            "Excellent Data Quality";
-
-        description.innerText =
-            "Your product dataset is highly complete and consistent with strong validation coverage.";
-
-    }
-
-    else if (quality >= 75) {
-
-        title.innerText =
-            "Good Data Quality";
-
-        description.innerText =
-            "Most product information is complete, but some records may require review.";
-
-    }
-
-    else if (quality >= 50) {
-
-        title.innerText =
-            "Moderate Data Quality";
-
-        description.innerText =
-            "Several product records contain incomplete or inconsistent information.";
-
-    }
-
-    else {
-
-        title.innerText =
-            "Needs Improvement";
-
-        description.innerText =
-            "A significant amount of product information requires enrichment or validation.";
-
-    }
-
-}
-
-
-// ============================================================
-// HERO MESSAGE
-// ============================================================
-
-function updateHeroMessage(
-    quality,
-    total,
-    verified,
-    review
-) {
-
-    const element =
-        document.getElementById(
-            "heroMessage"
-        );
-
-    if (!element) {
-
-        return;
-
-    }
-
-
-    if (total === 0) {
-
-        element.innerText =
-            "Upload a product dataset to generate intelligent product insights, validation scores and quality reports.";
-
-        return;
-
-    }
-
-
-    element.innerText =
-
-        `${total} products analyzed. ` +
-
-        `${verified} products are currently verified ` +
-
-        `and ${review} require attention. ` +
-
-        `The overall dataset quality score is ${quality}%.`;
-
-}
-
-
-// ============================================================
-// DATASET INFORMATION
-// ============================================================
-
-async function loadDatasetInfo() {
-
-    try {
-
-        const response =
-            await fetch(
-                `${API}/dataset`
-            );
-
-        if (!response.ok) {
-
-            return;
-
-        }
-
-        const data =
-            await response.json();
-
-
-        if (
-            !data.success ||
-            !data.dataset
-        ) {
-
-            setText(
-                "uploadedAt",
-                "—"
-            );
-
-            setText(
-                "datasetStatus",
-                "No dataset"
-            );
-
-            return;
-
-        }
-
-
-        setText(
-            "uploadedAt",
-            formatDate(
-                data.dataset.uploaded_at
-            )
-        );
-
-
-        setText(
-            "datasetStatus",
-            "Ready"
-        );
-
-    }
-    catch(error) {
-
-        console.error(
-            "Dataset info error:",
-            error
-        );
-
-    }
-
-}
-
-
-// ============================================================
-// RECENT PRODUCTS
-// ============================================================
-
-async function loadRecentProducts() {
+function renderRecentRecords(records) {
 
     const container =
         document.getElementById(
@@ -525,353 +1325,503 @@ async function loadRecentProducts() {
 
 
     if (!container) {
-
         return;
-
     }
 
 
+    if (
+        !Array.isArray(records) ||
+        records.length === 0
+    ) {
+
+        container.innerHTML = `
+            <div class="recent-empty">
+                <p>No records found</p>
+            </div>
+        `;
+
+        return;
+    }
+
+
+    const recent =
+        records.slice(0, 5);
+
+
+    container.innerHTML =
+        recent
+            .map(
+                (record, index) => {
+
+                    const name =
+                        getDisplayName(record);
+
+                    const fields =
+                        getInformationFields(record);
+
+                    const confidence =
+                        getRecordConfidence(record);
+
+                    const status =
+                        getRecordStatus(record);
+
+
+                    const visibleFields =
+                        fields.slice(0, 3);
+
+
+                    const informationHTML =
+                        visibleFields.length > 0
+
+                        ?
+
+                        visibleFields
+                            .map(
+                                field => `
+
+                                    <div class="recent-field">
+
+                                        <span class="recent-field-label">
+                                            ${escapeHTML(
+                                                formatFieldName(
+                                                    field.key
+                                                )
+                                            )}
+                                        </span>
+
+                                        <span class="recent-field-value">
+                                            ${escapeHTML(
+                                                field.value
+                                            )}
+                                        </span>
+
+                                    </div>
+
+                                `
+                            )
+                            .join("")
+
+                        :
+
+                        `
+                            <span class="recent-no-data">
+                                No additional information
+                            </span>
+                        `;
+
+
+                    return `
+
+                        <div class="recent-record-card">
+
+                            <div class="recent-record-number">
+                                ${index + 1}
+                            </div>
+
+
+                            <div class="recent-record-main">
+
+                                <div class="recent-record-title">
+                                    ${escapeHTML(name)}
+                                </div>
+
+                                <div class="recent-record-fields">
+                                    ${informationHTML}
+                                </div>
+
+                            </div>
+
+
+                            <div class="recent-record-confidence">
+
+                                <span>
+                                    Confidence
+                                </span>
+
+                                <strong>
+                                    ${confidence}%
+                                </strong>
+
+                            </div>
+
+
+                            <div class="recent-record-status">
+
+                                <span
+                                    class="status-badge ${statusClass(status)}"
+                                >
+                                    ${escapeHTML(status)}
+                                </span>
+
+                            </div>
+
+                        </div>
+
+                    `;
+                }
+            )
+            .join("");
+}
+
+
+// ============================================================
+// LOADING STATE
+// ============================================================
+
+function showLoadingState() {
+
+    const container =
+        document.getElementById(
+            "recentProducts"
+        );
+
+    if (!container) {
+        return;
+    }
+
+    container.innerHTML = `
+        <div class="recent-empty">
+            <p>Loading records...</p>
+        </div>
+    `;
+}
+
+
+// ============================================================
+// ERROR STATE
+// ============================================================
+
+function showErrorState(error) {
+
+    const container =
+        document.getElementById(
+            "recentProducts"
+        );
+
+    if (!container) {
+        return;
+    }
+
+    container.innerHTML = `
+        <div class="recent-empty">
+            <p>Unable to load records</p>
+
+            <small>
+                ${escapeHTML(
+                    error.message ||
+                    "Unknown error"
+                )}
+            </small>
+        </div>
+    `;
+}
+
+
+// ============================================================
+// DASHBOARD SUMMARY
+// ============================================================
+
+async function loadDashboardSummary() {
+
+    const dashboard =
+        await fetchAPI(
+            "/dashboard"
+        );
+
+
+    console.log(
+        "Dashboard summary:",
+        dashboard
+    );
+
+
+    if (
+        dashboard &&
+        dashboard.success !== false
+    ) {
+
+        updateDashboard(
+            dashboard
+        );
+    }
+
+
+    return dashboard;
+}
+
+
+// ============================================================
+// RECENT RECORDS
+// ============================================================
+
+async function loadRecentRecords() {
+
+    const records =
+        await fetchAPI(
+            "/products"
+        );
+
+
+    console.log(
+        "Products response:",
+        records
+    );
+
+
+    if (Array.isArray(records)) {
+
+        renderRecentRecords(
+            records
+        );
+
+        return records;
+    }
+
+
+    if (
+        records &&
+        Array.isArray(records.records)
+    ) {
+
+        renderRecentRecords(
+            records.records
+        );
+
+        return records.records;
+    }
+
+
+    if (
+        records &&
+        Array.isArray(records.products)
+    ) {
+
+        renderRecentRecords(
+            records.products
+        );
+
+        return records.products;
+    }
+
+
+    if (
+        records &&
+        Array.isArray(records.rows)
+    ) {
+
+        renderRecentRecords(
+            records.rows
+        );
+
+        return records.rows;
+    }
+
+
+    renderRecentRecords([]);
+
+    return [];
+}
+
+
+// ============================================================
+// DATASET INFORMATION
+// ============================================================
+
+async function loadDatasetInformation() {
+
     try {
 
-        const response =
-            await fetch(
-                `${API}/products`
+        const dataset =
+            await fetchAPI(
+                "/dataset"
             );
 
-        if (!response.ok) {
 
-            throw new Error(
-                "Products API failed"
-            );
-
-        }
-
-
-        const products =
-            await response.json();
+        console.log(
+            "Dataset information:",
+            dataset
+        );
 
 
         if (
-            !Array.isArray(products) ||
-            products.length === 0
+            !dataset ||
+            dataset.success === false
         ) {
-
-            container.innerHTML = `
-
-                <div
-                    style="
-                        padding:25px;
-                        text-align:center;
-                        color:#64748b;
-                    "
-                >
-
-                    No products available.
-
-                    <br><br>
-
-                    <a
-                        href="upload.html"
-                        class="button"
-                    >
-                        Upload Dataset
-                    </a>
-
-                </div>
-
-            `;
-
             return;
-
         }
 
 
-        /*
-         * Show latest/first 6 products
-         */
-
-        const recent =
-            products.slice(0, 6);
+        const info =
+            dataset.dataset ||
+            dataset;
 
 
-        let html = `
+        // Dataset filename
 
-            <div
-                style="
-                    overflow-x:auto;
-                "
-            >
-
-                <table
-                    class="recent-table"
-                >
-
-                    <thead>
-
-                        <tr>
-
-                            <th>
-                                Product
-                            </th>
-
-                            <th>
-                                Brand
-                            </th>
-
-                            <th>
-                                Category
-                            </th>
-
-                            <th>
-                                Confidence
-                            </th>
-
-                            <th>
-                                Status
-                            </th>
-
-                        </tr>
-
-                    </thead>
-
-                    <tbody>
-
-        `;
+        const filename =
+            info.filename ||
+            info.file_name ||
+            info.name;
 
 
-        recent.forEach(
-            product => {
+        if (filename) {
 
-                const status =
-                    product.status ||
-                    "Needs Review";
-
-
-                const statusClass =
-                    status === "Verified"
-                        ? "verified"
-                        : "review";
-
-
-                html += `
-
-                    <tr>
-
-                        <td>
-                            <strong>
-                                ${escapeHTML(
-                                    product.name
-                                )}
-                            </strong>
-                        </td>
-
-                        <td>
-                            ${escapeHTML(
-                                product.brand
-                            )}
-                        </td>
-
-                        <td>
-                            ${escapeHTML(
-                                product.category
-                            )}
-                        </td>
-
-                        <td>
-                            ${Number(
-                                product.confidence || 0
-                            )}%
-                        </td>
-
-                        <td>
-
-                            <span
-                                class="
-                                    status-badge
-                                    ${statusClass}
-                                "
-                            >
-                                ${escapeHTML(
-                                    status
-                                )}
-                            </span>
-
-                        </td>
-
-                    </tr>
-
-                `;
-
-            }
-        );
+            setMultiple(
+                [
+                    "datasetName",
+                    "datasetPill",
+                    "currentDataset",
+                    "currentDatasetName",
+                    "dataset-name"
+                ],
+                filename
+            );
+        }
 
 
-        html += `
+        // Rows
 
-                    </tbody>
+        if (
+            info.rows_count !== undefined
+        ) {
 
-                </table>
+            setMultiple(
+                [
+                    "totalRows",
+                    "currentRows",
+                    "datasetRows",
+                    "rowsCount"
+                ],
+                formatNumber(
+                    info.rows_count
+                )
+            );
+        }
 
-            </div>
 
-        `;
+        // Columns
 
+        if (
+            info.columns_count !== undefined
+        ) {
 
-        container.innerHTML =
-            html;
+            setMultiple(
+                [
+                    "totalColumns",
+                    "currentColumns",
+                    "datasetColumns",
+                    "columnsCount"
+                ],
+                formatNumber(
+                    info.columns_count
+                )
+            );
+        }
 
-    }
-    catch(error) {
+    } catch (error) {
 
-        console.error(
-            "Recent products error:",
+        console.warn(
+            "Dataset information could not be loaded:",
             error
         );
-
-        container.innerHTML = `
-
-            <p
-                style="
-                    color:#64748b;
-                "
-            >
-                Unable to load recent products.
-            </p>
-
-        `;
-
     }
-
 }
 
 
 // ============================================================
-// HELPERS
+// MAIN DASHBOARD
 // ============================================================
 
-function setText(
-    id,
-    value
-) {
+async function loadDashboard() {
 
-    const element =
-        document.getElementById(id);
-
-    if (element) {
-
-        element.innerText =
-            value;
-
-    }
-
-}
-
-
-function setWidth(
-    id,
-    percentage
-) {
-
-    const element =
-        document.getElementById(id);
-
-    if (element) {
-
-        element.style.width =
-            `${percentage}%`;
-
-    }
-
-}
-
-
-function formatDate(
-    value
-) {
-
-    if (!value) {
-
-        return "—";
-
-    }
+    showLoadingState();
 
 
     try {
 
-        return new Date(
-            value
-        ).toLocaleString(
-            "en-IN",
-            {
-                day: "2-digit",
-                month: "short",
-                year: "numeric",
-                hour: "2-digit",
-                minute: "2-digit"
-            }
+        const results =
+            await Promise.allSettled(
+                [
+
+                    loadDashboardSummary(),
+
+                    loadRecentRecords(),
+
+                    loadDatasetInformation()
+
+                ]
+            );
+
+
+        if (
+            results[0].status === "rejected"
+        ) {
+
+            console.error(
+                "Dashboard summary failed:",
+                results[0].reason
+            );
+        }
+
+
+        if (
+            results[1].status === "rejected"
+        ) {
+
+            console.error(
+                "Records failed:",
+                results[1].reason
+            );
+
+            showErrorState(
+                results[1].reason
+            );
+        }
+
+
+        if (
+            results[2].status === "rejected"
+        ) {
+
+            console.warn(
+                "Dataset information failed:",
+                results[2].reason
+            );
+        }
+
+
+        console.log(
+            "Dashboard loading completed."
         );
 
+    } catch (error) {
+
+        console.error(
+            "Dashboard error:",
+            error
+        );
+
+        showErrorState(
+            error
+        );
     }
-    catch(error) {
-
-        return value;
-
-    }
-
 }
 
 
-function escapeHTML(
-    value
-) {
+// ============================================================
+// AUTO REFRESH
+// ============================================================
 
-    if (
-        value === null ||
-        value === undefined
-    ) {
+function setupDashboardRefresh() {
 
-        return "Not Available";
+    window.addEventListener(
+        "focus",
+        function () {
 
-    }
+            loadDashboard();
 
-
-    return String(value)
-
-        .replaceAll(
-            "&",
-            "&amp;"
-        )
-
-        .replaceAll(
-            "<",
-            "&lt;"
-        )
-
-        .replaceAll(
-            ">",
-            "&gt;"
-        )
-
-        .replaceAll(
-            '"',
-            "&quot;"
-        )
-
-        .replaceAll(
-            "'",
-            "&#039;"
-        );
-
-}
-
-
-function showDashboardError() {
-
-    setText(
-        "heroMessage",
-        "Unable to connect to the Product Intelligence backend. Please make sure FastAPI is running."
+        }
     );
-
 }
 
 
@@ -879,4 +1829,13 @@ function showDashboardError() {
 // START
 // ============================================================
 
-loadDashboard();
+document.addEventListener(
+    "DOMContentLoaded",
+    function () {
+
+        loadDashboard();
+
+        setupDashboardRefresh();
+
+    }
+);

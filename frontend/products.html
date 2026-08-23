@@ -15,11 +15,51 @@
     </title>
 
 
+    <!-- =====================================================
+         MAIN CSS
+    ====================================================== -->
+
     <link
         rel="stylesheet"
         href="css/style.css"
     >
 
+    <link
+        rel="stylesheet"
+        href="css/innovative.css"
+    >
+
+    <link
+        rel="stylesheet"
+        href="css/premium.css"
+    >
+
+    <link
+        rel="stylesheet"
+        href="css/theme-contrast-fix.css"
+    >
+
+    <link
+        rel="stylesheet"
+        href="css/global-polish.css"
+    >
+
+    <link
+        rel="stylesheet"
+        href="css/final-theme-fix.css"
+    >
+
+    <link
+        rel="stylesheet"
+        href="css/theme-repair-v2.css"
+    >
+
+    <script src="js/global-theme.js"></script>
+
+
+    <!-- =====================================================
+         PRODUCTS PAGE CSS
+    ====================================================== -->
 
     <style>
 
@@ -28,25 +68,36 @@
         }
 
 
+        /* =====================================================
+           BODY
+        ====================================================== */
+
         body {
             margin: 0;
+
             background: #f5f7fb;
+
             color: #172033;
+
             font-family: Arial, sans-serif;
         }
 
 
         /* =====================================================
            NAVBAR
-        ===================================================== */
+        ====================================================== */
 
         .navbar {
             min-height: 72px;
+
             background: #111827;
+
             color: white;
 
             display: flex;
+
             align-items: center;
+
             justify-content: space-between;
 
             padding: 0 45px;
@@ -57,13 +108,16 @@
 
         .logo {
             font-size: 21px;
+
             font-weight: 700;
         }
 
 
         .nav {
             display: flex;
+
             align-items: center;
+
             gap: 25px;
 
             flex-wrap: wrap;
@@ -72,6 +126,7 @@
 
         .nav a {
             color: white;
+
             text-decoration: none;
 
             font-size: 14px;
@@ -85,7 +140,7 @@
 
         /* =====================================================
            PAGE
-        ===================================================== */
+        ====================================================== */
 
         .products-page {
             max-width: 1400px;
@@ -98,7 +153,7 @@
 
         /* =====================================================
            HEADER
-        ===================================================== */
+        ====================================================== */
 
         .product-header {
             display: flex;
@@ -142,7 +197,7 @@
 
         /* =====================================================
            STATS
-        ===================================================== */
+        ====================================================== */
 
         .stats {
             display: flex;
@@ -189,7 +244,7 @@
 
         /* =====================================================
            DATASET STATUS
-        ===================================================== */
+        ====================================================== */
 
         .dataset-status {
             display: inline-block;
@@ -212,7 +267,7 @@
 
         /* =====================================================
            TABLE CARD
-        ===================================================== */
+        ====================================================== */
 
         .table-card {
             background: white;
@@ -228,7 +283,7 @@
 
         /* =====================================================
            TABLE TOP BAR
-        ===================================================== */
+        ====================================================== */
 
         .table-topbar {
             display: flex;
@@ -263,7 +318,7 @@
 
         /* =====================================================
            SEARCH
-        ===================================================== */
+        ====================================================== */
 
         .search-box {
             width: 280px;
@@ -291,27 +346,72 @@
 
 
         /* =====================================================
-           TABLE
-        ===================================================== */
+           TABLE CONTAINER
+        ====================================================== */
 
         .table-container {
             width: 100%;
 
-            overflow-x: auto;
+            overflow: visible !important;
         }
 
 
-        table {
-            width: 100%;
+        /* =====================================================
+           PRODUCT TABLE WRAPPER
 
-            min-width: 1000px;
+           BOTH:
+           - Vertical scrollbar
+           - Horizontal scrollbar
+        ====================================================== */
+
+        .product-table-wrapper {
+
+            width: 100% !important;
+
+            max-width: 100% !important;
+
+            max-height: 600px !important;
+
+            overflow-x: auto !important;
+
+            overflow-y: auto !important;
+
+            position: relative;
+
+            border-radius: 0;
+
+            display: block;
+
+            scrollbar-width: auto;
+        }
+
+
+        /* =====================================================
+           TABLE
+
+           IMPORTANT:
+           min-width makes horizontal scrolling possible
+        ====================================================== */
+
+        .product-table-wrapper table {
+
+            width: max-content !important;
+
+            min-width: 1200px !important;
 
             border-collapse: collapse;
+
+            table-layout: auto;
         }
 
 
-        th {
-            background: #f8fafc;
+        /* =====================================================
+           TABLE HEADER
+        ====================================================== */
+
+        .product-table-wrapper thead th {
+
+            background: #f8fafc !important;
 
             text-align: left;
 
@@ -326,15 +426,20 @@
 
             color: #344054;
 
-            position: sticky;
+            position: sticky !important;
 
-            top: 0;
+            top: 0 !important;
 
-            z-index: 2;
+            z-index: 10;
         }
 
 
-        td {
+        /* =====================================================
+           TABLE DATA
+        ====================================================== */
+
+        .product-table-wrapper td {
+
             padding: 14px 15px;
 
             border-bottom:
@@ -354,16 +459,64 @@
         }
 
 
-        tbody tr:hover {
+        .product-table-wrapper tbody tr:hover {
+
             background: #f8fafc;
         }
 
 
         /* =====================================================
+           HORIZONTAL + VERTICAL SCROLLBAR
+        ====================================================== */
+
+        .product-table-wrapper::-webkit-scrollbar {
+
+            width: 10px;
+
+            height: 14px;
+        }
+
+
+        .product-table-wrapper::-webkit-scrollbar-track {
+
+            background: #f1f5f9;
+
+            border-radius: 10px;
+        }
+
+
+        .product-table-wrapper::-webkit-scrollbar-thumb {
+
+            background: #cbd5e1;
+
+            border-radius: 10px;
+
+            border: 2px solid #f1f5f9;
+        }
+
+
+        .product-table-wrapper::-webkit-scrollbar-thumb:hover {
+
+            background: #94a3b8;
+        }
+
+
+        /* =====================================================
+           MAKE HORIZONTAL BAR CLEARLY VISIBLE
+        ====================================================== */
+
+        .product-table-wrapper::-webkit-scrollbar:horizontal {
+
+            height: 14px;
+        }
+
+
+        /* =====================================================
            VIEW BUTTON
-        ===================================================== */
+        ====================================================== */
 
         .view-button {
+
             display: inline-block;
 
             background: #2563eb;
@@ -383,15 +536,17 @@
 
 
         .view-button:hover {
+
             background: #1d4ed8;
         }
 
 
         /* =====================================================
            LOADING
-        ===================================================== */
+        ====================================================== */
 
         .loading {
+
             padding: 80px 30px;
 
             text-align: center;
@@ -403,6 +558,7 @@
 
 
         .loading-icon {
+
             font-size: 40px;
 
             margin-bottom: 15px;
@@ -411,9 +567,10 @@
 
         /* =====================================================
            EMPTY
-        ===================================================== */
+        ====================================================== */
 
         .empty {
+
             padding: 80px 30px;
 
             text-align: center;
@@ -421,6 +578,7 @@
 
 
         .empty-icon {
+
             font-size: 55px;
 
             margin-bottom: 15px;
@@ -428,6 +586,7 @@
 
 
         .empty h2 {
+
             margin: 0 0 10px;
 
             color: #172033;
@@ -435,6 +594,7 @@
 
 
         .empty p {
+
             color: #667085;
 
             margin-bottom: 25px;
@@ -442,6 +602,7 @@
 
 
         .upload-button {
+
             display: inline-block;
 
             background: #2563eb;
@@ -459,15 +620,17 @@
 
 
         .upload-button:hover {
+
             background: #1d4ed8;
         }
 
 
         /* =====================================================
            ERROR
-        ===================================================== */
+        ====================================================== */
 
         .error {
+
             padding: 70px 30px;
 
             text-align: center;
@@ -479,6 +642,7 @@
 
 
         .retry-button {
+
             margin-top: 20px;
 
             border: none;
@@ -498,15 +662,17 @@
 
 
         .retry-button:hover {
+
             background: #1d4ed8;
         }
 
 
         /* =====================================================
            NO SEARCH RESULTS
-        ===================================================== */
+        ====================================================== */
 
         .no-results {
+
             display: none;
 
             padding: 50px;
@@ -519,9 +685,10 @@
 
         /* =====================================================
            PAGINATION
-        ===================================================== */
+        ====================================================== */
 
         .pagination {
+
             display: flex;
 
             align-items: center;
@@ -540,6 +707,7 @@
 
 
         .pagination-info {
+
             color: #667085;
 
             font-size: 13px;
@@ -547,6 +715,7 @@
 
 
         .pagination-buttons {
+
             display: flex;
 
             gap: 8px;
@@ -554,6 +723,7 @@
 
 
         .page-button {
+
             border: 1px solid #d1d5db;
 
             background: white;
@@ -571,11 +741,13 @@
 
 
         .page-button:hover:not(:disabled) {
+
             background: #f3f4f6;
         }
 
 
         .page-button:disabled {
+
             opacity: .5;
 
             cursor: not-allowed;
@@ -583,6 +755,7 @@
 
 
         .page-number {
+
             padding: 8px 13px;
 
             background: #2563eb;
@@ -598,12 +771,45 @@
 
 
         /* =====================================================
+           LIGHT MODE NAVBAR
+        ====================================================== */
+
+        body.pi-light .navbar {
+
+            background: #ffffff !important;
+
+            color: #172033 !important;
+
+            border-bottom: 1px solid #e5e7eb;
+        }
+
+
+        body.pi-light .navbar .logo {
+
+            color: #172033 !important;
+        }
+
+
+        body.pi-light .navbar .nav a {
+
+            color: #172033 !important;
+        }
+
+
+        body.pi-light .navbar .nav a:hover {
+
+            color: #2563eb !important;
+        }
+
+
+        /* =====================================================
            RESPONSIVE
-        ===================================================== */
+        ====================================================== */
 
         @media(max-width: 800px) {
 
             .navbar {
+
                 padding: 18px 20px;
 
                 flex-direction: column;
@@ -613,11 +819,13 @@
 
 
             .nav {
+
                 gap: 15px;
             }
 
 
             .products-page {
+
                 margin: 25px auto;
 
                 padding: 0 12px;
@@ -625,16 +833,19 @@
 
 
             .product-title h1 {
+
                 font-size: 28px;
             }
 
 
             .stats {
+
                 width: 100%;
             }
 
 
             .stat {
+
                 flex: 1;
 
                 min-width: 120px;
@@ -642,11 +853,13 @@
 
 
             .search-box {
+
                 width: 100%;
             }
 
 
             .table-topbar {
+
                 align-items: stretch;
 
                 flex-direction: column;
@@ -654,44 +867,16 @@
 
 
             .pagination {
+
                 flex-direction: column;
 
                 align-items: flex-start;
             }
 
         }
-        /* =====================================================
-   PRODUCTS PAGE - LIGHT MODE NAVBAR
-===================================================== */
-
-body.pi-light .navbar {
-    background: #ffffff !important;
-    color: #172033 !important;
-    border-bottom: 1px solid #e5e7eb;
-}
-
-body.pi-light .navbar .logo {
-    color: #172033 !important;
-}
-
-body.pi-light .navbar .nav a {
-    color: #172033 !important;
-}
-
-body.pi-light .navbar .nav a:hover {
-    color: #2563eb !important;
-}
 
     </style>
 
-    <link rel="stylesheet" href="css/innovative.css">
-    <link rel="stylesheet" href="css/premium.css">
-    <link rel="stylesheet" href="css/theme-contrast-fix.css">
-
-    <link rel="stylesheet" href="css/global-polish.css">
-    <link rel="stylesheet" href="css/final-theme-fix.css">
-    <script src="js/global-theme.js"></script>
-    <link rel="stylesheet" href="css/theme-repair-v2.css">
 </head>
 
 
@@ -715,21 +900,17 @@ body.pi-light .navbar .nav a:hover {
             Dashboard
         </a>
 
-
         <a href="upload.html">
             Upload
         </a>
-
 
         <a href="products.html">
             Products
         </a>
 
-
         <a href="validation.html">
             Validation
         </a>
-
 
         <a href="reports.html">
             Reports
@@ -744,9 +925,8 @@ body.pi-light .navbar .nav a:hover {
 </nav>
 
 
-
 <!-- =====================================================
-     PAGE
+     PRODUCTS PAGE
 ===================================================== -->
 
 <div class="products-page">
@@ -757,7 +937,6 @@ body.pi-light .navbar .nav a:hover {
     ================================================= -->
 
     <div class="product-header">
-
 
         <div class="product-title">
 
@@ -779,17 +958,17 @@ body.pi-light .navbar .nav a:hover {
                 class="dataset-status"
                 style="display:none"
             >
-                 Dataset Active
+                Dataset Active
             </span>
 
         </div>
 
 
-
-        <!-- STATS -->
+        <!-- =================================================
+             STATS
+        ================================================= -->
 
         <div class="stats">
-
 
             <div class="stat">
 
@@ -804,7 +983,6 @@ body.pi-light .navbar .nav a:hover {
             </div>
 
 
-
             <div class="stat">
 
                 <strong id="columnCount">
@@ -817,11 +995,9 @@ body.pi-light .navbar .nav a:hover {
 
             </div>
 
-
         </div>
 
     </div>
-
 
 
     <!-- =================================================
@@ -831,7 +1007,9 @@ body.pi-light .navbar .nav a:hover {
     <div class="table-card">
 
 
-        <!-- TABLE TOP BAR -->
+        <!-- =================================================
+             TABLE TOP BAR
+        ================================================= -->
 
         <div
             id="tableTopbar"
@@ -866,7 +1044,6 @@ body.pi-light .navbar .nav a:hover {
         </div>
 
 
-
         <!-- =================================================
              LOADING
         ================================================= -->
@@ -885,7 +1062,6 @@ body.pi-light .navbar .nav a:hover {
         </div>
 
 
-
         <!-- =================================================
              EMPTY
         ================================================= -->
@@ -897,7 +1073,7 @@ body.pi-light .navbar .nav a:hover {
         >
 
             <div class="empty-icon">
-                
+                📊
             </div>
 
 
@@ -922,7 +1098,6 @@ body.pi-light .navbar .nav a:hover {
         </div>
 
 
-
         <!-- =================================================
              ERROR
         ================================================= -->
@@ -941,9 +1116,7 @@ body.pi-light .navbar .nav a:hover {
                 Make sure FastAPI is running.
             </span>
 
-
             <br>
-
 
             <button
                 class="retry-button"
@@ -955,9 +1128,12 @@ body.pi-light .navbar .nav a:hover {
         </div>
 
 
-
         <!-- =================================================
-             TABLE
+             TABLE CONTAINER
+
+             IMPORTANT:
+             product-table-wrapper is INSIDE here.
+             This creates both scrollbars.
         ================================================= -->
 
         <div
@@ -966,24 +1142,27 @@ body.pi-light .navbar .nav a:hover {
             style="display:none"
         >
 
-            <table>
+            <div class="product-table-wrapper">
 
-                <thead id="tableHead">
+                <table>
 
-                </thead>
+                    <thead id="tableHead">
+                    </thead>
 
 
-                <tbody id="tableBody">
+                    <tbody id="tableBody">
+                    </tbody>
 
-                </tbody>
+                </table>
 
-            </table>
+            </div>
 
         </div>
 
 
-
-        <!-- NO SEARCH RESULTS -->
+        <!-- =================================================
+             NO SEARCH RESULTS
+        ================================================= -->
 
         <div
             id="noResults"
@@ -997,7 +1176,6 @@ body.pi-light .navbar .nav a:hover {
             No products match your search.
 
         </div>
-
 
 
         <!-- =================================================
@@ -1049,12 +1227,14 @@ body.pi-light .navbar .nav a:hover {
 
         </div>
 
-
     </div>
 
 </div>
 
 
+<!-- =====================================================
+     JAVASCRIPT
+===================================================== -->
 
 <script>
 
@@ -1065,7 +1245,6 @@ body.pi-light .navbar .nav a:hover {
 
 const API =
     "https://productintelligence-lzcn.onrender.com";
-
 
 
 /* =====================================================
@@ -1082,8 +1261,13 @@ let filteredRows = [];
 
 let currentPage = 1;
 
-const rowsPerPage = 50;
 
+/*
+   IMPORTANT:
+   50 products per page
+*/
+
+const rowsPerPage = 50;
 
 
 /* =====================================================
@@ -1210,11 +1394,8 @@ const nextButton =
     );
 
 
-
 /* =====================================================
    LOAD DATASET
-   IMPORTANT:
-   USE /dataset, NOT /products
 ===================================================== */
 
 async function loadProducts() {
@@ -1278,7 +1459,7 @@ async function loadProducts() {
 
 
         /* -----------------------------------------
-           GET CURRENT DATASET
+           GET DATASET
         ----------------------------------------- */
 
         const response =
@@ -1373,8 +1554,8 @@ async function loadProducts() {
             Array.isArray(
                 data.columns
             )
-            ? data.columns
-            : [];
+                ? data.columns
+                : [];
 
 
         /* -----------------------------------------
@@ -1385,8 +1566,8 @@ async function loadProducts() {
             Array.isArray(
                 data.rows
             )
-            ? data.rows
-            : [];
+                ? data.rows
+                : [];
 
 
         /* -----------------------------------------
@@ -1470,12 +1651,13 @@ async function loadProducts() {
 
 
         /* -----------------------------------------
-           DISPLAY DATASET INFORMATION
+           DATASET INFORMATION
         ----------------------------------------- */
 
         datasetName.innerHTML = `
 
             Dataset:
+
             <strong>
                 ${escapeHTML(
                     datasetInfo.filename ||
@@ -1521,14 +1703,14 @@ async function loadProducts() {
 
 
         /* -----------------------------------------
-           BUILD TABLE HEADER
+           BUILD HEADER
         ----------------------------------------- */
 
         buildTableHeader();
 
 
         /* -----------------------------------------
-           DISPLAY FIRST PAGE
+           FIRST PAGE
         ----------------------------------------- */
 
         currentPage = 1;
@@ -1537,6 +1719,7 @@ async function loadProducts() {
 
 
     }
+
 
     catch (error) {
 
@@ -1574,7 +1757,6 @@ async function loadProducts() {
     }
 
 }
-
 
 
 /* =====================================================
@@ -1640,7 +1822,6 @@ function showEmpty(
     }
 
 }
-
 
 
 /* =====================================================
@@ -1711,7 +1892,6 @@ function buildTableHeader() {
 }
 
 
-
 /* =====================================================
    RENDER CURRENT PAGE
 ===================================================== */
@@ -1756,6 +1936,10 @@ function renderCurrentPage() {
         "flex";
 
 
+    /* ---------------------------------------------
+       TOTAL PAGES
+    --------------------------------------------- */
+
     const totalPages =
         Math.ceil(
             filteredRows.length /
@@ -1783,10 +1967,13 @@ function renderCurrentPage() {
     }
 
 
+    /* ---------------------------------------------
+       PAGE RANGE
+    --------------------------------------------- */
+
     const startIndex =
         (
-            currentPage -
-            1
+            currentPage - 1
         ) *
         rowsPerPage;
 
@@ -1795,6 +1982,7 @@ function renderCurrentPage() {
         Math.min(
             startIndex +
             rowsPerPage,
+
             filteredRows.length
         );
 
@@ -1825,6 +2013,7 @@ function renderCurrentPage() {
 
             columns.forEach(
                 column => {
+
 
                     const td =
                         document.createElement(
@@ -1888,7 +2077,7 @@ function renderCurrentPage() {
 
 
             /* -----------------------------------------
-               ACTION
+               ACTION BUTTON
             ----------------------------------------- */
 
             const actionTd =
@@ -1939,7 +2128,7 @@ function renderCurrentPage() {
 
 
     /* ---------------------------------------------
-       UPDATE PAGINATION
+       PAGINATION INFORMATION
     --------------------------------------------- */
 
     const showingStart =
@@ -1956,14 +2145,17 @@ function renderCurrentPage() {
 
 
     pageNumber.innerText =
+
         `${currentPage} / ${totalPages}`;
 
 
     previousButton.disabled =
+
         currentPage <= 1;
 
 
     nextButton.disabled =
+
         currentPage >= totalPages;
 
 
@@ -1972,7 +2164,6 @@ function renderCurrentPage() {
         `${filteredRows.length} product records`;
 
 }
-
 
 
 /* =====================================================
@@ -1993,7 +2184,6 @@ function previousPage() {
     }
 
 }
-
 
 
 /* =====================================================
@@ -2024,7 +2214,6 @@ function nextPage() {
 }
 
 
-
 /* =====================================================
    SEARCH
 ===================================================== */
@@ -2048,6 +2237,7 @@ searchBox.addEventListener(
                 [...allRows];
 
         }
+
 
         else {
 
@@ -2097,7 +2287,6 @@ searchBox.addEventListener(
 );
 
 
-
 /* =====================================================
    ESCAPE HTML
 ===================================================== */
@@ -2137,18 +2326,22 @@ function escapeHTML(
 }
 
 
-
 /* =====================================================
    INITIAL LOAD
 ===================================================== */
 
 loadProducts();
 
-
 </script>
 
 
+<!-- =====================================================
+     INTELLIGENCE JS
+===================================================== -->
+
 <script src="js/intelligence.js"></script>
+
+
 </body>
 
 </html>

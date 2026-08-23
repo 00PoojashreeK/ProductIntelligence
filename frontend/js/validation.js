@@ -1,4 +1,5 @@
- const API = "https://productintelligence-lzcn.onrender.com";
+ const API =
+    "https://productintelligence-lzcn.onrender.com";
 
 
 // ============================================================
@@ -41,6 +42,7 @@ const errorBox =
 
 // ============================================================
 // PAGINATION
+// KEEPING 30 PRODUCTS PER PAGE
 // ============================================================
 
 const PRODUCTS_PER_PAGE = 30;
@@ -53,7 +55,7 @@ let productRows = [];
 
 
 // ============================================================
-// CREATE PAGINATION UI
+// CREATE PAGINATION
 // ============================================================
 
 function createPagination() {
@@ -72,12 +74,12 @@ function createPagination() {
             "validationPagination";
 
         pagination.style.cssText = `
-            display:flex;
-            justify-content:center;
-            align-items:center;
-            gap:12px;
-            margin:25px 0;
-            flex-wrap:wrap;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            gap: 12px;
+            margin: 25px 0;
+            flex-wrap: wrap;
         `;
 
         productSelect
@@ -89,6 +91,7 @@ function createPagination() {
         <button
             id="previousPage"
             class="button"
+            type="button"
             onclick="previousPage()"
         >
             ← Previous
@@ -97,8 +100,8 @@ function createPagination() {
         <span
             id="pageInfo"
             style="
-                font-weight:600;
-                padding:8px 14px;
+                font-weight: 600;
+                padding: 8px 14px;
             "
         >
             Page 1 of 1
@@ -107,6 +110,7 @@ function createPagination() {
         <button
             id="nextPage"
             class="button"
+            type="button"
             onclick="nextPage()"
         >
             Next →
@@ -116,7 +120,7 @@ function createPagination() {
 
 
 // ============================================================
-// LOAD PRODUCTS
+// LOAD PRODUCTS FROM BACKEND
 // ============================================================
 
 async function loadProducts() {
@@ -129,27 +133,69 @@ async function loadProducts() {
 
     validateBtn.disabled = true;
 
+    emptyBox.style.display = "none";
+
+    errorBox.style.display = "none";
+
+    validationResult.style.display = "none";
+
+
     try {
 
         const response =
             await fetch(
-                `${API}/products`
+                `${API}/products`,
+                {
+                    method: "GET",
+                    cache: "no-store",
+                    headers: {
+                        "Accept":
+                            "application/json"
+                    }
+                }
             );
+
 
         if (!response.ok) {
 
+            const errorText =
+                await response.text();
+
             throw new Error(
-                "Unable to fetch products."
+                `Backend returned ${response.status}: ${errorText}`
             );
         }
+
 
         const data =
             await response.json();
 
-        if (
-            !Array.isArray(data) ||
-            data.length === 0
-        ) {
+
+        console.log(
+            "Products received:",
+            data
+        );
+
+
+        // --------------------------------------------------------
+        // CHECK BACKEND RESPONSE
+        // --------------------------------------------------------
+
+        if (!Array.isArray(data)) {
+
+            throw new Error(
+                "Backend did not return a valid product list."
+            );
+        }
+
+
+        // --------------------------------------------------------
+        // NO PRODUCTS
+        // --------------------------------------------------------
+
+        if (data.length === 0) {
+
+            productRows = [];
 
             productSelect.innerHTML = `
                 <option value="">
@@ -160,32 +206,50 @@ async function loadProducts() {
             emptyBox.style.display =
                 "block";
 
+            validateBtn.disabled =
+                true;
+
+            removePagination();
+
             return;
         }
 
-        emptyBox.style.display =
-            "none";
+
+        // --------------------------------------------------------
+        // STORE PRODUCTS
+        // --------------------------------------------------------
 
         productRows =
             data;
 
+
         window.productRows =
             data;
 
+
+        // --------------------------------------------------------
+        // PAGINATION
+        // --------------------------------------------------------
+
         totalPages =
             Math.ceil(
-                data.length /
+                productRows.length /
                 PRODUCTS_PER_PAGE
             );
 
+
         currentPage = 1;
+
 
         createPagination();
 
+
         renderProductPage();
+
 
         validateBtn.disabled =
             false;
+
 
     }
     catch(error) {
@@ -195,25 +259,59 @@ async function loadProducts() {
             error
         );
 
+
+        productSelect.innerHTML = `
+            <option value="">
+                Unable to load products
+            </option>
+        `;
+
+
+        validateBtn.disabled =
+            true;
+
+
         showError(
-            "Unable to load products. Make sure FastAPI is running."
+            error.message ||
+            "Unable to load products from the backend."
         );
     }
 }
 
 
 // ============================================================
-// RENDER 30 PRODUCTS
+// REMOVE PAGINATION
+// ============================================================
+
+function removePagination() {
+
+    const pagination =
+        document.getElementById(
+            "validationPagination"
+        );
+
+    if (pagination) {
+
+        pagination.remove();
+    }
+}
+
+
+// ============================================================
+// RENDER PRODUCTS FOR CURRENT PAGE
 // ============================================================
 
 function renderProductPage() {
 
     const start =
-        (currentPage - 1)
-        * PRODUCTS_PER_PAGE;
+        (currentPage - 1) *
+        PRODUCTS_PER_PAGE;
+
 
     const end =
-        start + PRODUCTS_PER_PAGE;
+        start +
+        PRODUCTS_PER_PAGE;
+
 
     const pageProducts =
         productRows.slice(
@@ -221,11 +319,13 @@ function renderProductPage() {
             end
         );
 
+
     productSelect.innerHTML = `
         <option value="">
             Select a product
         </option>
     `;
+
 
     pageProducts.forEach(
         product => {
@@ -235,25 +335,73 @@ function renderProductPage() {
                     "option"
                 );
 
+
+            // ----------------------------------------------------
+            // DYNAMIC PRODUCT ID
+            // ----------------------------------------------------
+
+            const productId =
+                product.id !== undefined &&
+                product.id !== null
+                    ? product.id
+                    : product.row_number;
+
+
             option.value =
-                product.id;
+                productId;
+
+
+            // ----------------------------------------------------
+            // DYNAMIC PRODUCT NAME
+            // ----------------------------------------------------
 
             const name =
-                product.name &&
-                product.name !==
-                "Not Available"
-                    ? product.name
-                    : `Product ${product.row_number}`;
+                getProductDisplayValue(
+                    product,
+                    [
+                        "name",
+                        "product_name",
+                        "product",
+                        "title"
+                    ]
+                );
+
+
+            // ----------------------------------------------------
+            // DYNAMIC MODEL
+            // ----------------------------------------------------
 
             const model =
-                product.model &&
-                product.model !==
+                getProductDisplayValue(
+                    product,
+                    [
+                        "model",
+                        "model_name"
+                    ]
+                );
+
+
+            // ----------------------------------------------------
+            // BUILD DISPLAY NAME
+            // ----------------------------------------------------
+
+            let displayName =
+                name;
+
+
+            if (
+                model !==
                 "Not Available"
-                    ? ` - ${product.model}`
-                    : "";
+            ) {
+
+                displayName +=
+                    ` - ${model}`;
+            }
+
 
             option.textContent =
-                name + model;
+                displayName;
+
 
             productSelect.appendChild(
                 option
@@ -261,12 +409,47 @@ function renderProductPage() {
         }
     );
 
+
     updatePagination();
 }
 
 
 // ============================================================
-// PAGINATION CONTROLS
+// GET DYNAMIC PRODUCT VALUE
+// ============================================================
+
+function getProductDisplayValue(
+    product,
+    possibleFields
+) {
+
+    for (
+        const field of possibleFields
+    ) {
+
+        if (
+            product[field] !==
+                undefined &&
+            product[field] !==
+                null &&
+            String(
+                product[field]
+            ).trim() !== ""
+        ) {
+
+            return String(
+                product[field]
+            );
+        }
+    }
+
+
+    return "Not Available";
+}
+
+
+// ============================================================
+// UPDATE PAGINATION
 // ============================================================
 
 function updatePagination() {
@@ -276,15 +459,18 @@ function updatePagination() {
             "pageInfo"
         );
 
+
     const previous =
         document.getElementById(
             "previousPage"
         );
 
+
     const next =
         document.getElementById(
             "nextPage"
         );
+
 
     if (pageInfo) {
 
@@ -292,45 +478,41 @@ function updatePagination() {
             `Page ${currentPage} of ${totalPages}`;
     }
 
+
     if (previous) {
 
         previous.disabled =
-            currentPage === 1;
+            currentPage <= 1;
     }
+
 
     if (next) {
 
         next.disabled =
-            currentPage === totalPages;
+            currentPage >= totalPages;
     }
 }
 
+
+// ============================================================
+// PREVIOUS PAGE
+// ============================================================
 
 function previousPage() {
 
-    if (currentPage > 1) {
+    if (
+        currentPage > 1
+    ) {
 
         currentPage--;
 
-        renderProductPage();
-
-        productSelect.value = "";
-
-        validationResult.style.display =
-            "none";
-    }
-}
-
-
-function nextPage() {
-
-    if (currentPage < totalPages) {
-
-        currentPage++;
 
         renderProductPage();
 
-        productSelect.value = "";
+
+        productSelect.value =
+            "";
+
 
         validationResult.style.display =
             "none";
@@ -339,7 +521,34 @@ function nextPage() {
 
 
 // ============================================================
-// SELECT PRODUCT
+// NEXT PAGE
+// ============================================================
+
+function nextPage() {
+
+    if (
+        currentPage <
+        totalPages
+    ) {
+
+        currentPage++;
+
+
+        renderProductPage();
+
+
+        productSelect.value =
+            "";
+
+
+        validationResult.style.display =
+            "none";
+    }
+}
+
+
+// ============================================================
+// PRODUCT SELECTION
 // ============================================================
 
 productSelect.addEventListener(
@@ -351,7 +560,6 @@ productSelect.addEventListener(
 
         errorBox.style.display =
             "none";
-
     }
 );
 
@@ -365,6 +573,7 @@ async function validateProduct() {
     const productId =
         productSelect.value;
 
+
     if (!productId) {
 
         alert(
@@ -374,12 +583,21 @@ async function validateProduct() {
         return;
     }
 
+
+    // --------------------------------------------------------
+    // FIND SELECTED PRODUCT
+    // --------------------------------------------------------
+
     const product =
         productRows.find(
             item =>
-                String(item.id) ===
+                String(
+                    item.id ??
+                    item.row_number
+                ) ===
                 String(productId)
         );
+
 
     if (!product) {
 
@@ -390,31 +608,56 @@ async function validateProduct() {
         return;
     }
 
+
     validateBtn.disabled =
         true;
+
 
     validateBtn.innerText =
         "⏳ Validating...";
 
+
     errorBox.style.display =
         "none";
+
 
     validationResult.style.display =
         "none";
 
+
     try {
+
+        // ----------------------------------------------------
+        // CALL BACKEND VALIDATION API
+        // ----------------------------------------------------
 
         const response =
             await fetch(
-                `${API}/validate/${product.id}`
+                `${API}/validate/${encodeURIComponent(productId)}`,
+                {
+                    method: "GET",
+                    cache: "no-store",
+                    headers: {
+                        "Accept":
+                            "application/json"
+                    }
+                }
             );
+
 
         const data =
             await response.json();
 
+
+        console.log(
+            "Validation response:",
+            data
+        );
+
+
         if (
             !response.ok ||
-            !data.success
+            data.success !== true
         ) {
 
             throw new Error(
@@ -424,9 +667,16 @@ async function validateProduct() {
             );
         }
 
+
+        // ----------------------------------------------------
+        // DISPLAY BACKEND RESULT
+        // ----------------------------------------------------
+
         displayValidationResult(
-            data
+            data,
+            product
         );
+
 
     }
     catch(error) {
@@ -436,16 +686,19 @@ async function validateProduct() {
             error
         );
 
+
         showError(
             error.message ||
             "Unable to validate product."
         );
-
     }
+
+
     finally {
 
         validateBtn.disabled =
             false;
+
 
         validateBtn.innerText =
             "🔍 Validate Product";
@@ -454,204 +707,103 @@ async function validateProduct() {
 
 
 // ============================================================
-// DISPLAY RESULT
+// DISPLAY VALIDATION RESULT
 // ============================================================
 
 function displayValidationResult(
-    data
+    data,
+    selectedProduct
 ) {
 
     validationResult.style.display =
         "block";
 
-    resultProductName.innerText =
+
+    // --------------------------------------------------------
+    // PRODUCT NAME
+    // --------------------------------------------------------
+
+    const backendProduct =
+        data.product ||
+        {};
+
+
+    const productName =
         data.product_name ||
+        backendProduct.name ||
+        backendProduct.product_name ||
+        selectedProduct.name ||
+        selectedProduct.product_name ||
+        selectedProduct.product ||
+        selectedProduct.title ||
         "Selected Product";
+
+
+    resultProductName.innerText =
+        productName;
+
+
+    // --------------------------------------------------------
+    // STATUS
+    // --------------------------------------------------------
 
     const status =
         data.status ||
+        backendProduct.status ||
         "Needs Review";
+
 
     statusBadge.innerText =
         status;
 
+
     statusBadge.className =
         "status-badge";
 
-    if (
-        status === "Verified"
-    ) {
 
-        statusBadge.classList.add(
-            "status-verified"
-        );
+    applyStatusClass(
+        status
+    );
 
-    }
-    else if (
-        status === "Critical Issues"
-    ) {
 
-        statusBadge.classList.add(
-            "status-critical"
-        );
-
-    }
-    else {
-
-        statusBadge.classList.add(
-            "status-review"
-        );
-    }
+    // --------------------------------------------------------
+    // QUALITY SCORE
+    // --------------------------------------------------------
 
     const score =
-        Number(
-            data.quality_score || 0
-        );
+        getScore(data);
+
 
     qualityScore.innerText =
         `${score}%`;
 
+
     progressBar.style.width =
         `${score}%`;
 
+
     // --------------------------------------------------------
-    // CHECKS
+    // VALIDATION CHECKS
     // --------------------------------------------------------
 
-    checksContainer.innerHTML =
-        "";
-
-    const checks =
-        data.checks || [];
-
-    if (!checks.length) {
-
-        checksContainer.innerHTML =
-            "<p>No validation checks available.</p>";
-
-    }
-
-    checks.forEach(
-        check => {
-
-            const div =
-                document.createElement(
-                    "div"
-                );
-
-            let className =
-                "check-warning";
-
-            if (
-                check.status === "PASS"
-            ) {
-
-                className =
-                    "check-pass";
-
-            }
-            else if (
-                check.status === "FAIL"
-            ) {
-
-                className =
-                    "check-fail";
-            }
-
-            div.className =
-                `check-item ${className}`;
-
-            div.innerHTML = `
-
-                <div class="check-title">
-
-                    ${escapeHtml(
-                        check.icon || "🔎"
-                    )}
-
-                    ${escapeHtml(
-                        check.title
-                    )}
-
-                </div>
-
-                <div class="check-message">
-
-                    ${escapeHtml(
-                        check.message
-                    )}
-
-                </div>
-
-            `;
-
-            checksContainer.appendChild(
-                div
-            );
-        }
+    renderValidationChecks(
+        data
     );
+
 
     // --------------------------------------------------------
     // PRODUCT INFORMATION
     // --------------------------------------------------------
 
-    productInfo.innerHTML =
-        "";
+    renderProductInformation(
+        data,
+        selectedProduct
+    );
 
-    const selectedProduct =
-        productRows.find(
-            item => String(item.id) === String(productSelect.value)
-        ) || {};
 
-    const product = {
-        ...selectedProduct,
-        ...(data.product || {}),
-    };
-
-    const rawData =
-        product.raw_data &&
-        typeof product.raw_data === "object" &&
-        Object.keys(product.raw_data).length
-            ? product.raw_data
-            : product;
-
-    Object.entries(rawData)
-        .forEach(
-            ([key, value]) => {
-
-                const row =
-                    document.createElement(
-                        "tr"
-                    );
-
-                const displayValue =
-                    value === null ||
-                    value === undefined ||
-                    value === ""
-                        ? "Not Available"
-                        : value;
-
-                row.innerHTML = `
-
-                    <th>
-                        ${escapeHtml(
-                            formatFieldName(key)
-                        )}
-                    </th>
-
-                    <td>
-                        ${escapeHtml(
-                            String(displayValue)
-                        )}
-                    </td>
-
-                `;
-
-                productInfo.appendChild(
-                    row
-                );
-            }
-        );
+    // --------------------------------------------------------
+    // SCROLL TO RESULT
+    // --------------------------------------------------------
 
     validationResult.scrollIntoView({
         behavior: "smooth",
@@ -661,37 +813,576 @@ function displayValidationResult(
 
 
 // ============================================================
-// FORMAT FIELD
+// APPLY STATUS CLASS DYNAMICALLY
+// ============================================================
+
+function applyStatusClass(
+    status
+) {
+
+    const normalized =
+        String(status)
+            .trim()
+            .toLowerCase();
+
+
+    if (
+        normalized.includes(
+            "verified"
+        ) ||
+        normalized.includes(
+            "pass"
+        ) ||
+        normalized.includes(
+            "approved"
+        ) ||
+        normalized.includes(
+            "valid"
+        )
+    ) {
+
+        statusBadge.classList.add(
+            "status-verified"
+        );
+
+        return;
+    }
+
+
+    if (
+        normalized.includes(
+            "critical"
+        ) ||
+        normalized.includes(
+            "fail"
+        ) ||
+        normalized.includes(
+            "invalid"
+        ) ||
+        normalized.includes(
+            "error"
+        )
+    ) {
+
+        statusBadge.classList.add(
+            "status-critical"
+        );
+
+        return;
+    }
+
+
+    statusBadge.classList.add(
+        "status-review"
+    );
+}
+
+
+// ============================================================
+// GET QUALITY SCORE
+// ============================================================
+
+function getScore(data) {
+
+    const possibleScores = [
+
+        data.quality_score,
+
+        data.qualityScore,
+
+        data.score,
+
+        data.data_quality_score,
+
+        data.validation_score,
+
+        data.confidence,
+
+        data.average_confidence,
+
+        data.product &&
+            data.product.quality_score,
+
+        data.product &&
+            data.product.score
+    ];
+
+
+    for (
+        const value of possibleScores
+    ) {
+
+        if (
+            value !== undefined &&
+            value !== null &&
+            value !== "" &&
+            !Number.isNaN(
+                Number(value)
+            )
+        ) {
+
+            let number =
+                Number(value);
+
+
+            number =
+                Math.max(
+                    0,
+                    Math.min(
+                        100,
+                        number
+                    )
+                );
+
+
+            return number;
+        }
+    }
+
+
+    return 0;
+}
+
+
+// ============================================================
+// RENDER VALIDATION CHECKS
+// ============================================================
+
+function renderValidationChecks(
+    data
+) {
+
+    checksContainer.innerHTML =
+        "";
+
+
+    const checks =
+        Array.isArray(
+            data.checks
+        )
+            ? data.checks
+            : [];
+
+
+    if (
+        checks.length === 0
+    ) {
+
+        checksContainer.innerHTML = `
+            <p>
+                No validation checks were returned by the backend.
+            </p>
+        `;
+
+        return;
+    }
+
+
+    checks.forEach(
+        check => {
+
+            const div =
+                document.createElement(
+                    "div"
+                );
+
+
+            // ------------------------------------------------
+            // DYNAMIC STATUS
+            // ------------------------------------------------
+
+            const checkStatus =
+                String(
+                    check.status ||
+                    check.result ||
+                    check.state ||
+                    "WARNING"
+                ).toUpperCase();
+
+
+            let className =
+                "check-warning";
+
+
+            if (
+                checkStatus ===
+                "PASS"
+            ) {
+
+                className =
+                    "check-pass";
+            }
+
+            else if (
+                checkStatus ===
+                "FAIL"
+            ) {
+
+                className =
+                    "check-fail";
+            }
+
+
+            div.className =
+                `check-item ${className}`;
+
+
+            // ------------------------------------------------
+            // DYNAMIC ICON
+            // ------------------------------------------------
+
+            const icon =
+                check.icon ||
+                getCheckIcon(
+                    checkStatus
+                );
+
+
+            // ------------------------------------------------
+            // DYNAMIC TITLE
+            // ------------------------------------------------
+
+            const title =
+                check.title ||
+                check.name ||
+                check.check ||
+                check.field ||
+                "Validation Check";
+
+
+            // ------------------------------------------------
+            // DYNAMIC MESSAGE
+            // ------------------------------------------------
+
+            const message =
+                check.message ||
+                check.description ||
+                check.details ||
+                check.reason ||
+                check.value ||
+                "No additional information provided.";
+
+
+            div.innerHTML = `
+
+                <div class="check-title">
+
+                    ${escapeHtml(icon)}
+
+                    ${escapeHtml(title)}
+
+                    ${
+                        check.status
+                            ? `<span style="margin-left:8px;">
+                                ${escapeHtml(checkStatus)}
+                               </span>`
+                            : ""
+                    }
+
+                </div>
+
+                <div class="check-message">
+
+                    ${escapeHtml(
+                        String(message)
+                    )}
+
+                </div>
+
+            `;
+
+
+            checksContainer.appendChild(
+                div
+            );
+        }
+    );
+}
+
+
+// ============================================================
+// DYNAMIC CHECK ICON
+// ============================================================
+
+function getCheckIcon(
+    status
+) {
+
+    if (
+        status === "PASS"
+    ) {
+
+        return "✓";
+    }
+
+
+    if (
+        status === "FAIL"
+    ) {
+
+        return "✕";
+    }
+
+
+    return "!";
+}
+
+
+// ============================================================
+// RENDER PRODUCT INFORMATION
+// ============================================================
+
+function renderProductInformation(
+    data,
+    selectedProduct
+) {
+
+    productInfo.innerHTML =
+        "";
+
+
+    const backendProduct =
+        data.product &&
+        typeof data.product === "object"
+            ? data.product
+            : {};
+
+
+    const rawData =
+        backendProduct.raw_data &&
+        typeof backendProduct.raw_data === "object"
+            ? backendProduct.raw_data
+            : null;
+
+
+    let productData = {};
+
+
+    // --------------------------------------------------------
+    // PRIORITY:
+    // BACKEND RAW DATA
+    // BACKEND PRODUCT
+    // SELECTED PRODUCT
+    // --------------------------------------------------------
+
+    if (
+        rawData &&
+        Object.keys(rawData).length
+    ) {
+
+        productData =
+            rawData;
+    }
+
+    else if (
+        Object.keys(
+            backendProduct
+        ).length
+    ) {
+
+        productData =
+            backendProduct;
+    }
+
+    else {
+
+        productData =
+            selectedProduct || {};
+    }
+
+
+    // --------------------------------------------------------
+    // REMOVE INTERNAL RAW DATA
+    // --------------------------------------------------------
+
+    const excludedFields = [
+        "raw_data"
+    ];
+
+
+    Object.entries(
+        productData
+    ).forEach(
+        ([key, value]) => {
+
+            if (
+                excludedFields.includes(
+                    key
+                )
+            ) {
+
+                return;
+            }
+
+
+            const row =
+                document.createElement(
+                    "tr"
+                );
+
+
+            // ------------------------------------------------
+            // DISPLAY OBJECTS / ARRAYS
+            // ------------------------------------------------
+
+            let displayValue =
+                value;
+
+
+            if (
+                value === null ||
+                value === undefined ||
+                value === ""
+            ) {
+
+                displayValue =
+                    "Not Available";
+            }
+
+
+            else if (
+                typeof value ===
+                "object"
+            ) {
+
+                try {
+
+                    displayValue =
+                        JSON.stringify(
+                            value
+                        );
+
+                }
+                catch {
+
+                    displayValue =
+                        String(value);
+                }
+            }
+
+
+            row.innerHTML = `
+
+                <th>
+
+                    ${escapeHtml(
+                        formatFieldName(
+                            key
+                        )
+                    )}
+
+                </th>
+
+                <td>
+
+                    ${escapeHtml(
+                        String(
+                            displayValue
+                        )
+                    )}
+
+                </td>
+
+            `;
+
+
+            productInfo.appendChild(
+                row
+            );
+        }
+    );
+
+
+    // --------------------------------------------------------
+    // IF NO PRODUCT DATA
+    // --------------------------------------------------------
+
+    if (
+        !productInfo.children.length
+    ) {
+
+        productInfo.innerHTML = `
+            <tr>
+                <td colspan="2">
+                    No product information was returned by the backend.
+                </td>
+            </tr>
+        `;
+    }
+}
+
+
+// ============================================================
+// FORMAT FIELD NAME
 // ============================================================
 
 function formatFieldName(
     field
 ) {
 
-    return field
-        .replace(/_/g, " ")
-        .replace(/([A-Z])/g, " $1")
+    return String(field)
+
+        .replace(
+            /_/g,
+            " "
+        )
+
+        .replace(
+            /([A-Z])/g,
+            " $1"
+        )
+
+        .replace(
+            /\s+/g,
+            " "
+        )
+
+        .trim()
+
         .replace(
             /^./,
-            str => str.toUpperCase()
+            character =>
+                character.toUpperCase()
         );
 }
 
 
 // ============================================================
-// ESCAPE
+// ESCAPE HTML
 // ============================================================
 
 function escapeHtml(
     value
 ) {
 
-    return String(value)
-        .replace(/&/g, "&amp;")
-        .replace(/</g, "&lt;")
-        .replace(/>/g, "&gt;")
-        .replace(/"/g, "&quot;")
-        .replace(/'/g, "&#039;");
+    return String(
+        value
+    )
+
+        .replace(
+            /&/g,
+            "&amp;"
+        )
+
+        .replace(
+            /</g,
+            "&lt;"
+        )
+
+        .replace(
+            />/g,
+            "&gt;"
+        )
+
+        .replace(
+            /"/g,
+            "&quot;"
+        )
+
+        .replace(
+            /'/g,
+            "&#039;"
+        );
 }
 
 
@@ -706,13 +1397,22 @@ function showError(
     errorBox.style.display =
         "block";
 
+
     errorBox.innerText =
-        "❌ " + message;
+        "❌ " +
+        String(message);
 }
 
 
 // ============================================================
-// START
+// INITIAL LOAD
 // ============================================================
 
-loadProducts();
+document.addEventListener(
+    "DOMContentLoaded",
+    function() {
+
+        loadProducts();
+
+    }
+);

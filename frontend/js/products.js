@@ -110,9 +110,24 @@ async function loadProducts() {
 
         let html = `
 
-            <div class="product-table-wrapper">
+            <div
+                class="product-table-wrapper"
+                style="
+                    width: 100%;
+                    max-height: 600px;
+                    overflow-y: auto;
+                    overflow-x: auto;
+                    border-radius: 10px;
+                "
+            >
 
-                <table>
+                <table
+                    style="
+                        width: 100%;
+                        min-width: 1000px;
+                        border-collapse: collapse;
+                    "
+                >
 
                     <thead>
 
@@ -310,6 +325,7 @@ async function loadProducts() {
 
 
     }
+
 
     catch(error) {
 
