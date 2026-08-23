@@ -12,6 +12,7 @@
 
 
     <!-- MAIN CSS FILES -->
+
     <link rel="stylesheet" href="css/style.css">
     <link rel="stylesheet" href="css/innovative.css">
     <link rel="stylesheet" href="css/premium.css">
@@ -23,29 +24,39 @@
     <script src="js/global-theme.js"></script>
 
 
-    <!-- PASSWORD EYE ICON -->
+    <!-- PASSWORD EYE STYLE -->
+
     <style>
 
+        /* Password box */
+
         .login-password-wrapper {
-            position: relative;
-            width: 100%;
+            position: relative !important;
+            width: 100% !important;
         }
+
+
+        /* Password input */
 
         .login-password-wrapper input {
             width: 100% !important;
-            padding-right: 55px !important;
+
+            padding-right: 45px !important;
         }
+
+
+        /* Eye button */
 
         .login-eye-button {
             position: absolute !important;
 
-            right: 12px !important;
+            right: 8px !important;
             top: 50% !important;
 
             transform: translateY(-50%) !important;
 
-            width: 35px !important;
-            height: 35px !important;
+            width: 32px !important;
+            height: 32px !important;
 
             padding: 0 !important;
             margin: 0 !important;
@@ -55,25 +66,55 @@
             justify-content: center !important;
 
             background: transparent !important;
+
             border: none !important;
+
+            box-shadow: none !important;
+
+            color: #cbd5e1 !important;
+
+            font-size: 17px !important;
+
+            line-height: 1 !important;
+
+            cursor: pointer !important;
+
+            z-index: 10 !important;
+        }
+
+
+        /* Eye hover */
+
+        .login-eye-button:hover {
+            background: transparent !important;
+
             box-shadow: none !important;
 
             color: #ffffff !important;
 
-            font-size: 20px !important;
-
-            cursor: pointer !important;
-        }
-
-        .login-eye-button:hover {
             transform: translateY(-50%) !important;
-            background: transparent !important;
-            box-shadow: none !important;
-            opacity: 0.75;
+
+            opacity: 1 !important;
         }
+
+
+        /* Remove focus box */
+
+        .login-eye-button:focus {
+            outline: none !important;
+
+            box-shadow: none !important;
+        }
+
 
         /* Light theme */
+
         body.pi-light .login-eye-button {
+            color: #667085 !important;
+        }
+
+
+        body.pi-light .login-eye-button:hover {
             color: #344054 !important;
         }
 
@@ -140,6 +181,9 @@
                     required
                 >
 
+
+                <!-- EYE -->
+
                 <button
                     type="button"
                     id="loginPasswordToggle"
@@ -165,6 +209,8 @@
         </form>
 
 
+        <!-- SIGNUP -->
+
         <p style="text-align:center; margin-top:20px;">
 
             Don't have an account?
@@ -182,12 +228,13 @@
 </div>
 
 
-<!-- PASSWORD SHOW/HIDE SCRIPT -->
+<!-- PASSWORD SHOW / HIDE -->
 
 <script>
 
 const loginPassword =
     document.getElementById("password");
+
 
 const loginPasswordToggle =
     document.getElementById("loginPasswordToggle");
