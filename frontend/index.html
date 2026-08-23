@@ -11,7 +11,7 @@
     <title>Product Intelligence AI - Login</title>
 
 
-    <!-- MAIN CSS FILES -->
+    <!-- CSS FILES -->
 
     <link rel="stylesheet" href="css/style.css">
     <link rel="stylesheet" href="css/innovative.css">
@@ -24,11 +24,13 @@
     <script src="js/global-theme.js"></script>
 
 
-    <!-- PASSWORD EYE STYLE -->
+    <!-- =========================================
+         CLEAN PASSWORD EYE
+    ========================================== -->
 
     <style>
 
-        /* Password box */
+        /* Password container */
 
         .login-password-wrapper {
             position: relative !important;
@@ -40,14 +42,13 @@
 
         .login-password-wrapper input {
             width: 100% !important;
-
-            padding-right: 45px !important;
+            padding-right: 48px !important;
         }
 
 
         /* Eye button */
 
-        .login-eye-button {
+        #loginPasswordToggle {
             position: absolute !important;
 
             right: 8px !important;
@@ -62,60 +63,138 @@
             margin: 0 !important;
 
             display: flex !important;
+
             align-items: center !important;
             justify-content: center !important;
 
             background: transparent !important;
 
-            border: none !important;
+            border: 0 !important;
 
             box-shadow: none !important;
-
-            color: #cbd5e1 !important;
-
-            font-size: 17px !important;
-
-            line-height: 1 !important;
 
             cursor: pointer !important;
 
-            z-index: 10 !important;
+            z-index: 100 !important;
         }
 
 
-        /* Eye hover */
+        /* Remove button effects */
 
-        .login-eye-button:hover {
+        #loginPasswordToggle:hover,
+        #loginPasswordToggle:focus,
+        #loginPasswordToggle:active {
             background: transparent !important;
 
+            border: 0 !important;
+
             box-shadow: none !important;
 
-            color: #ffffff !important;
-
             transform: translateY(-50%) !important;
-
-            opacity: 1 !important;
         }
 
 
-        /* Remove focus box */
+        /* =========================================
+           DRAW THE EYE
+        ========================================== */
 
-        .login-eye-button:focus {
-            outline: none !important;
+        .eye-icon {
+            position: relative;
 
-            box-shadow: none !important;
+            width: 19px;
+            height: 12px;
+
+            border: 2px solid #94a3b8;
+
+            border-radius: 80% 20%;
+
+            transform: rotate(45deg);
+
+            display: block;
+        }
+
+
+        /* Eye pupil */
+
+        .eye-icon::after {
+            content: "";
+
+            position: absolute;
+
+            width: 5px;
+            height: 5px;
+
+            background: #94a3b8;
+
+            border-radius: 50%;
+
+            top: 50%;
+            left: 50%;
+
+            transform: translate(-50%, -50%);
+        }
+
+
+        /* Hover */
+
+        #loginPasswordToggle:hover .eye-icon {
+            border-color: #e2e8f0;
+        }
+
+        #loginPasswordToggle:hover .eye-icon::after {
+            background: #e2e8f0;
+        }
+
+
+        /* =========================================
+           HIDDEN EYE
+        ========================================== */
+
+        .eye-hidden {
+            width: 19px;
+            height: 2px;
+
+            background: #94a3b8;
+
+            display: block;
+
+            transform: rotate(-45deg);
+
+            position: relative;
+        }
+
+
+        .eye-hidden::before {
+            content: "";
+
+            position: absolute;
+
+            width: 19px;
+            height: 2px;
+
+            background: #94a3b8;
+
+            top: 0;
+            left: 0;
         }
 
 
         /* Light theme */
 
-        body.pi-light .login-eye-button {
-            color: #667085 !important;
+        body.pi-light #loginPasswordToggle .eye-icon {
+            border-color: #667085;
         }
 
+        body.pi-light #loginPasswordToggle .eye-icon::after {
+            background: #667085;
+        }
 
-        body.pi-light .login-eye-button:hover {
-            color: #344054 !important;
+        body.pi-light #loginPasswordToggle:hover .eye-icon {
+            border-color: #344054;
+        }
+
+        body.pi-light #loginPasswordToggle:hover .eye-icon::after {
+            background: #344054;
         }
 
     </style>
@@ -182,21 +261,22 @@
                 >
 
 
-                <!-- EYE -->
+                <!-- CLEAN EYE BUTTON -->
 
                 <button
                     type="button"
                     id="loginPasswordToggle"
-                    class="login-eye-button"
                     aria-label="Show password"
                 >
-                    👁
+
+                    <span class="eye-icon"></span>
+
                 </button>
 
             </div>
 
 
-            <!-- LOGIN BUTTON -->
+            <!-- LOGIN -->
 
             <button type="submit">
                 Login
@@ -209,7 +289,7 @@
         </form>
 
 
-        <!-- SIGNUP -->
+        <!-- SIGN UP -->
 
         <p style="text-align:center; margin-top:20px;">
 
@@ -228,7 +308,9 @@
 </div>
 
 
-<!-- PASSWORD SHOW / HIDE -->
+<!-- =========================================
+     PASSWORD SHOW / HIDE
+========================================= -->
 
 <script>
 
@@ -246,9 +328,12 @@ loginPasswordToggle.addEventListener(
 
         if (loginPassword.type === "password") {
 
+            /* SHOW PASSWORD */
+
             loginPassword.type = "text";
 
-            loginPasswordToggle.textContent = "🙈";
+            loginPasswordToggle.innerHTML =
+                '<span class="eye-hidden"></span>';
 
             loginPasswordToggle.setAttribute(
                 "aria-label",
@@ -259,9 +344,12 @@ loginPasswordToggle.addEventListener(
 
         else {
 
+            /* HIDE PASSWORD */
+
             loginPassword.type = "password";
 
-            loginPasswordToggle.textContent = "👁";
+            loginPasswordToggle.innerHTML =
+                '<span class="eye-icon"></span>';
 
             loginPasswordToggle.setAttribute(
                 "aria-label",
