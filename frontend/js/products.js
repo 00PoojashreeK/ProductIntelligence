@@ -1,5 +1,4 @@
-const API =
-    ((window.location.protocol === "file:" || window.location.hostname === "localhost" || window.location.hostname === "127.0.0.1") ? "http://127.0.0.1:8000" : "https://productintelligence-lzcn.onrender.com");
+const API ="https://productintelligence-lzcn.onrender.com";
 
 
 // ======================================================

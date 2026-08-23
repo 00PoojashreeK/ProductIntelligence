@@ -4,8 +4,7 @@
 // Works with ANY dataset
 // ============================================================
 
-const API_BASE_URL =
-    ((window.location.protocol === "file:" || window.location.hostname === "localhost" || window.location.hostname === "127.0.0.1") ? "http://127.0.0.1:8000" : "https://productintelligence-lzcn.onrender.com");
+const API_BASE_URL ="https://productintelligence-lzcn.onrender.com";
 
 
 // ============================================================
