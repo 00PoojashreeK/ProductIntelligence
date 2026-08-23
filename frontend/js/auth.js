@@ -1,176 +1,151 @@
-const API_URL = ((window.location.protocol === "file:" || window.location.hostname === "localhost" || window.location.hostname === "127.0.0.1") ? "http://127.0.0.1:8000" : "https://productintelligence-lzcn.onrender.com");
+// ============================================================
+// Product Intelligence AI - Login
+// ============================================================
 
-document.addEventListener("DOMContentLoaded", function () {
+const API = "https://productintelligence-lzcn.onrender.com";
+
+document.addEventListener("DOMContentLoaded", () => {
 
     const loginForm = document.getElementById("loginForm");
+    const message = document.getElementById("message");
 
     if (!loginForm) {
-        console.error("loginForm not found.");
+        console.error("Login form not found.");
         return;
     }
 
-    loginForm.addEventListener("submit", async function (event) {
+    loginForm.addEventListener("submit", async (event) => {
 
         event.preventDefault();
 
-        const emailElement = document.getElementById("email");
-        const passwordElement = document.getElementById("password");
-        const messageElement = document.getElementById("message");
+        const email = document.getElementById("email").value.trim();
+        const password = document.getElementById("password").value.trim();
 
-        if (!emailElement || !passwordElement || !messageElement) {
-            console.error("Login elements not found.");
+        // Clear previous message
+        if (message) {
+            message.textContent = "";
+            message.style.color = "";
+        }
+
+        if (!email || !password) {
+            showMessage("Please enter email and password.", false);
             return;
         }
 
-        const email = emailElement.value.trim();
-        const password = passwordElement.value;
+        // Disable button while logging in
+        const loginButton = loginForm.querySelector("button[type='submit']");
 
-        console.log("LOGIN DEBUG");
-        console.log("Email:", email);
-        console.log("Password entered:", password.length > 0);
-
-        // ----------------------------------------------------
-        // CHECK EMPTY FIELDS
-        // ----------------------------------------------------
-
-        if (email === "" || password === "") {
-
-            messageElement.style.color = "#dc2626";
-            messageElement.textContent =
-                "Please enter your email and password.";
-
-            return;
+        if (loginButton) {
+            loginButton.disabled = true;
+            loginButton.textContent = "Logging in...";
         }
-
-        // ----------------------------------------------------
-        // SHOW LOGIN MESSAGE
-        // ----------------------------------------------------
-
-        messageElement.style.color = "#94a3b8";
-        messageElement.textContent = "Logging in...";
 
         try {
 
-            // ------------------------------------------------
-            // SEND DATA AS QUERY PARAMETERS
-            // This matches the current FastAPI /login endpoint
-            // ------------------------------------------------
+            // IMPORTANT:
+            // FastAPI Form(...) requires FormData / form-urlencoded,
+            // NOT JSON.
 
-            const loginURL =
-                `${API_URL}/login` +
-                `?email=${encodeURIComponent(email)}` +
-                `&username=${encodeURIComponent(email)}` +
-                `&password=${encodeURIComponent(password)}`;
+            const formData = new FormData();
 
-            const response = await fetch(
-                loginURL,
-                {
-                    method: "POST"
-                }
-            );
+            formData.append("email", email);
+            formData.append("password", password);
 
-            console.log(
-                "Login status:",
-                response.status
-            );
+            const response = await fetch(`${API}/login`, {
+                method: "POST",
+                body: formData
+            });
 
-            // ------------------------------------------------
-            // READ RESPONSE
-            // ------------------------------------------------
+            let result;
 
-            const data = await response.json();
+            try {
+                result = await response.json();
+            } catch (jsonError) {
+                throw new Error(
+                    `Backend returned an invalid response (${response.status}).`
+                );
+            }
 
-            console.log(
-                "Login response:",
-                data
-            );
+            console.log("Login response:", result);
 
-            // ------------------------------------------------
-            // SUCCESS
-            // ------------------------------------------------
+            if (!response.ok) {
+                throw new Error(
+                    result.detail ||
+                    result.message ||
+                    `Login failed (${response.status}).`
+                );
+            }
 
-            if (
-                response.ok &&
-                data.success === true
-            ) {
+            if (result.success === true) {
 
-                messageElement.style.color = "#16a34a";
+                // Save login information
+                localStorage.setItem(
+                    "pi_logged_in",
+                    "true"
+                );
 
-                messageElement.textContent =
-                    "Login successful!";
+                localStorage.setItem(
+                    "pi_user",
+                    JSON.stringify(
+                        result.user || {
+                            name: email.split("@")[0],
+                            email: email
+                        }
+                    )
+                );
 
-                // --------------------------------------------
-                // SAVE USER
-                // --------------------------------------------
+                showMessage(
+                    "Login successful. Redirecting...",
+                    true
+                );
 
-                if (data.user) {
-
-                    localStorage.setItem(
-                        "user",
-                        JSON.stringify(data.user)
-                    );
-
-                } else {
-
-                    localStorage.setItem(
-                        "user",
-                        JSON.stringify({
-                            email: email,
-                            username: email
-                        })
-                    );
-                }
-
-                // --------------------------------------------
-                // REDIRECT
-                // --------------------------------------------
-
-                setTimeout(function () {
-
-                    window.location.href =
-                        "dashboard.html";
-
+                // Redirect to dashboard
+                setTimeout(() => {
+                    window.location.href = "dashboard.html";
                 }, 500);
 
+            } else {
+
+                showMessage(
+                    result.message ||
+                    "Invalid login details.",
+                    false
+                );
             }
 
-            // ------------------------------------------------
-            // LOGIN FAILED
-            // ------------------------------------------------
+        } catch (error) {
 
-            else {
+            console.error("Login error:", error);
 
-                messageElement.style.color =
-                    "#dc2626";
-
-                messageElement.textContent =
-                    data.message ||
-                    data.detail ||
-                    "Invalid username or password.";
-
-            }
-
-        }
-
-        // ----------------------------------------------------
-        // SERVER CONNECTION ERROR
-        // ----------------------------------------------------
-
-        catch (error) {
-
-            console.error(
-                "LOGIN ERROR:",
-                error
+            showMessage(
+                "Unable to connect to the backend. Make sure FastAPI is running.",
+                false
             );
 
-            messageElement.style.color =
-                "#dc2626";
+        } finally {
 
-            messageElement.textContent =
-                "Cannot connect to the server.";
-
+            if (loginButton) {
+                loginButton.disabled = false;
+                loginButton.textContent = "Login";
+            }
         }
-
     });
+
+
+    function showMessage(text, success) {
+
+        if (!message) return;
+
+        message.textContent = text;
+
+        message.style.marginTop = "14px";
+        message.style.fontWeight = "600";
+
+        if (success) {
+            message.style.color = "#22c55e";
+        } else {
+            message.style.color = "#ef4444";
+        }
+    }
 
 });
